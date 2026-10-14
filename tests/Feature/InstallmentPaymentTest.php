@@ -20,6 +20,48 @@ class InstallmentPaymentTest extends CustomerPurchaseTest
         $user = new User; $user->id = 1; $this->actingAs($user);
     }
     protected function tearDown(): void {Carbon::setTestNow(); parent::tearDown();}
+    public function test_receipt_uses_profile_template_and_returns_pdf(): void
+    {
+        $id = $this->credit();
+        foreach ([\App\Models\KonfigurasiAplikasi::class, \App\Models\MetodeBayar::class, \App\Models\KategoriTransaksi::class] as $class) {
+            $model = new $class;
+            if (Schema::hasTable($model->getTable())) continue;
+            Schema::create($model->getTable(), function (Blueprint $table) use ($model) {
+                $table->increments('id');
+                foreach ($model->getFillable() as $column) {
+                    if ($column !== 'id') $table->text($column)->nullable();
+                }
+            });
+        }
+        Schema::create('konfigurasi_media', function (Blueprint $table) {
+            $table->increments('id'); $table->string('jenis_data'); $table->string('nama_file');
+        });
+        DB::table('konfigurasi')->insert(['nama_perusahaan'=>'Profil Receipt Test','alamat'=>'Alamat profil','telp'=>'123']);
+        $template = 'receipt-test-'.\Illuminate\Support\Str::uuid().'.png';
+        $image = \Illuminate\Http\UploadedFile::fake()->image($template, 1280, 673);
+        copy($image->getRealPath(), public_path('config_media/'.$template));
+        DB::table('konfigurasi_media')->insert(['jenis_data'=>'kwitansi','nama_file'=>$template]);
+        $logoName = 'logo-'.$template;
+        $logoImage = \Illuminate\Http\UploadedFile::fake()->image($logoName, 100, 100);
+        copy($logoImage->getRealPath(), public_path('config_media/'.$logoName));
+        DB::table('konfigurasi_media')->insert(['jenis_data'=>'logo website','nama_file'=>$logoName]);
+        $payment = DB::table('pemasukan')->where('id_customer',$id)->first();
+        $number = 'RECEIPT-TEST-'.\Illuminate\Support\Str::uuid();
+        DB::table('pemasukan')->where('id',$payment->id)->update(['no_kwitansi'=>$number]);
+        $file = public_path('kwitansi/kwitansi_'.$payment->id.'_'.$number.'.pdf');
+        try {
+            $response = $this->get(route('pembayaran.cetak',$payment->id))->assertOk()->assertHeader('Content-Type','application/pdf');
+            $this->assertStringStartsWith('%PDF', $response->getContent());
+            $this->assertStringContainsString('/Subtype /Image', $response->getContent());
+            $this->assertGreaterThanOrEqual(2, substr_count($response->getContent(), '/Subtype /Image'));
+            $this->assertStringContainsString('Profil Receipt Test', $response->getContent());
+            $this->assertFileExists($file);
+        } finally {
+            @unlink(public_path('config_media/'.$template));
+            @unlink(public_path('config_media/'.$logoName));
+            @unlink($file);
+        }
+    }
     private function credit(array $extra=[]): int
     {
         $this->postJson(route('customer.store'), $this->purchase(array_replace(['id_kavling'=>[1], 'discount'=>0, 'jenis_pembelian'=>'Kredit', 'dp_kredit'=>10000000, 'inhouse_tenor'=>6, 'inhouse_perbulan'=>15000000, 'inhouse_jatuh_tempo'=>'2026-08-31'], $extra)))->assertOk();

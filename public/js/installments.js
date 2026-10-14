@@ -45,6 +45,22 @@ document.addEventListener('DOMContentLoaded', function () {
                 const messages = Object.values(result.errors || {}).flat();
                 throw new Error(messages.join(' ') || result.message || 'Pembayaran gagal dicatat.');
             }
+            submitting = false;
+            modal.hide();
+            const message = document.createElement('div');
+            const text = document.createElement('p');
+            text.textContent = 'Pembayaran berhasil dicatat. Kwitansi siap dicetak.';
+            message.appendChild(text);
+            if (result.receipt_url) {
+                const receipt = document.createElement('a');
+                receipt.href = result.receipt_url;
+                receipt.target = '_blank';
+                receipt.rel = 'noopener noreferrer';
+                receipt.className = 'btn btn-primary';
+                receipt.textContent = 'Cetak kwitansi';
+                message.appendChild(receipt);
+            }
+            await Swal.fire({icon:'success', title:'Pembayaran tersimpan', html:message, confirmButtonText:'Kembali ke cicilan', allowOutsideClick:false});
             window.location.reload();
         } catch (failure) {error.textContent = failure.message; error.hidden = false; submitting = false; save.disabled = false; save.textContent = 'Simpan pembayaran';}
     });

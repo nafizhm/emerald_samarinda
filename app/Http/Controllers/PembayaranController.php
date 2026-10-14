@@ -391,6 +391,56 @@ class PembayaranController extends Controller
             'tgl_cetak'      => Carbon::now()->translatedFormat('d F Y'),
         ];
 
+        $templatePath = $logo ? public_path('config_media/' . basename($logo)) : null;
+        $companyLogo = DB::table('konfigurasi_media')->where('jenis_data', 'logo website')->value('nama_file');
+        $companyLogoPath = $companyLogo ? public_path('config_media/'.basename($companyLogo)) : null;
+        if ($templatePath && is_file($templatePath)) {
+            $pdf = new TCPDF('L', 'mm', 'A5', true, 'UTF-8', false);
+            $pdf->setPrintHeader(false);
+            $pdf->setPrintFooter(false);
+            $pdf->SetMargins(0, 0, 0);
+            $pdf->SetAutoPageBreak(false, 0);
+            $pdf->SetTitle('Kwitansi '.$data['faktur_no']);
+            $pdf->SetAuthor($data['perusahaan']);
+            $pdf->AddPage();
+            // Profile media is the complete receipt background, not a company logo.
+            $pdf->Image($templatePath, 0, 0, 210, 110.4);
+            $headerX = 10;
+            if ($companyLogoPath && is_file($companyLogoPath)) {
+                [$imageWidth, $imageHeight] = getimagesize($companyLogoPath);
+                $scale = min(20 / $imageWidth, 18 / $imageHeight);
+                $pdf->Image($companyLogoPath, 10, 5, $imageWidth * $scale, $imageHeight * $scale);
+                $headerX = 36;
+            }
+            $pdf->SetFont('helvetica', 'B', 12);
+            $pdf->SetXY($headerX, 5);
+            $pdf->Cell(200 - $headerX, 6, $data['perusahaan'], 0, 1, 'L');
+            $pdf->SetFont('helvetica', '', 8);
+            $pdf->SetXY($headerX, 12);
+            $pdf->MultiCell(200 - $headerX, 4, $data['alamat'].' / '.$data['telp'], 0, 'L');
+            $pdf->SetXY(20, 33);
+            $pdf->Cell(65, 5, $data['faktur_no']);
+            $pdf->SetXY(57, 39);
+            $pdf->Cell(142, 4, $data['terima_dari']);
+            $pdf->SetXY(57, 45);
+            $pdf->MultiCell(142, 3, $data['terbilang'], 0, 'L');
+            $pdf->SetXY(57, 52);
+            $pdf->MultiCell(142, 5, ($pembayaran->keterangan ?: 'Pembayaran kavling').' / '.($customer->lokasiKavling?->nama_kavling ?? '').' / '.$customer->kavling->pluck('kode_kavling')->implode(', '), 0, 'L');
+            $pdf->SetFont('helvetica', 'B', 11);
+            $pdf->SetXY(20, 74);
+            $pdf->Cell(55, 5, $data['sejumlah_uang']);
+            $pdf->SetFont('helvetica', '', 8);
+            $pdf->SetXY(12, 91);
+            $pdf->MultiCell(82, 4, $pembayaran->metode?->nama ?? '-', 0, 'L');
+            $pdf->SetXY(140, 78);
+            $pdf->Cell(60, 5, $data['tgl_angsuran'], 0, 1, 'L');
+            $pdf->SetXY(140, 98);
+            $pdf->Cell(60, 5, $data['perusahaan'], 0, 1, 'L');
+            $pdf->SetXY(10, 116);
+            $pdf->Cell(190, 5, 'Total dibayar: Rp '.$data['total_angsuran'].' / Sisa: Rp '.$data['sisa_hutang'].' / '.$data['status']);
+            return $this->receiptResponse($pdf, $pembayaran);
+        }
+
         $pdf = new TCPDF('L', 'mm', 'A5', true, 'UTF-8', false);
 
         $pdf->SetCreator($data['perusahaan']);
@@ -409,9 +459,9 @@ class PembayaranController extends Controller
 
         $pdf->Rect(8, 8, 194, 132, 'D');
 
-        $logoPath = public_path('config_media/' . $logo);
+        $logoPath = $companyLogoPath;
 
-        if (file_exists($logoPath)) {
+        if ($logoPath && is_file($logoPath)) {
             $pdf->Image($logoPath, 12, 12, 20, 20);
         }
 
@@ -568,6 +618,11 @@ class PembayaranController extends Controller
         $pdf->SetFont('helvetica', 'I', 9);
         $pdf->Cell(45, 5, 'Melda Shantika', 0, 0, 'R');
 
+        return $this->receiptResponse($pdf, $pembayaran);
+    }
+
+    private function receiptResponse(TCPDF $pdf, Pemasukan $pembayaran)
+    {
         $safeFaktur = preg_replace('/[^A-Za-z0-9_\-]/', '_', $pembayaran->no_kwitansi ?: $pembayaran->id);
         $filename   = 'kwitansi_' . $pembayaran->id . '_' . $safeFaktur . '.pdf';
         $saveDir    = public_path('kwitansi');
