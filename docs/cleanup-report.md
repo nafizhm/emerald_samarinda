@@ -1,0 +1,104 @@
+﻿# Laporan pembersihan
+
+Ukuran sebelum: 254.24 MiB
+Ukuran sesudah: 155.45 MiB
+Dihapus: sekitar 98.79 MiB
+
+File aplikasi, vendor, database SQL, dokumen Word, unggahan, konfigurasi dan tests dipertahankan.
+
+## Target yang dihapus
+
+- public\template\plugins\bootstrap-colorpicker
+- public\template\plugins\bootstrap-slider
+- public\template\plugins\bootstrap-switch
+- public\template\plugins\bootstrap4-duallistbox
+- public\template\plugins\bs-custom-file-input
+- public\template\plugins\bs-stepper
+- public\template\plugins\chart.js
+- public\template\plugins\codemirror
+- public\template\plugins\datatables-autofill
+- public\template\plugins\datatables-colreorder
+- public\template\plugins\datatables-fixedcolumns
+- public\template\plugins\datatables-fixedheader
+- public\template\plugins\datatables-keytable
+- public\template\plugins\datatables-rowgroup
+- public\template\plugins\datatables-rowreorder
+- public\template\plugins\datatables-scroller
+- public\template\plugins\datatables-searchbuilder
+- public\template\plugins\datatables-searchpanes
+- public\template\plugins\datatables-select
+- public\template\plugins\daterangepicker
+- public\template\plugins\dropzone
+- public\template\plugins\ekko-lightbox
+- public\template\plugins\fastclick
+- public\template\plugins\filterizr
+- public\template\plugins\flag-icon-css
+- public\template\plugins\flot
+- public\template\plugins\fullcalendar
+- public\template\plugins\icheck-bootstrap
+- public\template\plugins\inputmask
+- public\template\plugins\ion-rangeslider
+- public\template\plugins\jquery-knob
+- public\template\plugins\jquery-mapael
+- public\template\plugins\jquery-mousewheel
+- public\template\plugins\jquery-ui
+- public\template\plugins\jquery-validation
+- public\template\plugins\jqvmap
+- public\template\plugins\jsgrid
+- public\template\plugins\overlayScrollbars
+- public\template\plugins\pace-progress
+- public\template\plugins\raphael
+- public\template\plugins\select2
+- public\template\plugins\select2-bootstrap4-theme
+- public\template\plugins\sparklines
+- public\template\plugins\summernote
+- public\template\plugins\tempusdominus-bootstrap-4
+- public\template\plugins\uplot
+- public\template\assets\extensions\dragula
+- public\template\assets\extensions\feather-icons
+- public\template\assets\extensions\filepond
+- public\template\assets\extensions\filepond-plugin-file-validate-size
+- public\template\assets\extensions\filepond-plugin-file-validate-type
+- public\template\assets\extensions\filepond-plugin-image-crop
+- public\template\assets\extensions\filepond-plugin-image-exif-orientation
+- public\template\assets\extensions\filepond-plugin-image-filter
+- public\template\assets\extensions\filepond-plugin-image-preview
+- public\template\assets\extensions\filepond-plugin-image-resize
+- public\template\assets\extensions\flatpickr
+- public\template\assets\extensions\jsvectormap
+- public\template\assets\extensions\parsleyjs
+- public\template\assets\extensions\quill
+- public\template\assets\extensions\simple-datatables
+- public\template\assets\extensions\summernote
+- public\template\assets\extensions\sweetalert2
+- public\template\assets\extensions\tinymce
+- public\template\assets\extensions\toastify-js
+- public\template\dist
+- public\.DS_Store
+- public\template\.DS_Store
+- public\template\assets\extensions\jquery\jquery.min.map
+- public\template\assets\extensions\jquery\jquery.slim.min.map
+- public\template\plugins\bootstrap\js\bootstrap.bundle.js.map
+- public\template\plugins\bootstrap\js\bootstrap.bundle.min.js.map
+- public\template\plugins\bootstrap\js\bootstrap.js.map
+- public\template\plugins\bootstrap\js\bootstrap.min.js.map
+- public\template\plugins\jquery\jquery.min.map
+- public\template\plugins\jquery\jquery.slim.min.map
+- public\template\plugins\moment\locales.min.js.map
+- public\template\plugins\moment\moment-with-locales.min.js.map
+- public\template\plugins\moment\moment.min.js.map
+- public\template\plugins\popper\popper-utils.js.map
+- public\template\plugins\popper\popper-utils.min.js.map
+- public\template\plugins\popper\popper.js.map
+- public\template\plugins\popper\popper.min.js.map
+- public\template\plugins\popper\esm\popper-utils.js.map
+- public\template\plugins\popper\esm\popper-utils.min.js.map
+- public\template\plugins\popper\esm\popper.js.map
+- public\template\plugins\popper\esm\popper.min.js.map
+- public\template\plugins\popper\umd\popper-utils.js.map
+- public\template\plugins\popper\umd\popper-utils.min.js.map
+- public\template\plugins\popper\umd\popper.js.map
+- public\template\plugins\popper\umd\popper.min.js.map
+- .DS_Store
+- .phpunit.result.cache
+- storage\logs\laravel.log

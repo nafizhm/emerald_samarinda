@@ -1,0 +1,294 @@
+{
+    "date": "2026-10-14",
+    "database": "mysql",
+    "buyers": 30,
+    "cash": 6,
+    "current_credit": 3,
+    "paid_credit": 3,
+    "late_scenarios": 18,
+    "due_customers": 17,
+    "due_amount": 540000000,
+    "project_id": 21,
+    "customer_ids": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69,
+        70,
+        71,
+        72,
+        73,
+        74,
+        75,
+        76,
+        77,
+        78,
+        79,
+        80,
+        81,
+        82,
+        83,
+        84,
+        85,
+        86,
+        87,
+        88,
+        89,
+        90
+    ],
+    "persisted": true,
+    "result": "PASS",
+    "scenarios": [
+        {
+            "buyer": 1,
+            "scenario": {
+                "kind": "cash"
+            },
+            "remaining": 0
+        },
+        {
+            "buyer": 2,
+            "scenario": {
+                "kind": "cash"
+            },
+            "remaining": 0
+        },
+        {
+            "buyer": 3,
+            "scenario": {
+                "kind": "cash"
+            },
+            "remaining": 0
+        },
+        {
+            "buyer": 4,
+            "scenario": {
+                "kind": "cash"
+            },
+            "remaining": 0
+        },
+        {
+            "buyer": 5,
+            "scenario": {
+                "kind": "cash"
+            },
+            "remaining": 0
+        },
+        {
+            "buyer": 6,
+            "scenario": {
+                "kind": "cash"
+            },
+            "remaining": 0
+        },
+        {
+            "buyer": 7,
+            "scenario": {
+                "kind": "current"
+            },
+            "remaining": 100000000
+        },
+        {
+            "buyer": 8,
+            "scenario": {
+                "kind": "current"
+            },
+            "remaining": 100000000
+        },
+        {
+            "buyer": 9,
+            "scenario": {
+                "kind": "current"
+            },
+            "remaining": 100000000
+        },
+        {
+            "buyer": 10,
+            "scenario": {
+                "kind": "paid"
+            },
+            "remaining": 0
+        },
+        {
+            "buyer": 11,
+            "scenario": {
+                "kind": "paid"
+            },
+            "remaining": 0
+        },
+        {
+            "buyer": 12,
+            "scenario": {
+                "kind": "paid"
+            },
+            "remaining": 0
+        },
+        {
+            "buyer": 13,
+            "scenario": {
+                "kind": "late",
+                "months": 1,
+                "variant": "unpaid"
+            },
+            "remaining": 100000000
+        },
+        {
+            "buyer": 14,
+            "scenario": {
+                "kind": "late",
+                "months": 1,
+                "variant": "partial"
+            },
+            "remaining": 95000000
+        },
+        {
+            "buyer": 15,
+            "scenario": {
+                "kind": "late",
+                "months": 1,
+                "variant": "installment"
+            },
+            "remaining": 90000000
+        },
+        {
+            "buyer": 16,
+            "scenario": {
+                "kind": "late",
+                "months": 2,
+                "variant": "unpaid"
+            },
+            "remaining": 100000000
+        },
+        {
+            "buyer": 17,
+            "scenario": {
+                "kind": "late",
+                "months": 2,
+                "variant": "partial"
+            },
+            "remaining": 95000000
+        },
+        {
+            "buyer": 18,
+            "scenario": {
+                "kind": "late",
+                "months": 2,
+                "variant": "installment"
+            },
+            "remaining": 90000000
+        },
+        {
+            "buyer": 19,
+            "scenario": {
+                "kind": "late",
+                "months": 3,
+                "variant": "unpaid"
+            },
+            "remaining": 100000000
+        },
+        {
+            "buyer": 20,
+            "scenario": {
+                "kind": "late",
+                "months": 3,
+                "variant": "partial"
+            },
+            "remaining": 95000000
+        },
+        {
+            "buyer": 21,
+            "scenario": {
+                "kind": "late",
+                "months": 3,
+                "variant": "installment"
+            },
+            "remaining": 90000000
+        },
+        {
+            "buyer": 22,
+            "scenario": {
+                "kind": "late",
+                "months": 4,
+                "variant": "unpaid"
+            },
+            "remaining": 100000000
+        },
+        {
+            "buyer": 23,
+            "scenario": {
+                "kind": "late",
+                "months": 4,
+                "variant": "partial"
+            },
+            "remaining": 95000000
+        },
+        {
+            "buyer": 24,
+            "scenario": {
+                "kind": "late",
+                "months": 4,
+                "variant": "installment"
+            },
+            "remaining": 90000000
+        },
+        {
+            "buyer": 25,
+            "scenario": {
+                "kind": "late",
+                "months": 5,
+                "variant": "unpaid"
+            },
+            "remaining": 100000000
+        },
+        {
+            "buyer": 26,
+            "scenario": {
+                "kind": "late",
+                "months": 5,
+                "variant": "partial"
+            },
+            "remaining": 95000000
+        },
+        {
+            "buyer": 27,
+            "scenario": {
+                "kind": "late",
+                "months": 5,
+                "variant": "installment"
+            },
+            "remaining": 90000000
+        },
+        {
+            "buyer": 28,
+            "scenario": {
+                "kind": "late",
+                "months": 6,
+                "variant": "unpaid"
+            },
+            "remaining": 100000000
+        },
+        {
+            "buyer": 29,
+            "scenario": {
+                "kind": "late",
+                "months": 6,
+                "variant": "partial"
+            },
+            "remaining": 95000000
+        },
+        {
+            "buyer": 30,
+            "scenario": {
+                "kind": "late",
+                "months": 6,
+                "variant": "installment"
+            },
+            "remaining": 90000000
+        }
+    ]
+}
