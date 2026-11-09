@@ -105,7 +105,7 @@ class LokasiKavlingController extends Controller
                     }
                     return [
                         'name'            => 'Ready',
-                        'warna'           => '#80ff00',
+                        'warna'           => '#ffffff',
                         'warna_bootstrap' => 'success',
                     ];
                 })

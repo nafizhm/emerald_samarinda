@@ -46,7 +46,7 @@ $template = '<g><polygon class="fil4" points="[[1]]" style="fill:[[2]]"/><g tran
 $pathTemplate = str_replace(['<polygon', 'points='], ['<path', 'd='], $template);
 $rendered = str_replace(['[[lebar]]', '[[tinggi]]'], ['100%', '100%'], $header);
 foreach ($shapes as $label => $shape) {
-    $rendered .= str_replace(['[[1]]', '[[2]]', '[[3]]', '[[4]]'], [$shape['map'], '#80ff00', $shape['matrik'], $label], $shape['jenis_map'] === 'path' ? $pathTemplate : $template);
+    $rendered .= str_replace(['[[1]]', '[[2]]', '[[3]]', '[[4]]'], [$shape['map'], '#ffffff', $shape['matrik'], $label], $shape['jenis_map'] === 'path' ? $pathTemplate : $template);
 }
 $validation = new DOMDocument();
 if (!$validation->loadXML($rendered.'</svg>', LIBXML_NONET)) throw new RuntimeException('Invalid rendered SVG');
@@ -83,7 +83,7 @@ if ($persist) {
         if (!$ready) {
             $readyId = DB::table('progres_list_penjualan')->insertGetId([
                 'status_progres' => 'Ready', 'urutan' => 1, 'keterangan' => 'Kavling tersedia',
-                'warna' => '#80ff00', 'warna_bootstrap' => 'success', 'short_name' => 'Ready', 'stt_tampil' => 1,
+                'warna' => '#ffffff', 'warna_bootstrap' => 'success', 'short_name' => 'Ready', 'stt_tampil' => 1,
             ]);
         } else $readyId = $ready->id;
         DB::table('customer')->where('id_lokasi', $location->id)->where(function ($q) {

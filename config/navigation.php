@@ -33,8 +33,4 @@ return [
         'pengguna.index' => 'Pengguna',
         'hak-akses.index' => 'Hak Akses',
     ]],
-    ['id' => 38, 'title' => 'WhatsApp', 'icon' => 'bi bi-whatsapp', 'section' => 'Sistem', 'children' => [
-        'pengaturan-koneksi.index' => 'Koneksi WhatsApp',
-        'template-pesan.index' => 'Template Pesan',
-    ]],
 ];

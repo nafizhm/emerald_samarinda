@@ -85,7 +85,7 @@ class SiteplanPenjualanController extends Controller
                 $kavling->registrasi = $owner;
             }
 
-            $readyColor = ListPenjualan::where('status_progres', 'Ready')->value('warna') ?: '#80ff00';
+            $readyColor = ListPenjualan::where('status_progres', 'Ready')->value('warna') ?: '#ffffff';
             $html = view('admin.st_penjualan.siteplan_content', compact('lokasi', 'readyColor'))->render();
 
             return response()->json([
@@ -414,7 +414,7 @@ class SiteplanPenjualanController extends Controller
         // Render Header SVG
         echo str_replace(['[[lebar]]', '[[tinggi]]'], [$width, $height], $lokasi->masterSvg->header_svg);
 
-        $readyColor = ListPenjualan::where('status_progres', 'Ready')->value('warna') ?: '#80ff00';
+        $readyColor = ListPenjualan::where('status_progres', 'Ready')->value('warna') ?: '#ffffff';
 
         // 3. Loop Kavling
         foreach ($lokasi->kavlingPeta as $pt) {
