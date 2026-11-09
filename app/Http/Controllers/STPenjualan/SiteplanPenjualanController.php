@@ -85,7 +85,8 @@ class SiteplanPenjualanController extends Controller
                 $kavling->registrasi = $owner;
             }
 
-            $html = view('admin.st_penjualan.siteplan_content', compact('lokasi'))->render();
+            $readyColor = ListPenjualan::where('status_progres', 'Ready')->value('warna') ?: '#80ff00';
+            $html = view('admin.st_penjualan.siteplan_content', compact('lokasi', 'readyColor'))->render();
 
             return response()->json([
                 'success' => true,
@@ -171,7 +172,7 @@ class SiteplanPenjualanController extends Controller
         $listrikAir = ListrikAir::where('id_kavling', $kavling->id)->first();
 
         $kavlingData = [
-            'status'        => $cust ? ($cust->progres?->status_progres ?? 'Belum ada status') : 'Belum dialokasikan',
+            'status'        => $cust?->progres?->status_progres ?? 'Ready',
             'marketing'     => $cust && $cust->marketing ? $cust->marketing->nama_marketing : '-',
             'lokasi'        => $namaLokasi,
             'blok'          => $kavling->kode_kavling ?? '-',
@@ -333,7 +334,8 @@ class SiteplanPenjualanController extends Controller
 
     public function cetakJPG($id_lokasi)
     {
-        $svgContent = $this->generateSVG($id_lokasi);
+        $svgContent = $this->generateRasterSVG($id_lokasi);
+
 
         $svgFilename = "siteplan_{$id_lokasi}.svg";
 
@@ -377,6 +379,23 @@ class SiteplanPenjualanController extends Controller
         return response()->download($jpgPath);
     }
 
+    private function generateRasterSVG($id_lokasi): string
+    {
+        $svgContent = $this->generateSVG($id_lokasi);
+        // Raster converters need explicit pixel dimensions instead of percentages.
+        // Preserve the viewBox ratio while keeping the output within 2400 pixels.
+        $document = new \DOMDocument();
+        $document->loadXML($svgContent, LIBXML_NONET);
+        $root = $document->documentElement;
+        $viewBox = preg_split('/[\s,]+/', trim($root->getAttribute('viewBox')));
+        abort_unless(count($viewBox) === 4 && is_numeric($viewBox[2]) && is_numeric($viewBox[3])
+            && $viewBox[2] > 0 && $viewBox[3] > 0, 422, 'Ukuran denah SVG tidak valid.');
+        $scale = 2400 / max((float) $viewBox[2], (float) $viewBox[3]);
+        $root->setAttribute('width', (string) max(1, (int) round($viewBox[2] * $scale)));
+        $root->setAttribute('height', (string) max(1, (int) round($viewBox[3] * $scale)));
+        return $document->saveXML($root);
+    }
+
     private function generateSVG($id_lokasi, $width = '100%', $height = '100%')
     {
         // 1. Eager Loading 'kavlingPeta.customer' untuk performa (Pivot Table)
@@ -395,9 +414,11 @@ class SiteplanPenjualanController extends Controller
         // Render Header SVG
         echo str_replace(['[[lebar]]', '[[tinggi]]'], [$width, $height], $lokasi->masterSvg->header_svg);
 
+        $readyColor = ListPenjualan::where('status_progres', 'Ready')->value('warna') ?: '#80ff00';
+
         // 3. Loop Kavling
         foreach ($lokasi->kavlingPeta as $pt) {
-            $warna = '#ffffff'; // Default Putih (Available)
+            $warna = $readyColor;
 
             // Ambil Customer Pertama dari Relasi Pivot
             // Karena Many-to-Many, $pt->customer adalah Collection. Kita ambil first().
@@ -408,14 +429,7 @@ class SiteplanPenjualanController extends Controller
                 if ($owner->id_status_progres && isset($listWarna[$owner->id_status_progres])) {
                     $warna = $listWarna[$owner->id_status_progres];
                 }
-                // Fallback Logic (Logic Registrasi lama)
-                else {
-                    if ($owner->stt_reg == 0) {
-                        $warna = '#00ffff'; // Warna Cyan (Booking Sementara/Draft)
-                    } elseif (in_array($owner->stt_reg, [1, 2, 3])) {
-                        $warna = '#ffffff';
-                    }
-                }
+
             }
 
             // Tentukan Jenis Shape SVG (Polygon / Path)
@@ -441,7 +455,7 @@ class SiteplanPenjualanController extends Controller
         $namaKavling = $lokasi->nama_kavling ?? '-';
         $periodeCetak = now()->translatedFormat('d F Y');
 
-        $svgContent = $this->generateSVG($id_lokasi);
+        $svgContent = $this->generateRasterSVG($id_lokasi);
         $svgFilename = "siteplan_{$id_lokasi}.svg";
         $svgPath = public_path("svg/{$svgFilename}");
 
@@ -520,6 +534,9 @@ class SiteplanPenjualanController extends Controller
 
         $pdf->Image($jpgPath, $posisiX, $pdf->GetY(), $finalWidth, 0, 'JPG');
 
-        $pdf->Output("siteplan_{$namaKavling}.pdf", 'I');
+        return response($pdf->Output("siteplan.pdf", 'S'), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="siteplan_'.$id_lokasi.'.pdf"',
+        ]);
     }
 }

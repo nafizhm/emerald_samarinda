@@ -20,11 +20,9 @@
         <aside class="dashboard-panel siteplan-legend" id="legend" aria-label="Keterangan warna kavling">
             <div class="panel-heading"><div><h2>Keterangan warna</h2><p>Status setiap kavling</p></div><i class="bi bi-palette text-muted"></i></div>
             <div class="siteplan-legend-items">
-                <div class="siteplan-legend-item"><span class="siteplan-swatch available"></span><span>Belum dialokasikan</span></div>
                 @foreach($legend as $item)<div class="siteplan-legend-item"><span class="siteplan-swatch" style="background:{{ $item->warna }}"></span><span>{{ $item->status_progres }}</span></div>@endforeach
-                <div class="siteplan-legend-item"><span class="siteplan-swatch unclassified"></span><span>Belum ada status</span></div>
             </div>
-            <div class="siteplan-legend-note"><i class="bi bi-info-circle"></i><p>Warna mengikuti tahapan pelanggan. Kavling berwarna netral belum memiliki status penjualan.</p></div>
+            <div class="siteplan-legend-note"><i class="bi bi-info-circle"></i><p>Warna mengikuti tahapan pelanggan. Kavling tanpa tahapan penjualan ditampilkan sebagai Ready.</p></div>
         </aside>
     </div>
     @else

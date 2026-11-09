@@ -345,7 +345,7 @@
                 success: function(response) {
                     if (response.success) {
                         $('#modalDetailLabel').text('Kavling ' + (response.kavling.kode_kavling ?? '-'));
-                        $('#unit-detail-subtitle').text(response.lokasi + ' · ' + (response.customer ? response.customer.nama_lengkap : 'Belum dialokasikan'));
+                        $('#unit-detail-subtitle').text(response.lokasi + ' · ' + (response.customer ? response.customer.nama_lengkap : 'Ready'));
                         $('#unit-detail-state').hide();
                         $('#tabDetailContent').prop('hidden', false);
                         $('#btn-cetak').prop('disabled', false);

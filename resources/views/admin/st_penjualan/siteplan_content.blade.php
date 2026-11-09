@@ -21,20 +21,7 @@
     {{-- Loop kavling --}}
     @foreach ($lokasi->kavlingPeta as $pt)
         @php
-            $warna = $pt->customer ? '#dbe4ef' : '#ffffff';
-            if ($pt->customer) {
-                if ($pt->progres) {
-                    $warna = $pt->progres->warna ?: '#dbe4ef';
-                }
-            } else {
-                if ($pt->registrasi) {
-                    if ($pt->registrasi->stt_reg == 0) {
-                        $warna = '#00ffff';
-                    } elseif (in_array($pt->registrasi->stt_reg, [1, 2, 3])) {
-                        $warna = '#ffffff';
-                    }
-                }
-            }
+            $warna = $pt->progres?->warna ?: $readyColor;
         @endphp
 
         @php $svg_code = $pt->jenis_map === 'polygon' ? $lokasi->masterSvg->polygon_svg : $lokasi->masterSvg->path_svg; @endphp
