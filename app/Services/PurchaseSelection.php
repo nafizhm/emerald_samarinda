@@ -16,7 +16,7 @@ class PurchaseSelection
             throw ValidationException::withMessages(['id_kavling' => 'Pilih kavling yang berada di lokasi transaksi.']);
         }
         if ($units->contains(fn ($unit) => $unit->customer()->where('stt_arsip', 0)->exists())) {
-            throw ValidationException::withMessages(['id_kavling' => 'Salah satu kavling sudah dibeli pelanggan lain. Pilih kembali kavling yang tersedia.']);
+            throw ValidationException::withMessages(['id_kavling' => 'Salah satu kavling sudah dibeli customer lain. Pilih kembali kavling yang tersedia.']);
         }
         $total = (int) $units->sum('hrg_jual');
         if ($discount < 0 || $discount > $total) {

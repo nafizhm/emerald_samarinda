@@ -19,13 +19,106 @@
 #main .workspace-page h2,#main .workspace-page h3 { color:var(--text-main); font-size:19px; font-weight:600; }
 #main .workspace-page h4,#main .workspace-page h5,#main .workspace-page h6 { color:var(--text-main); font-weight:600; }
 #main .workspace-page .text-muted { color:var(--text-secondary) !important; }
-#main .workspace-page .btn,.workspace-modal .btn { border-radius:8px; font-size:13px; min-height:38px; padding:8px 13px; line-height:1.4; box-shadow:none; }
-#main .workspace-page .btn-sm,.workspace-modal .btn-sm { min-height:32px; padding:6px 10px; font-size:12px; }
+#main .workspace-page .btn,.workspace-modal .btn { border-radius:8px; font-size:13px; min-height:38px; padding:8px 14px; line-height:1.4; box-shadow:none; display:inline-flex; align-items:center; justify-content:center; vertical-align:middle; gap:0.35rem; white-space:nowrap; }
+#main .workspace-page .btn-sm,.workspace-modal .btn-sm { min-height:32px; padding:6px 12px; font-size:12px; }
 #main .workspace-page .btn-light,.workspace-modal .btn-light { background:var(--surface-soft); border-color:var(--panel-border); color:var(--text-main); }
-#main .workspace-page .btn-primary,.workspace-modal .btn-primary { background:#3659b8; border-color:#3659b8; color:#fff; }
-#main .workspace-page .btn-primary:hover,.workspace-modal .btn-primary:hover { background:#2b4899; border-color:#2b4899; }
+#main .workspace-page .btn-primary,.workspace-modal .btn-primary { background:#166b53; border-color:#166b53; color:#fff; }
+#main .workspace-page .btn-primary:hover,.workspace-modal .btn-primary:hover { background:#105240; border-color:#105240; }
+
+/* Proteksi Dark Mode agar border-radius tombol tidak di-reset ke 0 oleh app-dark.css */
+html[data-bs-theme="dark"] .btn,
+html[data-bs-theme="dark"] button.btn,
+html[data-bs-theme="dark"] a.btn,
+[data-bs-theme="dark"] .btn { border-radius:8px !important; }
+html[data-bs-theme="dark"] .btn-sm,
+html[data-bs-theme="dark"] button.btn-sm,
+html[data-bs-theme="dark"] a.btn-sm,
+[data-bs-theme="dark"] .btn-sm { border-radius:6px !important; }
+html[data-bs-theme="dark"] .btn-rounded,
+html[data-bs-theme="dark"] button.btn-rounded,
+html[data-bs-theme="dark"] a.btn-rounded,
+[data-bs-theme="dark"] .btn-rounded { border-radius:50rem !important; }
+
+/* Sistem perataan vertikal icon di seluruh tombol (icon sejajar persis di tengah dengan text) */
+.btn > :is(i, [class*="fa"]),
+button.btn > :is(i, [class*="fa"]),
+a.btn > :is(i, [class*="fa"]),
+#main .btn > :is(i, [class*="fa"]),
+.workspace-modal .btn > :is(i, [class*="fa"]),
+.dashboard-action > :is(i, [class*="fa"]),
+.customer-edit-actions .btn > :is(i, [class*="fa"]) {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    vertical-align: middle !important;
+}
+
+.btn > :is(i, [class*="fa"])::before,
+button.btn > :is(i, [class*="fa"])::before,
+a.btn > :is(i, [class*="fa"])::before,
+#main .btn > :is(i, [class*="fa"])::before,
+.workspace-modal .btn > :is(i, [class*="fa"])::before,
+.dashboard-action > :is(i, [class*="fa"])::before,
+.customer-edit-actions .btn > :is(i, [class*="fa"])::before {
+    display: inline-block !important;
+    line-height: 1 !important;
+    vertical-align: 0 !important;
+}
+
+/* Tombol ICON ONLY yang eksplisit: Harus Center Presisi Horizontal dan Vertikal */
+.btn-icon,
+.btn-delete,
+.siteplan-tool,
+.topbar-icon:not(.burger-btn),
+.due-floating,
+.remove-preview {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+}
+
+@media (min-width: 1200px) {
+    .burger-btn,
+    .topbar-icon.burger-btn {
+        display: none !important;
+    }
+}
+
+@media (max-width: 1199.98px) {
+    .topbar-icon.burger-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+}
+
+.btn-icon > :is(i, [class*="fa"], svg),
+.btn-delete > :is(i, [class*="fa"], svg),
+.siteplan-tool > :is(i, [class*="fa"], svg),
+.topbar-icon > :is(i, [class*="fa"], svg),
+.due-floating > :is(i, [class*="fa"], svg),
+.remove-preview > :is(i, [class*="fa"], svg) {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    vertical-align: middle !important;
+}
+
+.modal-header .btn-close,
+.modal-header .close {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+}
 #main .workspace-page :is(.form-control,.form-select),.workspace-modal :is(.form-control,.form-select) { border:1px solid var(--panel-border); border-radius:8px; background-color:var(--panel-bg); color:var(--text-main); font-size:14px; min-height:42px; padding:9px 12px; box-shadow:none; }
-#main .workspace-page :is(.form-control,.form-select):focus,.workspace-modal :is(.form-control,.form-select):focus { border-color:#7d99d9; box-shadow:0 0 0 3px #3659b81a; }
+#main .workspace-page :is(.form-control,.form-select):focus,.workspace-modal :is(.form-control,.form-select):focus { border-color:#5ea691; box-shadow:0 0 0 3px rgba(22, 107, 83, 0.18); }
 #main .workspace-page :is(.form-control,.form-select):disabled,#main .workspace-page .form-control[readonly],.workspace-modal :is(.form-control,.form-select):disabled,.workspace-modal .form-control[readonly] { background:var(--surface-soft); opacity:1; }
 #main .workspace-page .form-control::placeholder,.workspace-modal .form-control::placeholder { color:var(--text-secondary); }
 #main .workspace-page .form-control.is-invalid,.workspace-modal .form-control.is-invalid { border-color:#dc3545; }
@@ -38,14 +131,20 @@
 #main .workspace-page .table > tfoot > tr > :is(th,td) { background:var(--surface-soft); padding:12px 14px; font-weight:600; border-color:var(--panel-border); }
 #main .workspace-page .table td p { margin-bottom:4px; }
 #main .workspace-page .table td .btn { margin-top:3px; margin-bottom:3px; }
-#main .workspace-page .table-responsive { border-radius:9px; }
 #main .workspace-page .dataTables_wrapper { font-size:12px; color:var(--text-secondary); max-width:100%; }
 #main .workspace-page .dataTables_wrapper > .row { align-items:center; row-gap:12px; margin-bottom:12px; }
 #main .workspace-page .dataTables_wrapper > .row:last-child { margin-top:16px; margin-bottom:0; }
-#main .workspace-page .dataTables_filter input { background:var(--panel-bg); color:var(--text-main); border:1px solid var(--panel-border); border-radius:8px; min-height:38px; }
+#main .dataTables_filter { width:100%; max-width:340px; margin-left:auto; text-align:left; }
+#main .dataTables_filter label { display:block; width:100%; margin:0; font-size:0; }
+#main .workspace-search-wrap { position:relative; width:100%; display:flex; align-items:center; }
+#main .workspace-search-wrap > i { position:absolute; left:14px; top:50%; transform:translateY(-50%); display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; line-height:1; font-size:14px; color:var(--text-secondary); pointer-events:none; }
+#main .workspace-search-wrap > i::before { display:block; line-height:1; vertical-align:0; }
+#main .dataTables_filter input { width:100%; min-height:42px; margin:0; background:var(--panel-bg); color:var(--text-main); border:1px solid var(--panel-border); border-radius:8px; padding:10px 14px 10px 42px !important; font-size:13px; }
+#main .dataTables_filter input::placeholder { color:var(--text-secondary); }
+#main .dataTables_filter input:focus { outline:2px solid var(--accent); outline-offset:1px; }
 #main .workspace-page .dataTables_length select { background-color:var(--panel-bg); color:var(--text-main); border-color:var(--panel-border); border-radius:8px; min-height:36px; }
 #main .workspace-page .page-link { border-color:var(--panel-border); background:var(--panel-bg); color:var(--text-secondary); font-size:12px; padding:8px 12px; }
-#main .workspace-page .page-item.active .page-link { background:#3659b8; border-color:#3659b8; color:#fff; }
+#main .workspace-page .page-item.active .page-link { background:#166b53; border-color:#166b53; color:#fff; }
 #main .workspace-page .page-item.disabled .page-link { background:var(--surface-soft); color:var(--text-secondary); }
 #main .workspace-page .nav-tabs { gap:6px; border-color:var(--panel-border); flex-wrap:wrap; }
 #main .workspace-page .nav-tabs .nav-link { border:0; border-radius:8px 8px 0 0; padding:11px 15px; font-size:13px; color:var(--text-secondary); }
@@ -72,8 +171,9 @@
     #main .workspace-page .workspace-page-header > .d-flex > div { width:100%; }
     #main .workspace-page .workspace-page-header .btn { margin-left:0 !important; margin-right:0 !important; }
     #main .workspace-page .dataTables_filter,#main .workspace-page .dataTables_length,#main .workspace-page .dataTables_info { text-align:left; }
-    #main .workspace-page .dataTables_filter label { display:flex; align-items:center; gap:8px; width:100%; }
-    #main .workspace-page .dataTables_filter input { flex:1; min-width:0; margin-left:0; }
+    #main .dataTables_filter { width:100%; max-width:none; margin-left:0; }
+    #main .dataTables_filter label { display:block; width:100%; }
+    #main .dataTables_filter input { width:100%; min-width:0; margin-left:0; }
     #main .workspace-page .dataTables_paginate .pagination { justify-content:flex-start; flex-wrap:wrap; gap:3px; }
     #main .workspace-page .dataTables_wrapper > .row > [class*="col-"] { width:100%; }
     .workspace-modal .modal-header,.workspace-modal .modal-body,.workspace-modal .modal-footer { padding:16px; }
@@ -91,16 +191,13 @@
 }
 @media(prefers-reduced-motion:reduce) { .workspace-modal,#main .workspace-page .btn { transition:none; } }
 
-.workspace-table-scroll { width:100%; max-width:100%; overflow-x:auto; overscroll-behavior-x:contain; border-radius:9px; scrollbar-width:thin; }
+.workspace-table-scroll { width:100%; max-width:100%; border-radius:9px; }
 .workspace-table-scroll:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 #main .workspace-page .nav-pills .nav-link { border-radius:8px; color:var(--text-secondary); font-size:13px; }
-#main .workspace-page .nav-pills .nav-link.active { background:#3659b8; color:#fff; }
+#main .workspace-page .nav-pills .nav-link.active { background:#166b53; color:#fff; }
 @media(max-width:575.98px) {
     #main .workspace-page form .row > .col-form-label { width:100%; padding-bottom:5px; }
     #main .workspace-page form .row > :is(.col-9,.col-sm-2,.col-sm-3,.col-sm-4,.col-sm-6,.col-sm-8,.col-sm-9) { width:100%; }
-    #main .workspace-page .table { min-width:600px; }
-    #main .workspace-page .table.dtr-inline.collapsed { min-width:0; }
-    .workspace-modal table { min-width:480px; }
 }
 
 #main .workspace-page .card-custom { width:100%; max-width:340px; min-height:72px; height:auto; padding:18px; background:var(--panel-bg); color:var(--text-main); border:1px solid var(--panel-border); border-radius:12px; box-shadow:0 2px 5px #1b335003; font-size:14px; }
@@ -108,6 +205,8 @@
 #main .workspace-page.content-wrapper { background:transparent; margin:0 auto; }
 
 #main .topbar-search { display:inline-flex; align-items:center; gap:10px; min-height:36px; padding:7px 11px; border:1px solid var(--panel-border); border-radius:9px; background:var(--surface-soft); color:var(--text-secondary); font-size:12px; }
+#main .topbar-search > i { display:inline-flex !important; align-items:center !important; justify-content:center !important; line-height:1 !important; width:1em !important; height:1em !important; font-size:13px !important; flex-shrink:0 !important; margin:0 !important; }
+#main .topbar-search > i::before { display:block !important; line-height:1 !important; vertical-align:0 !important; }
 #main .topbar-search kbd { padding:2px 5px; font-size:10px; background:var(--panel-bg); color:var(--text-secondary); border:1px solid var(--panel-border); border-radius:4px; }
 .workspace-menu-modal .modal-header p { font-size:12px; color:var(--text-secondary); margin:5px 0 0; }
 .workspace-menu-input { position:relative; margin-bottom:14px; }.workspace-menu-input > i { position:absolute; left:12px; top:13px; color:var(--text-secondary); }.workspace-menu-input .form-control { padding-left:36px; }

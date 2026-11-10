@@ -9,10 +9,15 @@
         aria-hidden="true" data-bs-backdrop="static">
 
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
-            <div class="modal-content workspace-modal">
-                <div class="modal-header unit-detail-header">
-                    <div><span class="unit-detail-eyebrow">Rincian unit</span><h5 class="modal-title" id="modalDetailLabel">Detail kavling</h5><p id="unit-detail-subtitle">Informasi tanah dan pelanggan</p></div>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <div>
+                        <h5 class="modal-title white" id="modalDetailLabel">Detail kavling</h5>
+                        <p id="unit-detail-subtitle" class="text-white-50 mb-0 small">Informasi tanah dan customer</p>
+                    </div>
+                    <button type="button" class="close white" data-bs-dismiss="modal" aria-label="Tutup">
+                        <i data-feather="x"></i>
+                    </button>
                 </div>
                 
                     <div class="modal-body">
@@ -38,7 +43,7 @@
                                     <li class="nav-item" role="presentation">
                                         <a class="nav-link" id="page-2-tab" data-bs-toggle="pill" href="#page-2"
                                             role="tab" aria-controls="page-2" aria-selected="false">
-                                            <i class="bi bi-person me-2"></i>Data pelanggan
+                                            <i class="bi bi-person me-2"></i>Data customer
                                         </a>
                                     </li>
                                     {{-- <li class="nav-item" role="presentation">
@@ -64,7 +69,7 @@
 <div class="unit-detail-item"><dt>Luas tanah</dt><dd id="luas_tanah_id">-</dd></div></dl></section>
 <section class="unit-detail-section"><h6>Catatan unit</h6><dl class="unit-detail-grid"><div class="unit-detail-item unit-detail-wide"><dt>Keterangan</dt><dd id="keterangan_id">-</dd></div></dl></section>
 </div>
-<div class="tab-pane fade" id="page-2" role="tabpanel" aria-labelledby="page-2-tab"><div id="unit-customer-empty" class="unit-detail-state" hidden>Belum ada pelanggan yang dialokasikan untuk kavling ini.</div><div id="unit-customer-content"><section class="unit-detail-section"><h6>Identitas pelanggan</h6><dl class="unit-detail-grid"><div class="unit-detail-item unit-detail-wide"><dt>Nama lengkap</dt><dd id="nama_lengkap_id">-</dd></div>
+<div class="tab-pane fade" id="page-2" role="tabpanel" aria-labelledby="page-2-tab"><div id="unit-customer-empty" class="unit-detail-state" hidden>Belum ada customer yang dialokasikan untuk kavling ini.</div><div id="unit-customer-content"><section class="unit-detail-section"><h6>Identitas customer</h6><dl class="unit-detail-grid"><div class="unit-detail-item unit-detail-wide"><dt>Nama lengkap</dt><dd id="nama_lengkap_id">-</dd></div>
 <div class="unit-detail-item"><dt>Nomor KTP</dt><dd id="no_ktp_id">-</dd></div>
 <div class="unit-detail-item"><dt>Nomor KTP pasangan</dt><dd id="no_ktp_p_id">-</dd></div>
 <div class="unit-detail-item"><dt>Tempat lahir</dt><dd id="tempat_lahir_id">-</dd></div>
@@ -75,7 +80,7 @@
 <div class="unit-detail-item"><dt>Jenis pembelian</dt><dd id="jenis_pembelian_id">-</dd></div>
 <div class="unit-detail-item unit-detail-wide"><dt>Alamat KTP</dt><dd id="alamat_id">-</dd></div>
 <div class="unit-detail-item unit-detail-wide"><dt>Alamat domisili</dt><dd id="alamat_domisili_id">-</dd></div></dl></section>
-<section class="unit-detail-section"><h6>Dokumen pelanggan</h6><div class="unit-detail-documents"><div class="unit-detail-document"><span>KTP</span><a href="#" class="view-photo-link" id="fotoKtpLink" target="_blank" rel="noopener" style="display:none"><i class="bi bi-box-arrow-up-right"></i> Lihat dokumen</a><span id="noFotoKtp">Belum tersedia</span></div><div class="unit-detail-document"><span>Pemohon</span><a href="#" class="view-photo-link" id="fotoPemohonLink" target="_blank" rel="noopener" style="display:none"><i class="bi bi-box-arrow-up-right"></i> Lihat dokumen</a><span id="noFotoPemohon">Belum tersedia</span></div><div class="unit-detail-document"><span>Kartu keluarga</span><a href="#" class="view-photo-link" id="fotoKkLink" target="_blank" rel="noopener" style="display:none"><i class="bi bi-box-arrow-up-right"></i> Lihat dokumen</a><span id="noFotoKk">Belum tersedia</span></div><div class="unit-detail-document"><span>KTP pasangan</span><a href="#" class="view-photo-link" id="fotoKtpPasanganLink" target="_blank" rel="noopener" style="display:none"><i class="bi bi-box-arrow-up-right"></i> Lihat dokumen</a><span id="noFotoKtpPasangan">Belum tersedia</span></div><div class="unit-detail-document"><span>NPWP</span><a href="#" class="view-photo-link" id="fotoNpwpLink" target="_blank" rel="noopener" style="display:none"><i class="bi bi-box-arrow-up-right"></i> Lihat dokumen</a><span id="noFotoNpwp">Belum tersedia</span></div><div class="unit-detail-document"><span>BPJS</span><a href="#" class="view-photo-link" id="fotoBpjsLink" target="_blank" rel="noopener" style="display:none"><i class="bi bi-box-arrow-up-right"></i> Lihat dokumen</a><span id="noFotoBpjs">Belum tersedia</span></div></div></section></div></div>
+<section class="unit-detail-section"><h6>Dokumen customer</h6><div class="unit-detail-documents"><div class="unit-detail-document"><span>KTP</span><a href="#" class="view-photo-link" id="fotoKtpLink" target="_blank" rel="noopener" style="display:none"><i class="bi bi-box-arrow-up-right"></i> Lihat dokumen</a><span id="noFotoKtp">Belum tersedia</span></div><div class="unit-detail-document"><span>Pemohon</span><a href="#" class="view-photo-link" id="fotoPemohonLink" target="_blank" rel="noopener" style="display:none"><i class="bi bi-box-arrow-up-right"></i> Lihat dokumen</a><span id="noFotoPemohon">Belum tersedia</span></div><div class="unit-detail-document"><span>Kartu keluarga</span><a href="#" class="view-photo-link" id="fotoKkLink" target="_blank" rel="noopener" style="display:none"><i class="bi bi-box-arrow-up-right"></i> Lihat dokumen</a><span id="noFotoKk">Belum tersedia</span></div><div class="unit-detail-document"><span>KTP pasangan</span><a href="#" class="view-photo-link" id="fotoKtpPasanganLink" target="_blank" rel="noopener" style="display:none"><i class="bi bi-box-arrow-up-right"></i> Lihat dokumen</a><span id="noFotoKtpPasangan">Belum tersedia</span></div><div class="unit-detail-document"><span>NPWP</span><a href="#" class="view-photo-link" id="fotoNpwpLink" target="_blank" rel="noopener" style="display:none"><i class="bi bi-box-arrow-up-right"></i> Lihat dokumen</a><span id="noFotoNpwp">Belum tersedia</span></div><div class="unit-detail-document"><span>BPJS</span><a href="#" class="view-photo-link" id="fotoBpjsLink" target="_blank" rel="noopener" style="display:none"><i class="bi bi-box-arrow-up-right"></i> Lihat dokumen</a><span id="noFotoBpjs">Belum tersedia</span></div></div></section></div></div>
                                     <div class="tab-pane fade" id="page-3">
                                         <h3>Tagihan & Pembayaran</h3>
                                         <hr>
@@ -334,9 +339,10 @@
             $('#btn-cetak').prop('disabled', true);
             $('#unit-detail-state').text('Memuat rincian unit...').show();
             $('#modalDetailLabel').text('Detail kavling');
-            $('#unit-detail-subtitle').text('Informasi tanah dan pelanggan');
+            $('#unit-detail-subtitle').text('Informasi tanah dan customer');
             bootstrap.Tab.getOrCreateInstance(document.getElementById('page-1-tab')).show();
             hideAllCustomerPhotoLinks();
+            if (typeof feather !== 'undefined') { feather.replace(); }
             $('#modalDetail').data('id-kavling', id_kavling);
 
             detailRequest = $.ajax({

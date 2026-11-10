@@ -22,7 +22,7 @@ class JatuhTempoController extends Controller
         $page = max(1, (int) $request->query('page', 1));
         $customers = new \Illuminate\Pagination\LengthAwarePaginator($filtered->forPage($page, 20), $filtered->count(), 20, $page,
             ['path' => $request->url(), 'query' => $request->query()]);
-        return view('admin.pembayaran.pelanggan_jatuh_tempo', compact('customers', 'summary', 'search', 'status'));
+        return view('admin.pembayaran.customer_jatuh_tempo', compact('customers', 'summary', 'search', 'status'));
     }
 
     public function notification(JatuhTempoService $service)

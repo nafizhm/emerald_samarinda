@@ -1,5 +1,6 @@
 @extends('admin.layout')
 @section('page_title', 'Data Unit')
+@section('search_placeholder', 'Cari nama cluster, lokasi...')
 @section('content')
     <div class="page-content dashboard-page workspace-page">
         <section class="section">
@@ -19,7 +20,6 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
                         <table class="table data-table table-bordered table-striped">
                             <thead>
                                 <tr>
@@ -34,7 +34,6 @@
                             </thead>
                             <tbody></tbody>
                         </table>
-                    </div>
                 </div>
             </div>
         </section>

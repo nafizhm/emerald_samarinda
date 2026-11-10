@@ -1,5 +1,6 @@
 @extends('admin.layout')
 @section('page_title', 'Data Detail Penjualan')
+@section('search_placeholder', 'Cari kode kavling, customer...')
 @section('content')
     <div class="page-content dashboard-page workspace-page">
         <section class="section">
@@ -27,7 +28,7 @@
                             <tr>
                                 <th width="5%">No</th>
                                 <th width="15%">Kode Kavling</th>
-                                <th width="20%">Pelanggan</th>
+                                <th width="20%">Customer</th>
                                 <th width="15%">Harga Jual</th>
                                 <th width="15%">Harga Sudah Laku</th>
                                 <th width="15%">Sudah Terbayar</th>

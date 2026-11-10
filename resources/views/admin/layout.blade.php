@@ -136,7 +136,7 @@
 
         body.dark #main-navbar .nav-link.active,
         body.dark #main-navbar .nav-link:hover {
-            color: #0d6efd;
+            color: #5ecba1;
         }
 
         .main-navbar {
@@ -351,6 +351,297 @@
     <link rel="stylesheet" href="{{ asset('template/assets/css/admin-pages.css') }}?v={{ filemtime(public_path('template/assets/css/admin-pages.css')) }}">
     <link rel="stylesheet" href="{{ asset('template/assets/css/select2-custom.css') }}?v={{ filemtime(public_path('template/assets/css/select2-custom.css')) }}">
     @stack('styles')
+    <style>
+        /* =====================================================================
+           Theme Color Overrides: Forest & Emerald Green Palette
+           Sesuai tema eksklusif login (Emerald Samarinda)
+           Menjamin keselarasan aksen hijau baik di Light Mode maupun Dark Mode
+           ===================================================================== */
+        :root,
+        html[data-bs-theme="light"],
+        body.light {
+            --bs-blue: #166b53;
+            --bs-primary: #166b53;
+            --bs-primary-rgb: 22, 107, 83;
+            --bs-primary-text-emphasis: #0b362a;
+            --bs-primary-bg-subtle: #e8f5f0;
+            --bs-primary-border-subtle: #b7dfd0;
+            --bs-link-color: #166b53;
+            --bs-link-color-rgb: 22, 107, 83;
+            --bs-link-hover-color: #105240;
+            --bs-link-hover-color-rgb: 16, 82, 64;
+            --accent: #166b53;
+        }
+
+        /* Primary Buttons - Light & Dark */
+        .btn-primary,
+        html[data-bs-theme="dark"] .btn-primary,
+        html[data-bs-theme="light"] .btn-primary,
+        body.theme-dark .btn-primary,
+        body.dark .btn-primary {
+            --bs-btn-bg: #166b53 !important;
+            --bs-btn-border-color: #166b53 !important;
+            --bs-btn-hover-bg: #105240 !important;
+            --bs-btn-hover-border-color: #105240 !important;
+            --bs-btn-active-bg: #0d4233 !important;
+            --bs-btn-active-border-color: #0d4233 !important;
+            --bs-btn-disabled-bg: #166b53 !important;
+            --bs-btn-disabled-border-color: #166b53 !important;
+            --bs-btn-focus-shadow-rgb: 22, 107, 83 !important;
+            background-color: #166b53 !important;
+            border-color: #166b53 !important;
+            color: #fff !important;
+        }
+        .btn-primary:hover,
+        html[data-bs-theme="dark"] .btn-primary:hover,
+        html[data-bs-theme="light"] .btn-primary:hover,
+        body.theme-dark .btn-primary:hover,
+        body.dark .btn-primary:hover {
+            background-color: #105240 !important;
+            border-color: #105240 !important;
+            color: #fff !important;
+        }
+        .btn-primary:active,
+        .btn-primary.active,
+        .show > .btn-primary.dropdown-toggle,
+        html[data-bs-theme="dark"] .btn-primary:active,
+        html[data-bs-theme="dark"] .btn-primary.active {
+            background-color: #0d4233 !important;
+            border-color: #0d4233 !important;
+            color: #fff !important;
+        }
+        .btn-outline-primary,
+        html[data-bs-theme="light"] .btn-outline-primary {
+            --bs-btn-color: #166b53 !important;
+            --bs-btn-border-color: #166b53 !important;
+            --bs-btn-hover-bg: #166b53 !important;
+            --bs-btn-hover-border-color: #166b53 !important;
+            --bs-btn-active-bg: #166b53 !important;
+            --bs-btn-active-border-color: #166b53 !important;
+            --bs-btn-focus-shadow-rgb: 22, 107, 83 !important;
+            color: #166b53 !important;
+            border-color: #166b53 !important;
+        }
+        .btn-outline-primary:hover,
+        .btn-outline-primary:active,
+        .btn-outline-primary.active,
+        html[data-bs-theme="light"] .btn-outline-primary:hover {
+            background-color: #166b53 !important;
+            border-color: #166b53 !important;
+            color: #fff !important;
+        }
+
+        /* Primary Backgrounds, Texts & Badges */
+        .bg-primary,
+        html[data-bs-theme="dark"] .bg-primary,
+        html[data-bs-theme="light"] .bg-primary {
+            background-color: #166b53 !important;
+        }
+        .text-primary,
+        html[data-bs-theme="light"] .text-primary {
+            color: #166b53 !important;
+        }
+        .border-primary,
+        html[data-bs-theme="dark"] .border-primary,
+        html[data-bs-theme="light"] .border-primary {
+            border-color: #166b53 !important;
+        }
+        .badge.bg-light-primary {
+            background-color: #e8f5f0 !important;
+            color: #166b53 !important;
+        }
+        .badge.bg-primary,
+        html[data-bs-theme="dark"] .badge.bg-primary {
+            background-color: #166b53 !important;
+            color: #fff !important;
+        }
+
+        /* Form Controls, Checkboxes & Switches */
+        .form-check-input:checked,
+        html[data-bs-theme="dark"] .form-check-input:checked,
+        html[data-bs-theme="light"] .form-check-input:checked,
+        body.theme-dark .form-check-input:checked,
+        body.dark .form-check-input:checked {
+            background-color: #166b53 !important;
+            border-color: #166b53 !important;
+        }
+        .form-check-input[type=checkbox]:indeterminate,
+        html[data-bs-theme="dark"] .form-check-input[type=checkbox]:indeterminate {
+            background-color: #166b53 !important;
+            border-color: #166b53 !important;
+        }
+        .form-check-input:focus,
+        html[data-bs-theme="dark"] .form-check-input:focus {
+            border-color: #5ea691 !important;
+            box-shadow: 0 0 0 0.25rem rgba(22, 107, 83, 0.2) !important;
+        }
+        .form-control:focus,
+        .form-select:focus,
+        html[data-bs-theme="dark"] .form-control:focus,
+        html[data-bs-theme="dark"] .form-select:focus {
+            border-color: #5ea691 !important;
+            box-shadow: 0 0 0 0.25rem rgba(22, 107, 83, 0.18) !important;
+        }
+
+        /* Pagination, Nav Tabs & Nav Pills */
+        .page-item.active .page-link,
+        html[data-bs-theme="dark"] .page-item.active .page-link,
+        html[data-bs-theme="dark"] .pagination .page-item.active .page-link {
+            background-color: #166b53 !important;
+            border-color: #166b53 !important;
+            color: #fff !important;
+        }
+        .nav-pills .nav-link.active,
+        .nav-pills .show > .nav-link,
+        html[data-bs-theme="dark"] .nav-pills .nav-link.active,
+        html[data-bs-theme="light"] .nav-pills .nav-link.active {
+            background-color: #166b53 !important;
+            border-color: #166b53 !important;
+            color: #fff !important;
+            box-shadow: 0 2px 10px rgba(22, 107, 83, 0.3) !important;
+        }
+        .nav-tabs .nav-link.active,
+        html[data-bs-theme="light"] .nav-tabs .nav-link.active {
+            color: #166b53 !important;
+        }
+        .nav-tabs .nav-link.active:after,
+        html[data-bs-theme="light"] .nav-tabs .nav-link.active:after {
+            background-color: #166b53 !important;
+            box-shadow: 0 2px 5px rgba(22, 107, 83, 0.3) !important;
+        }
+
+        /* List Groups, Dropdowns & Progress */
+        .list-group-item.active,
+        html[data-bs-theme="dark"] .list-group-item.active {
+            background-color: #166b53 !important;
+            border-color: #166b53 !important;
+            color: #fff !important;
+        }
+        .dropdown-item.active,
+        .dropdown-item:active,
+        html[data-bs-theme="dark"] .dropdown-item.active,
+        html[data-bs-theme="dark"] .dropdown-item:active {
+            background-color: #166b53 !important;
+            color: #fff !important;
+        }
+        .progress-bar,
+        html[data-bs-theme="dark"] .progress-bar {
+            background-color: #166b53 !important;
+        }
+        .swal2-styled.swal2-confirm {
+            background-color: #166b53 !important;
+            border-color: #166b53 !important;
+        }
+        .choices__list--dropdown .choices__item--selectable.is-highlighted {
+            background-color: #e8f5f0 !important;
+            color: #166b53 !important;
+        }
+
+        /* Dark Mode Overrides (Emerald Cerah & Kontras Tinggi) */
+        [data-bs-theme="dark"],
+        html[data-bs-theme="dark"],
+        body.theme-dark,
+        body.dark {
+            --bs-primary: #5ecba1;
+            --bs-primary-rgb: 94, 203, 161;
+            --bs-primary-text-emphasis: #a4ebd0;
+            --bs-primary-bg-subtle: #1b382e;
+            --bs-primary-border-subtle: #2d5646;
+            --bs-link-color: #5ecba1;
+            --bs-link-hover-color: #7ce3ba;
+            --accent: #5ecba1;
+        }
+        [data-bs-theme="dark"] .badge.bg-light-primary,
+        html[data-bs-theme="dark"] .badge.bg-light-primary,
+        body.theme-dark .badge.bg-light-primary,
+        body.dark .badge.bg-light-primary {
+            background-color: #1b382e !important;
+            color: #5ecba1 !important;
+        }
+        [data-bs-theme="dark"] .text-primary,
+        html[data-bs-theme="dark"] .text-primary,
+        body.theme-dark .text-primary,
+        body.dark .text-primary {
+            color: #5ecba1 !important;
+        }
+        [data-bs-theme="dark"] .btn-outline-primary,
+        html[data-bs-theme="dark"] .btn-outline-primary,
+        body.theme-dark .btn-outline-primary,
+        body.dark .btn-outline-primary {
+            color: #5ecba1 !important;
+            border-color: #5ecba1 !important;
+        }
+        [data-bs-theme="dark"] .btn-outline-primary:hover,
+        html[data-bs-theme="dark"] .btn-outline-primary:hover,
+        body.theme-dark .btn-outline-primary:hover,
+        body.dark .btn-outline-primary:hover {
+            background-color: #5ecba1 !important;
+            border-color: #5ecba1 !important;
+            color: #112820 !important;
+        }
+        [data-bs-theme="dark"] .nav-tabs .nav-link.active,
+        html[data-bs-theme="dark"] .nav-tabs .nav-link.active {
+            color: #5ecba1 !important;
+        }
+        [data-bs-theme="dark"] .nav-tabs .nav-link.active:after,
+        html[data-bs-theme="dark"] .nav-tabs .nav-link.active:after {
+            background-color: #5ecba1 !important;
+            box-shadow: 0 2px 5px rgba(94, 203, 161, 0.4) !important;
+        }
+        html[data-bs-theme="dark"] .sidebar-wrapper .menu .submenu .submenu-item.active > a {
+            color: #5ecba1 !important;
+        }
+        [data-bs-theme="dark"] .choices__list--dropdown .choices__item--selectable.is-highlighted {
+            background-color: #1b382e !important;
+            color: #5ecba1 !important;
+        }
+
+        /* Samakan indikator validasi untuk seluruh form admin, termasuk halaman dengan CSS khusus. */
+        .form-control.is-invalid,
+        .form-select.is-invalid {
+            border-color: var(--bs-form-invalid-border-color) !important;
+            padding-right: calc(1.5em + .75rem) !important;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e") !important;
+            background-repeat: no-repeat !important;
+            background-position: right calc(.375em + .1875rem) center !important;
+            background-size: calc(.75em + .375rem) calc(.75em + .375rem) !important;
+        }
+
+        textarea.form-control.is-invalid {
+            background-position: top calc(.375em + .1875rem) right calc(.375em + .1875rem) !important;
+        }
+
+        .select2.is-invalid .select2-selection,
+        .select2-container.is-invalid .select2-selection {
+            border-color: var(--bs-form-invalid-border-color) !important;
+            box-shadow: 0 0 0 .15rem rgba(220, 53, 69, .15);
+        }
+
+        .invalid-feedback {
+            color: var(--bs-form-invalid-color);
+        }
+
+        .modal-dialog-scrollable .modal-content > form {
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .modal-dialog-scrollable .modal-content > form > .modal-body {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+
+        .modal-dialog-scrollable .modal-content > .modal-body {
+            min-height: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+    </style>
 </head>
 
 <body class="{{ session('theme') === 'dark' ? 'theme-dark' : '' }}">
@@ -432,7 +723,9 @@
 
 
     <script>
-        var audio = new Audio('{{ asset('audio/notification.ogg') }}');
+        window.audioAlert = new Audio('{{ asset('audio/notification.ogg') }}');
+        window.audioSuccess = new Audio('{{ asset('audio/success.mp3') }}');
+        window.audio = window.audioAlert;
 
         $(document).on('input', '.format-number', function() {
             let input = $(this).val().replace(/[^\d]/g, '');
@@ -473,6 +766,11 @@
     </script>
 
     <script src="{{ asset('js/select2_multiple.js') }}?v={{ filemtime(public_path('js/select2_multiple.js')) }}"></script>
+
+    @php
+        $searchPlaceholder = trim($__env->yieldContent('search_placeholder')) ?: 'Ketik kata pencarian...';
+    @endphp
+    <script>window.workspaceSearchPlaceholder = {{ Illuminate\Support\Js::from($searchPlaceholder) }};</script>
 
     <script src="{{ asset('template/assets/js/admin-pages.js') }}?v={{ filemtime(public_path('template/assets/js/admin-pages.js')) }}"></script>
     @stack('scripts')

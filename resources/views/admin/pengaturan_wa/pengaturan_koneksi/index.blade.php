@@ -6,7 +6,7 @@
             <div class="card">
                 <div class="card-header workspace-page-header">
                     <div class="d-flex align-content-center justify-content-between">
-                        <div class="workspace-heading"><p class="dashboard-eyebrow">WhatsApp</p><h1>Pengaturan Koneksi WA</h1><p class="workspace-description">Kelola koneksi dan template pesan pelanggan.</p></div>
+                        <div class="workspace-heading"><p class="dashboard-eyebrow">WhatsApp</p><h1>Pengaturan Koneksi WA</h1><p class="workspace-description">Kelola koneksi dan template pesan customer.</p></div>
                     </div>
                 </div>
                 <form id="formData">
@@ -109,7 +109,6 @@
 @push('scripts')
     <script>
         var permissions = @json($permissions);
-        var audio = new Audio('{{ asset('audio/notification.ogg') }}');
 
         $('#modalForm').on('show.bs.modal', function() {
             $('#testPesanForm')[0].reset();

@@ -5,14 +5,14 @@
 @endpush
 @section('content')
     <div class="dashboard-page customer-page purchase-page">
-        <div class="dashboard-intro"><div><p class="dashboard-eyebrow">Pelanggan &amp; penjualan</p><h1>Transaksi pembelian baru</h1><p>Catat pelanggan, pilih kavling, dan tentukan pembayaran dalam satu transaksi.</p></div><a class="dashboard-action" href="{{ route('customer.index') }}"><i class="bi bi-arrow-left"></i>Kembali ke pelanggan</a></div>
+        <div class="dashboard-intro"><div><p class="dashboard-eyebrow">Customer &amp; penjualan</p><h1>Transaksi pembelian baru</h1><p>Catat customer, pilih kavling, dan tentukan pembayaran dalam satu transaksi.</p></div><a class="dashboard-action" href="{{ route('customer.index') }}"><i class="bi bi-arrow-left"></i>Kembali ke customer</a></div>
         <section class="section">
             <div class="card">
                 <form id="formData" class="purchase-form" novalidate>
                     @csrf
                     <div class="card-body">
                         <div id="purchase-errors" class="purchase-errors" role="alert" tabindex="-1" hidden></div>
-                        <section class="purchase-section" id="buyer-section"><div class="purchase-section-heading"><span>01</span><div><h2>Identitas pelanggan</h2><p>Lengkapi data pembeli. Kolom bertanda * wajib diisi.</p></div></div>
+                        <section class="purchase-section" id="buyer-section"><div class="purchase-section-heading"><span>01</span><div><h2>Identitas customer</h2><p>Lengkapi data customer. Kolom bertanda * wajib diisi.</p></div></div>
                         <div class="row mb-3">
                             <label for="tgl_terima" class="col-sm-2 col-form-label">Tanggal transaksi <span class="text-danger">*</span></label>
                             <div class="col-sm-2">
@@ -121,7 +121,9 @@
                             <label for="hrg_jual" class="col-sm-2 col-form-label">Harga Jual</label>
                             <div class="col-sm-4">
                                 <div class="input-group">
-                                    <span class="input-group-text">Rp</span>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
                                     <input type="text" class="form-control format-number" id="hrg_jual"
                                         name="hrg_jual" readonly>
                                 </div>
@@ -129,7 +131,9 @@
                             <label for="discount" class="col-sm-2 col-form-label">Diskon</label>
                             <div class="col-sm-4">
                                 <div class="input-group">
-                                    <span class="input-group-text">Rp</span>
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">Rp.</span>
+                                    </div>
                                     <input type="text" class="form-control format-number" id="discount"
                                         name="discount">
                                 </div>
@@ -155,7 +159,7 @@
                                         <option value="{{ $p->id }}">{{ $p->status_progres }}</option>
                                     @endforeach
                                 </select>
-                                <small class="text-muted">Terisi otomatis mengikuti skema pembayaran. Bisa disesuaikan dengan progres pelanggan.</small>
+                                <small class="text-muted">Terisi otomatis mengikuti skema pembayaran. Bisa disesuaikan dengan progres customer.</small>
                             </div>
                         </div>
 
@@ -392,7 +396,7 @@
                 $('#summary-price').text('Rp ' + formatNumber(price));
                 $('#summary-net').text('Rp ' + formatNumber(net));
                 $('#summary-balance').text('Rp ' + formatNumber(Math.max(0, net - paid)));
-                $('#purchase-payment-hint').text(type === 'Cash Keras' ? 'Seluruh harga setelah diskon akan dicatat sebagai pemasukan dan pelunasan.' : type === 'Booking' ? 'Pembayaran booking akan dicatat sebagai pemasukan. Sisa harga menjadi piutang pelanggan.' : type === 'Kredit' ? 'DP akan dicatat sebagai pemasukan. Sisa harga menjadi piutang dengan rencana cicilan.' : 'Pilih skema pembayaran untuk melengkapi rencana pembayaran.');
+                $('#purchase-payment-hint').text(type === 'Cash Keras' ? 'Seluruh harga setelah diskon akan dicatat sebagai pemasukan dan pelunasan.' : type === 'Booking' ? 'Pembayaran booking akan dicatat sebagai pemasukan. Sisa harga menjadi piutang customer.' : type === 'Kredit' ? 'DP akan dicatat sebagai pemasukan. Sisa harga menjadi piutang dengan rencana cicilan.' : 'Pilih skema pembayaran untuk melengkapi rencana pembayaran.');
                 $('#submitBtn').data('price-ready', priceReady);
             }
 
@@ -453,10 +457,6 @@
 
             let submitBtn = $('#submitBtn');
             if (submitBtn.prop('disabled')) return;
-            if (!submitBtn.data('price-ready')) {
-                $('#purchase-errors').prop('hidden', false).text('Pilih kavling dan tunggu harga selesai dimuat sebelum menyimpan.')[0].focus();
-                return;
-            }
             let spinner = submitBtn.find('.spinner-border');
             let btnText = submitBtn.find('.button-text');
 
@@ -494,42 +494,22 @@
                             positionClass: "toast-bottom-right",
                         });
 
-                        let errors = xhr.responseJSON.errors;
-                        const summary = $('#purchase-errors').prop('hidden', false).empty().append($('<strong>').text('Periksa kembali data transaksi:'));
-                        const list = $('<ul>').appendTo(summary);
-                        Object.values(errors).forEach(messages => $('<li>').text(messages[0]).appendTo(list));
-                        summary[0].focus();
+                        let errors = xhr.responseJSON.errors || {};
+                        let firstInvalid = null;
                         $.each(errors, function(key, val) {
-                            if (key.includes('.')) {
-                                let parts = key.split('.');
-                                let field = parts[0];
-                                let index = parseInt(parts[1]);
+                            const field = key.split('.')[0];
+                            const input = $(`[name="${field}"] , [name="${field}[]"]`).first();
+                            if (!input.length) return;
 
-                                let inputSelector;
-
-                                if ($(`[name="${field}[]"]`).length > 0) {
-                                    inputSelector = $(`[name="${field}[]"]`).first();
-                                } else {
-                                    return;
-                                }
-
-                                inputSelector.addClass('is-invalid');
-                                inputSelector.closest('.form-control, .form-select').parent()
-                                    .find('.invalid-feedback').remove();
-                                inputSelector.closest('.form-control, .form-select').parent()
-                                    .append(
-                                        `<span class="invalid-feedback" role="alert"><b>${val[0]}</b></span>`
-                                    );
-                            } else {
-                                let input = $('[name="' + key + '"]');
-                                input.addClass('is-invalid');
-                                input.parent().find('.invalid-feedback').remove();
-                                input.parent().append(
-                                    '<span class="invalid-feedback" role="alert"><b>' +
-                                    val[0] + '</b></span>'
-                                );
-                            }
+                            input.addClass('is-invalid').attr('aria-invalid', 'true');
+                            const select2 = input.next('.select2');
+                            select2.addClass('is-invalid');
+                            const group = input.closest('[class*="col-"]').first();
+                            group.find(`.invalid-feedback[data-field="${field}"]`).remove();
+                            group.append(`<span class="invalid-feedback d-block" data-field="${field}" role="alert"><b>${val[0]}</b></span>`);
+                            if (!firstInvalid) firstInvalid = input;
                         });
+                        if (firstInvalid) firstInvalid.trigger('focus');
                     }
 
                     if (xhr.status !== 422) {

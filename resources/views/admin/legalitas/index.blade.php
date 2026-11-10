@@ -1,5 +1,6 @@
 @extends('admin.layout')
 @section('page_title', 'Data Legalitas')
+@section('search_placeholder', 'Cari kode kavling, nama konsumen...')
 @section('content')
     <style>
         td.keterangan-col {
@@ -41,7 +42,6 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
                         <table class="table data-table table-bordered table-striped">
                             <thead>
                                 <tr>
@@ -58,21 +58,20 @@
                             </thead>
                             <tbody></tbody>
                         </table>
-                    </div>
                 </div>
             </div>
         </section>
     </div>
 
     <div class="modal fade text-left" id="modalForm" tabindex="-1" role="dialog" aria-labelledby="modalFormLabel"
-        aria-hidden="true" data-backdrop="static" data-keyboard="false" data-focus="false">
+        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" data-focus="false">
 
-        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-            <div class="modal-content workspace-modal">
-                <div class="modal-header ">
-                    <h5 class="modal-title" id="myModalLabel160">Legalitas
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content ">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title white" id="myModalLabel160">Legalitas
                     </h5>
-                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Tutup">
+                    <button type="button" class="close white" data-bs-dismiss="modal" aria-label="Tutup">
                         <i data-feather="x"></i>
                     </button>
                 </div>
@@ -115,7 +114,7 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             <span class="button-text">Batal</span>
                         </button>
                         <button type="submit" class="btn btn-primary ms-1" id="submitBtn">
@@ -130,17 +129,24 @@
     </div>
 
     <!-- Modal Foto -->
-    <div class="modal fade" id="modalFoto" tabindex="-1" aria-labelledby="modalFotoLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content workspace-modal">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalFotoLabel">Foto Legalitas</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+    <div class="modal fade text-left" id="modalFoto" tabindex="-1" role="dialog" aria-labelledby="modalFotoLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content ">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title white" id="modalFotoLabel">Foto Legalitas</h5>
+                    <button type="button" class="close white" data-bs-dismiss="modal" aria-label="Tutup">
+                        <i data-feather="x"></i>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <div id="fotoContainer" class="d-flex flex-wrap gap-3 justify-content-start">
                         <!-- Foto akan dimuat di sini -->
                     </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <span class="button-text">Tutup</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -162,7 +168,6 @@
 
         var permissions = @json($permissions);
         var showActionColumn = (permissions['edit'] == 1 || permissions['hapus'] == 1);
-        var audio = new Audio('{{ asset('audio/notification.ogg') }}');
 
         var table;
 

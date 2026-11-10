@@ -52,14 +52,14 @@ class SidebarNavigationTest extends TestCase
     {
         foreach (['dashboard', 'st-penjualan.index', 'customer.index', 'upload-file.index', 'bank.index', 'list-penjualan.index'] as $route) $this->grant($route);
         $items = (new SidebarNavigation)->forUser(1, 'customer.edit');
-        $this->assertSame(['Dashboard', 'Denah Penjualan', 'Pelanggan', 'Keuangan', 'Data Referensi'], array_column($items, 'title'));
-        $this->assertSame(['Data Pelanggan', 'Dokumen Pelanggan'], array_column($items[2]['children'], 'title'));
+        $this->assertSame(['Dashboard', 'Denah Penjualan', 'Customer', 'Keuangan', 'Data Referensi'], array_column($items, 'title'));
+        $this->assertSame(['Data Customer', 'Dokumen Customer'], array_column($items[2]['children'], 'title'));
         $this->assertTrue($items[2]['active']);
         $this->assertSame('Rekening Bank', $items[3]['children'][0]['title']);
         $this->assertSame('Tahapan Penjualan', $items[4]['children'][0]['title']);
         DB::table('hak_akses')->where('id_menu', DB::table('menu')->where('route_name', 'customer.index')->value('id'))->update(['lihat' => 0]);
         $items = (new SidebarNavigation)->forUser(1, 'customer.edit');
-        $this->assertSame(['Dokumen Pelanggan'], array_column($items[2]['children'], 'title'));
+        $this->assertSame(['Dokumen Customer'], array_column($items[2]['children'], 'title'));
         $this->assertFalse($items[2]['active']);
     }
 

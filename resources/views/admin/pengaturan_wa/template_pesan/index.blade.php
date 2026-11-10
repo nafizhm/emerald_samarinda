@@ -1,12 +1,13 @@
 @extends('admin.layout')
 @section('page_title', 'Template Pesan WA')
+@section('search_placeholder', 'Cari judul pesan, jenis...')
 @section('content')
     <div class="page-content dashboard-page workspace-page">
         <section class="section">
             <div class="card">
                 <div class="card-header workspace-page-header">
                     <div class="d-flex align-content-center justify-content-between">
-                        <div class="workspace-heading"><p class="dashboard-eyebrow">WhatsApp</p><h1>Template Pesan WA</h1><p class="workspace-description">Kelola koneksi dan template pesan pelanggan.</p></div>
+                        <div class="workspace-heading"><p class="dashboard-eyebrow">WhatsApp</p><h1>Template Pesan WA</h1><p class="workspace-description">Kelola koneksi dan template pesan customer.</p></div>
                         <div class="d-flex align-items-center">
                             @if (isset($permissions['tambah']) && $permissions['tambah'] == 1)
                                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalForm">
@@ -21,7 +22,6 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
                         <table class="table data-table table-bordered table-striped">
                             <thead>
                                 <tr>
@@ -34,7 +34,6 @@
                             </thead>
                             <tbody></tbody>
                         </table>
-                    </div>
                 </div>
             </div>
         </section>
@@ -98,7 +97,6 @@
     <script>
         var permissions = @json($permissions);
         var showActionColumn = (permissions['edit'] == 1 || permissions['hapus'] == 1);
-        var audio = new Audio('{{ asset('audio/notification.ogg') }}');
         var table;
 
         $(function() {

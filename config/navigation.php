@@ -3,17 +3,17 @@
 return [
     ['id' => 2, 'title' => 'Dashboard', 'route' => 'dashboard', 'icon' => 'bi bi-grid-fill', 'section' => null],
     ['id' => 3, 'title' => 'Denah Penjualan', 'route' => 'st-penjualan.index', 'icon' => 'bi bi-map-fill', 'section' => 'Operasional'],
-    ['id' => 5, 'title' => 'Pelanggan', 'icon' => 'bi bi-people-fill', 'section' => 'Operasional', 'children' => [
-        'customer.index' => 'Data Pelanggan',
-        'upload-file.index' => 'Dokumen Pelanggan',
-        'arsip-customer.index' => 'Arsip Pelanggan',
+    ['id' => 5, 'title' => 'Customer', 'icon' => 'bi bi-people-fill', 'section' => 'Operasional', 'children' => [
+        'customer.index' => 'Data Customer',
+        'upload-file.index' => 'Dokumen Customer',
+        'arsip-customer.index' => 'Arsip Customer',
     ]],
     ['id' => 27, 'title' => 'Pembayaran', 'route' => 'pembayaran.index', 'icon' => 'bi bi-credit-card', 'section' => 'Operasional'],
     ['id' => 28, 'title' => 'Legalitas', 'route' => 'legalitas.index', 'icon' => 'bi bi-folder-fill', 'section' => 'Operasional'],
     ['id' => 4, 'title' => 'Keuangan', 'icon' => 'bi bi-cash-stack', 'section' => 'Administrasi', 'children' => [
         'pemasukan.index' => 'Pemasukan',
         'pengeluaran.index' => 'Pengeluaran',
-        'mutasi-saldo.index' => 'Transfer Rekening',
+        'mutasi-saldo.index' => 'Mutasi Saldo',
         'piutang.index' => 'Piutang',
         'hutang.index' => 'Utang',
         'laporan-arus-kas.index' => 'Laporan Arus Kas',

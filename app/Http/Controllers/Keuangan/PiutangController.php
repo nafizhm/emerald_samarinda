@@ -136,18 +136,25 @@ class PiutangController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge(['nominal' => str_replace('.', '', (string) $request->nominal)]);
         $request->validate([
             'tanggal_piutang' => 'required|date',
-            'nominal' => 'required',
-            'id_bank' => 'required',
-            'deskripsi' => 'required',
+            'nominal' => 'required|integer|min:1',
+            'id_bank' => 'required|integer|exists:bank,id',
+            'deskripsi' => 'required|string|max:5000',
             'lampiran' => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ], [
             'tanggal_piutang.required' => 'Tanggal piutang wajib diisi.',
             'tanggal_piutang.date' => 'Tanggal piutang harus berupa tanggal.',
             'nominal.required' => 'Nominal wajib diisi.',
+            'nominal.integer' => 'Nominal harus berupa angka bulat.',
+            'nominal.min' => 'Nominal minimal Rp1.',
             'id_bank.required' => 'Bank wajib diisi.',
+            'id_bank.integer' => 'Bank tidak valid.',
+            'id_bank.exists' => 'Bank yang dipilih tidak ditemukan.',
             'deskripsi.required' => 'Deskripsi wajib diisi.',
+            'deskripsi.string' => 'Deskripsi harus berupa teks.',
+            'deskripsi.max' => 'Deskripsi maksimal 5.000 karakter.',
             'lampiran.required' => 'Lampiran wajib diisi.',
             'lampiran.file' => 'Lampiran harus berupa file.',
             'lampiran.mimes' => 'Format lampiran harus jpg, jpeg, png, atau pdf.',
@@ -176,17 +183,18 @@ class PiutangController extends Controller
             $db['lampiran'] = $filename;
         }
 
-        $piutang = Piutang::create($db);
-
-        Pengeluaran::create([
-            'id_bank' => $request->id_bank,
-            'id_piutang' => $piutang->id,
-            'tanggal' => $request->tanggal_piutang,
-            'nominal' => str_replace('.', '', $request->nominal),
-            'lampiran' => $filename,
-            'id_kategori_transaksi' => 11,
-            'keterangan' => $request->deskripsi,
-        ]);
+        DB::transaction(function () use ($db, $request, $filename) {
+            $piutang = Piutang::create($db);
+            Pengeluaran::create([
+                'id_bank' => $request->id_bank,
+                'id_piutang' => $piutang->id,
+                'tanggal' => $request->tanggal_piutang,
+                'nominal' => $request->nominal,
+                'lampiran' => $filename,
+                'id_kategori_transaksi' => 101,
+                'keterangan' => $request->deskripsi,
+            ]);
+        });
 
         return response()->json(['status' => 'success']);
     }
@@ -194,12 +202,13 @@ class PiutangController extends Controller
     public function update(Request $request, $id)
     {
         $data = Piutang::findOrFail($id);
+        $request->merge(['nominal' => str_replace('.', '', (string) $request->nominal)]);
 
         $rules = [
             'tanggal_piutang' => 'required|date',
-            'nominal' => 'required',
-            'id_bank' => 'required',
-            'deskripsi' => 'required',
+            'nominal' => 'required|integer|min:1',
+            'id_bank' => 'required|integer|exists:bank,id',
+            'deskripsi' => 'required|string|max:5000',
         ];
 
         if (empty($data->lampiran)) {
@@ -212,20 +221,32 @@ class PiutangController extends Controller
             'tanggal_piutang.required' => 'Tanggal Piutang wajib diisi.',
             'tanggal_piutang.date' => 'Tanggal Piutang harus berupa tanggal.',
             'nominal.required' => 'Nominal wajib diisi.',
+            'nominal.integer' => 'Nominal harus berupa angka bulat.',
+            'nominal.min' => 'Nominal minimal Rp1.',
             'id_bank.required' => 'Bank wajib diisi.',
+            'id_bank.integer' => 'Bank tidak valid.',
+            'id_bank.exists' => 'Bank yang dipilih tidak ditemukan.',
             'lampiran.required' => 'Lampiran wajib diisi.',
             'lampiran.file' => 'Lampiran harus berupa file.',
             'lampiran.mimes' => 'Format lampiran harus jpg, jpeg, png, atau pdf.',
             'lampiran.max' => 'Ukuran file maksimal 2MB.',
             'deskripsi.required' => 'Deskripsi wajib diisi.',
+            'deskripsi.string' => 'Deskripsi harus berupa teks.',
+            'deskripsi.max' => 'Deskripsi maksimal 5.000 karakter.',
         ]);
+
+        if ((int) $request->nominal < (int) $data->terbayar) {
+            return response()->json(['errors' => ['nominal' => ['Nominal tidak boleh lebih kecil dari pembayaran yang sudah tercatat.']]], 422);
+        }
 
         $db = [
             'tanggal_piutang' => $request->tanggal_piutang,
             'deskripsi' => $request->deskripsi,
             'id_bank' => $request->id_bank,
-            'nominal' => str_replace('.', '', $request->nominal),
-            'sisa_bayar' => str_replace('.', '', $request->nominal),
+            'nominal' => $request->nominal,
+            'sisa_bayar' => (int) $request->nominal - (int) $data->terbayar,
+            'status' => (int) $request->nominal === (int) $data->terbayar ? 2 : 1,
+            'tgl_pelunasan' => (int) $request->nominal === (int) $data->terbayar ? ($data->tgl_pelunasan ?? now()->toDateString()) : null,
         ];
 
         $filename = $data->lampiran;
@@ -243,15 +264,15 @@ class PiutangController extends Controller
             $db['lampiran'] = $filename;
         }
 
-        $data->update($db);
-
-        $pengeluaran = Pengeluaran::where('id_piutang', $id)->first();
-        $pengeluaran->update([
-            'tanggal' => $request->tanggal_hutang,
-            'id_bank' => $request->id_bank,
-            'nominal' => str_replace('.', '', $request->nominal),
-            'lampiran' => $filename,
-        ]);
+        DB::transaction(function () use ($data, $db, $id, $request, $filename) {
+            $data->update($db);
+            Pengeluaran::where('id_piutang', $id)->update([
+                'tanggal' => $request->tanggal_piutang,
+                'id_bank' => $request->id_bank,
+                'nominal' => $request->nominal,
+                'lampiran' => $filename,
+            ]);
+        });
 
         return response()->json(['status' => 'success']);
     }
@@ -259,27 +280,21 @@ class PiutangController extends Controller
     public function destroy($id)
     {
         $data = Piutang::findOrFail($id);
+        if (Pemasukan::where('id_piutang', $id)->exists()) {
+            return response()->json(['message' => 'Piutang tidak dapat dihapus karena sudah memiliki pembayaran. Hapus pembayaran terkait terlebih dahulu.'], 422);
+        }
         if (! empty($data->lampiran) && file_exists(public_path('assets/keuangan/pengeluaran/'.$data->lampiran))) {
             unlink(public_path('assets/keuangan/pengeluaran/'.$data->lampiran));
         }
 
-        $pengeluaran = Pengeluaran::where('id_piutang', $id)->first();
+        $pengeluarans = Pengeluaran::where('id_piutang', $id)->get();
 
-        if ($pengeluaran) {
+        foreach ($pengeluarans as $pengeluaran) {
             if (! empty($pengeluaran->lampiran) && file_exists(public_path('assets/keuangan/pengeluaran/'.$pengeluaran->lampiran))) {
                 unlink(public_path('assets/keuangan/pengeluaran/'.$pengeluaran->lampiran));
             }
             $pengeluaran->delete();
         }
-        $pemasukan = Pemasukan::where('id_piutang', $id)->first();
-
-        if ($pemasukan) {
-            if (! empty($pemasukan->lampiran) && file_exists(public_path('assets/keuangan/pemasukan/'.$pemasukan->lampiran))) {
-                unlink(public_path('assets/keuangan/pemasukan/'.$pemasukan->lampiran));
-            }
-            $pemasukan->delete();
-        }
-
         $data->delete();
 
         return response()->json(['status' => 'success']);

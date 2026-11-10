@@ -1,5 +1,6 @@
 @extends('admin.layout')
 @section('page_title', 'Detail Pembayaran')
+@section('search_placeholder', 'Cari jenis tagihan, jenis pembayaran...')
 @section('content')
     <style>
         .table tr td,
@@ -37,14 +38,14 @@
             <div class="card">
                 <div class="card-header workspace-page-header">
                     <div class="d-flex align-content-center justify-content-between">
-                        <div class="workspace-heading"><p class="dashboard-eyebrow">Pembayaran</p><h1>Detail Pembayaran</h1><p class="workspace-description">Tinjau tagihan, pembayaran, dan catatan transaksi pelanggan.</p></div>
+                        <div class="workspace-heading"><p class="dashboard-eyebrow">Pembayaran</p><h1>Detail Pembayaran</h1><p class="workspace-description">Tinjau tagihan, pembayaran, dan catatan transaksi customer.</p></div>
                     </div>
                 </div>
                 <div class="card-body">
                     <div class="row mt-2">
                         <div class="col col-7">
                             <div class="row mb-3">
-                                <label class="control-label col-sm-4">Nama Pelanggan</label>
+                                <label class="control-label col-sm-4">Nama Customer</label>
                                 <div class="col-sm-7">
                                     <input name="nama_lengkap" value="{{ $customer->nama_lengkap }}" class="form-control"
                                         type="text" disabled>
@@ -193,11 +194,13 @@
         aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" data-focus="false">
 
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
-            <div class="modal-content workspace-modal">
-                <div class="modal-header ">
-                    <h5 class="modal-title" id="myModalLabel160">Tagihan
+            <div class="modal-content ">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title white" id="myModalLabel160">Tagihan
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    <button type="button" class="close white" data-bs-dismiss="modal" aria-label="Tutup">
+                        <i data-feather="x"></i>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <form id="formTagihan">
@@ -237,7 +240,9 @@
                         </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <span class="button-text">Batal</span>
+                    </button>
                     <button type="submit" class="btn btn-primary ms-1" id="submitBtnTagihan">
                         <span class="spinner-border spinner-border-sm mx-1 d-none" role="status"
                             aria-hidden="true"></span>
@@ -254,11 +259,13 @@
         data-focus="false">
 
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
-            <div class="modal-content workspace-modal">
-                <div class="modal-header ">
-                    <h5 class="modal-title" id="myModalLabel160">Pemasukan
+            <div class="modal-content ">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title white" id="myModalLabel160">Pemasukan
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    <button type="button" class="close white" data-bs-dismiss="modal" aria-label="Tutup">
+                        <i data-feather="x"></i>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <form id="formPemasukan">
@@ -273,7 +280,7 @@
                         </div>
 
                         <div class="row mb-3">
-                            <label class="control-label col-sm-3">Nama Pelanggan</label>
+                            <label class="control-label col-sm-3">Nama Customer</label>
                             <div class="col-sm-9">
                                 <input name="nama_lengkap" value="{{ $customer->nama_lengkap }}" class="form-control"
                                     type="text" disabled>
@@ -369,7 +376,9 @@
                         </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <span class="button-text">Batal</span>
+                    </button>
                     <button type="submit" class="btn btn-primary ms-1" id="submitBtnPemasukan">
                         <span class="spinner-border spinner-border-sm mx-1 d-none" role="status"
                             aria-hidden="true"></span>
@@ -383,12 +392,14 @@
 
     <div class="modal fade text-left" id="modalKirimKwitansi" tabindex="-1" role="dialog"
         aria-labelledby="modalKirimKwitansiLabel" aria-hidden="true" data-bs-backdrop="static"
-        data-bs-keyboard="false">
-        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
-            <div class="modal-content workspace-modal">
-                <div class="modal-header ">
-                    <h5 class="modal-title" id="modalKirimKwitansiLabel">Kirim Kwitansi</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+        data-bs-keyboard="false" data-focus="false">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
+            <div class="modal-content ">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title white" id="modalKirimKwitansiLabel">Kirim Kwitansi</h5>
+                    <button type="button" class="close white" data-bs-dismiss="modal" aria-label="Tutup">
+                        <i data-feather="x"></i>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <form id="formKirimKwitansi">
@@ -396,7 +407,7 @@
                         <input type="hidden" id="kirim_pdf_url" name="pdf_url">
 
                         <div class="row mb-3 align-items-center">
-                            <label for="kirim_nama_customer" class="col-sm-3 col-form-label">Nama Pelanggan</label>
+                            <label for="kirim_nama_customer" class="col-sm-3 col-form-label">Nama Customer</label>
                             <div class="col-sm-9">
                                 <input type="text" class="form-control" id="kirim_nama_customer"
                                     name="nama_customer" readonly>
@@ -426,8 +437,10 @@
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
-                    <button type="submit" form="formKirimKwitansi" class="btn btn-success" id="submitBtnKirimKwitansi">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <span class="button-text">Tutup</span>
+                    </button>
+                    <button type="submit" form="formKirimKwitansi" class="btn btn-success ms-1" id="submitBtnKirimKwitansi">
                         <span class="spinner-border spinner-border-sm me-2 d-none" role="status"
                             aria-hidden="true"></span>
                         <span class="button-text">Kirim</span>
@@ -439,7 +452,6 @@
 @endsection
 @push('scripts')
     <script>
-        var audio = new Audio('{{ asset('audio/notification.ogg') }}');
 
         $(document).on('click', '.btn-cetak-pemasukan', function() {
             let id = $(this).data('id');

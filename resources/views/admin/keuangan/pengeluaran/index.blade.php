@@ -1,5 +1,6 @@
 @extends('admin.layout')
 @section('page_title', 'Data Pengeluaran')
+@section('search_placeholder', 'Cari kategori, rekening...')
 @section('content')
     <div class="page-content dashboard-page workspace-page">
         <section class="section">
@@ -44,13 +45,15 @@
     </div>
 
     <div class="modal fade text-left" id="modalForm" tabindex="-1" role="dialog" aria-labelledby="modalFormLabel"
-        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" data-focus="false">
 
-        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-            <div class="modal-content workspace-modal">
-                <div class="modal-header ">
-                    <h5 class="modal-title" id="modalFormLabel">Pengeluaran</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content ">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title white" id="modalFormLabel">Pengeluaran</h5>
+                    <button type="button" class="close white" data-bs-dismiss="modal" aria-label="Tutup">
+                        <i data-feather="x"></i>
+                    </button>
                 </div>
                 <form id="formData" enctype="multipart/form-data">
                     @csrf
@@ -115,7 +118,7 @@
                         </div>
 
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                 <span class="button-text">Batal</span>
                             </button>
                             <button type="submit" class="btn btn-primary ms-1" id="submitBtn">
@@ -131,13 +134,15 @@
     </div>
 
     <div class="modal fade text-left" id="modalDetail" tabindex="-1" role="dialog" aria-labelledby="modalDetailLabel"
-        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" data-focus="false">
 
-        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-            <div class="modal-content workspace-modal">
-                <div class="modal-header ">
-                    <h5 class="modal-title" id="modalDetailLabel">Detail Pengeluaran</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content ">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title white" id="modalDetailLabel">Detail Pengeluaran</h5>
+                    <button type="button" class="close white" data-bs-dismiss="modal" aria-label="Tutup">
+                        <i data-feather="x"></i>
+                    </button>
                 </div>
                 <input type="hidden" id="primary_id_detail" name="primary_id">
                 <div class="modal-body">
@@ -199,7 +204,7 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             <span class="button-text">Tutup</span>
                         </button>
                     </div>
@@ -243,7 +248,7 @@
             $('#id_kategori_transaksi').on('change', function() {
                 const selectedValue = $(this).val();
 
-                if (selectedValue == 10) {
+                if (selectedValue) {
                     $('#row-hutang').show();
                     $('#sisa_bayar').val('');
                 } else {
@@ -276,7 +281,6 @@
 
 
 
-        var audio = new Audio('{{ asset('audio/notification.ogg') }}');
         var permissions = @json($permissions);
         var showActionColumn = (permissions['edit'] == 1 || permissions['hapus'] == 1);
 

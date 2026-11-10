@@ -1,22 +1,62 @@
 @extends('admin.layout')
-@section('page_title', 'Data Pelanggan')
+@section('page_title', 'Data Customer')
+@section('search_placeholder', 'Cari nama customer, kavling...')
 @push('styles')
 <link rel="stylesheet" href="{{ asset('template/assets/css/customer-custom.css') }}?v={{ filemtime(public_path('template/assets/css/customer-custom.css')) }}">
 @endpush
 @section('content')
-    <div class="dashboard-page customer-page customer-list-page">
-        <div class="dashboard-intro"><div><p class="dashboard-eyebrow">Pelanggan &amp; penjualan</p><h1>Pelanggan</h1><p>Kelola pembeli, informasi kavling, dan tahapan penjualan.</p></div><div class="customer-list-actions">@if(isset($permissions['tambah']) && $permissions['tambah'] == 1)<a href="{{ route('customer.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i>Tambah pembeli</a>@endif<button type="button" class="dashboard-action" data-bs-toggle="modal" data-bs-target="#modalPrint"><i class="bi bi-printer"></i>Cetak daftar</button></div></div>
-        <section class="dashboard-panel customer-list-panel"><div class="panel-heading"><div><h2>Daftar pelanggan aktif</h2><p>Cari nama, kode pelanggan, atau nomor telepon. Buka Edit untuk memperbarui data pembeli.</p></div></div><div class="customer-list-content"><table class="table data-table customer-table"><thead><tr><th>No</th><th>Transaksi</th><th>Pelanggan</th><th>Marketing</th><th>Kavling / proyek</th><th>Tahapan penjualan</th><th>Aksi</th></tr></thead><tbody></tbody></table></div></section>
+    <div class="page-content dashboard-page workspace-page customer-page customer-list-page">
+        <section class="section">
+            <div class="card">
+                <div class="card-header workspace-page-header">
+                    <div class="d-flex align-content-center justify-content-between">
+                        <div class="workspace-heading">
+                            <p class="dashboard-eyebrow">Customer &amp; penjualan</p>
+                            <h1>Customer</h1>
+                            <p class="workspace-description">Kelola customer, informasi kavling, dan tahapan penjualan.</p>
+                        </div>
+                        <div class="customer-list-actions">
+                            @if (isset($permissions['tambah']) && $permissions['tambah'] == 1)
+                                <a href="{{ route('customer.create') }}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-plus-lg"></i> Tambah customer
+                                </a>
+                            @endif
+                            <button type="button" class="btn btn-light btn-rounded btn-sm" data-bs-toggle="modal"
+                                data-bs-target="#modalPrint">
+                                <i class="bi bi-printer"></i> Cetak daftar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body customer-list-content">
+                    <table class="table data-table customer-table">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Transaksi</th>
+                                <th>Customer</th>
+                                <th>Marketing</th>
+                                <th>Kavling / proyek</th>
+                                <th>Tahapan penjualan</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
     </div>
 
-    <div class="modal fade customer-modal" id="modalPrint" tabindex="-1" aria-labelledby="modalPrintLabel" aria-hidden="true"
-        data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content workspace-modal">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalPrintLabel">Cetak Transaksi</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                        aria-label="Tutup"></button>
+    <div class="modal fade text-left" id="modalPrint" tabindex="-1" role="dialog" aria-labelledby="modalPrintLabel"
+        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" data-focus="false">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content ">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title white" id="modalPrintLabel">Cetak Transaksi</h5>
+                    <button type="button" class="close white" data-bs-dismiss="modal" aria-label="Tutup">
+                        <i data-feather="x"></i>
+                    </button>
                 </div>
                 <form id="formPrint" action="{{ route('customer.cetak') }}" method="GET" target="_blank">
                     @csrf
@@ -39,7 +79,7 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             <span class="button-text">Batal</span>
                         </button>
                         <button type="submit" class="btn btn-primary ms-1" id="submitBtn">
@@ -53,19 +93,20 @@
         </div>
     </div>
 
-    <div class="modal fade customer-modal" id="modalCancel" tabindex="-1" aria-labelledby="modalCancelLabel" aria-hidden="true"
-        data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content workspace-modal">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalCancelLabel">Batalkan transaksi pelanggan</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                        aria-label="Tutup"></button>
+    <div class="modal fade text-left" id="modalCancel" tabindex="-1" role="dialog" aria-labelledby="modalCancelLabel"
+        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" data-focus="false">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" role="document">
+            <div class="modal-content ">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title white" id="modalCancelLabel">Batalkan transaksi customer</h5>
+                    <button type="button" class="close white" data-bs-dismiss="modal" aria-label="Tutup">
+                        <i data-feather="x"></i>
+                    </button>
                 </div>
                 <form id="formCancel" method="POST">
                     @csrf
                     @method('DELETE')
-                    <div class="modal-body"><p class="text-muted small">Isi tanggal dan alasan pembatalan transaksi pelanggan ini.</p>
+                    <div class="modal-body"><p class="text-muted small">Isi tanggal dan alasan pembatalan transaksi customer ini.</p>
                         <div class="container-fluid">
                             <div class="row mb-3">
                                 <label for="tgl_cancel" class="col-sm-4 col-form-label">Tanggal pembatalan <span class="text-danger">*</span></label>
@@ -83,9 +124,9 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            Batal
+                            <span class="button-text">Batal</span>
                         </button>
-                        <button type="submit" class="btn btn-danger" id="btnSubmitCancel">
+                        <button type="submit" class="btn btn-danger ms-1" id="btnSubmitCancel">
                             <span class="spinner-border spinner-border-sm me-2 d-none" role="status"
                                 aria-hidden="true"></span>
                             <span class="button-text">Batalkan transaksi</span>
@@ -130,12 +171,12 @@
         $(function() {
             var table = $('.data-table').DataTable({
                 processing: true,
-                language: {search: 'Cari pelanggan:', searchPlaceholder: 'Nama, kode, atau telepon', lengthMenu: 'Tampilkan _MENU_ pelanggan', info: '_START_ - _END_ dari _TOTAL_ pelanggan', infoEmpty: 'Belum ada pelanggan', infoFiltered: '(dari _MAX_ pelanggan)', zeroRecords: 'Pelanggan tidak ditemukan', emptyTable: 'Belum ada transaksi pembelian. Klik Transaksi pembelian baru untuk memulai.', processing: 'Memuat pelanggan...', paginate: {previous: 'Sebelumnya', next: 'Berikutnya'}},
+                language: {search: 'Cari customer:', searchPlaceholder: 'Nama, kode, atau telepon', lengthMenu: 'Tampilkan _MENU_ customer', info: '_START_ - _END_ dari _TOTAL_ customer', infoEmpty: 'Belum ada customer', infoFiltered: '(dari _MAX_ customer)', zeroRecords: 'Customer tidak ditemukan', emptyTable: 'Belum ada transaksi pembelian. Klik Transaksi pembelian baru untuk memulai.', processing: 'Memuat customer...', paginate: {previous: 'Sebelumnya', next: 'Berikutnya'}},
                 serverSide: true,
                 ordering: false,
                 responsive: false,
                 autoWidth: false,
-                createdRow: function(row) { const labels = ['No', 'Transaksi', 'Pelanggan', 'Marketing', 'Kavling / proyek', 'Tahapan penjualan', 'Aksi']; row.querySelectorAll('td').forEach((cell, index) => cell.setAttribute('data-label', labels[index])); },
+                createdRow: function(row) { const labels = ['No', 'Transaksi', 'Customer', 'Marketing', 'Kavling / proyek', 'Tahapan penjualan', 'Aksi']; row.querySelectorAll('td').forEach((cell, index) => cell.setAttribute('data-label', labels[index])); },
                 ajax: "{{ route('customer.index') }}",
                 columns: [{
                         data: 'DT_RowIndex',

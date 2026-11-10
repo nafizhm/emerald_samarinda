@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 @php
     use Illuminate\Support\Facades\DB;
@@ -25,7 +25,7 @@
             <div class="hero-copy">
                 <div class="eyebrow"><span></span> SETIAP LAHAN, SEBUAH PELUANG</div>
                 <h1>Kelola lahan.<br>Bangun <em>masa depan.</em></h1>
-                <p>Satu ruang untuk mengelola kavling, menjalin hubungan dengan pelanggan, dan mengembangkan penjualan Anda.</p>
+                <p>Satu ruang untuk mengelola kavling, menjalin hubungan dengan customer, dan mengembangkan penjualan Anda.</p>
                 <div class="feature-list"><span>Inventori kavling</span><span>Penjualan & pembayaran</span><span>Legalitas</span></div>
             </div>
             <div class="landscape-footer"><span class="location-mark" aria-hidden="true">⌖</span><span>Langkah besar dimulai dari pengelolaan yang tepat.</span><span class="edition">PROPERTY MANAGEMENT</span></div>

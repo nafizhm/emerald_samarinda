@@ -10,7 +10,7 @@ return new class extends Migration
     {
         if (!Schema::hasTable('menu')) return;
         DB::transaction(function () {
-            DB::table('menu')->where('id', 5)->update(['title' => 'Pelanggan']);
+            DB::table('menu')->where('id', 5)->update(['title' => 'Customer']);
             DB::table('menu')->where('route_name', 'pembayaran.index')->update(['title' => 'Pembayaran']);
             DB::table('menu')->where('route_name', 'mutasi-saldo.index')->update(['title' => 'Transfer Rekening']);
         });
@@ -20,8 +20,8 @@ return new class extends Migration
     {
         if (!Schema::hasTable('menu')) return;
         DB::transaction(function () {
-            DB::table('menu')->where('id', 5)->update(['title' => 'Penjualan & Pelanggan']);
-            DB::table('menu')->where('route_name', 'pembayaran.index')->update(['title' => 'Pembayaran Pelanggan']);
+            DB::table('menu')->where('id', 5)->update(['title' => 'Penjualan & Customer']);
+            DB::table('menu')->where('route_name', 'pembayaran.index')->update(['title' => 'Pembayaran Customer']);
             DB::table('menu')->where('route_name', 'mutasi-saldo.index')->update(['title' => 'Transfer Antar Rekening']);
         });
     }

@@ -1,5 +1,6 @@
 @extends('admin.layout')
 @section('page_title', 'Tim Marketing')
+@section('search_placeholder', 'Cari kode, nama marketing...')
 @section('content')
     <div class="page-content dashboard-page workspace-page">
         <section class="section">
@@ -21,7 +22,6 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
                         <table class="table data-table table-bordered table-striped">
                             <thead>
                                 <tr>
@@ -35,20 +35,20 @@
                             </thead>
                             <tbody></tbody>
                         </table>
-                    </div>
                 </div>
             </div>
         </section>
     </div>
 
-    <div class="modal fade" id="modalForm" tabindex="-1" aria-labelledby="modalFormLabel" aria-hidden="true"
-        data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content workspace-modal">
-                <div class="modal-header ">
-                    <h5 class="modal-title" id="modalFormLabel">Marketing</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                        aria-label="Tutup"></button>
+    <div class="modal fade text-left" id="modalForm" tabindex="-1" role="dialog" aria-labelledby="modalFormLabel"
+        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" data-focus="false">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content ">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title white" id="modalFormLabel">Marketing</h5>
+                    <button type="button" class="close white" data-bs-dismiss="modal" aria-label="Tutup">
+                        <i data-feather="x"></i>
+                    </button>
                 </div>
                 <form id="formData">
                     @csrf
@@ -117,7 +117,7 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             <span class="button-text">Batal</span>
                         </button>
                         <button type="submit" class="btn btn-primary ms-1" id="submitBtn">
@@ -168,7 +168,6 @@
 
         var permissions = @json($permissions);
         var showActionColumn = (permissions['edit'] == 1 || permissions['hapus'] == 1);
-        var audio = new Audio('{{ asset('audio/notification.ogg') }}');
 
         $(function() {
             var table = $('.data-table').DataTable({

@@ -1,27 +1,21 @@
 @extends('admin.layout')
 @section('page_title', 'Data Lokasi Kavling')
+@section('search_placeholder', 'Cari nama kavling, alamat...')
 @section('content')
     <div class="page-content dashboard-page workspace-page">
         <section class="section">
             <div class="card">
                 <div class="card-header workspace-page-header">
                     <div class="d-flex align-content-center justify-content-between">
-                        <div class="workspace-heading"><p class="dashboard-eyebrow">Proyek & kavling</p><h1>Data Lokasi Kavling</h1><p class="workspace-description">Kelola lokasi proyek, denah, dan informasi kavling.</p></div>
-                        <div class="d-flex align-items-center">
-                            @if (isset($permissions['tambah']) && $permissions['tambah'] == 1)
-                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalForm">
-                                    <i class="bi bi-plus-lg"></i> Tambah Lokasi Kavling
-                                </button>
-                            @endif
-                            <a href="javascript:void(0);" onclick="reloadTable()"
-                                class="btn btn-light btn-rounded btn-sm ms-2" title="Perbarui daftar">
-                                <i class="bi bi-arrow-clockwise"></i> Perbarui
-                            </a>
+                        <div class="workspace-heading">
+                            <p class="dashboard-eyebrow">Proyek & kavling</p>
+                            <h1>Data Lokasi Kavling</h1>
+                            <p class="workspace-description">Kelola lokasi proyek, denah, dan informasi kavling.</p>
                         </div>
+
                     </div>
                 </div>
                 <div class="card-body">
-
                     <table class="table data-table table-bordered table-striped">
                         <thead>
                             <tr>
@@ -40,18 +34,19 @@
         </section>
     </div>
 
-    <div class="modal fade" id="modalForm" tabindex="-1" aria-labelledby="modalFormLabel" aria-hidden="true"
-        data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content workspace-modal">
-                <div class="modal-header ">
-                    <h5 class="modal-title" id="modalFormLabel">Lokasi Kavling</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                        aria-label="Tutup"></button>
+    <div class="modal fade text-left" id="modalForm" tabindex="-1" role="dialog" aria-labelledby="modalFormLabel"
+        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" data-focus="false">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
+            <div class="modal-content ">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title white" id="modalFormLabel">Lokasi Kavling</h5>
+                    <button type="button" class="close white" data-bs-dismiss="modal" aria-label="Tutup">
+                        <i data-feather="x"></i>
+                    </button>
                 </div>
                 <form id="formData">
                     @csrf
-                    <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                    <div class="modal-body">
                         <input type="hidden" id="primary_id" name="primary_id">
 
                         <div class="container-fluid">
@@ -115,8 +110,7 @@
                             <div class="row mb-3">
                                 <label class="col-sm-4 col-form-label">Telp Perusahaan</label>
                                 <div class="col-sm-8">
-                                    <input type="telp" name="telp_perusahaan" id="telp_perusahaan"
-                                        class="form-control">
+                                    <input type="telp" name="telp_perusahaan" id="telp_perusahaan" class="form-control">
                                 </div>
                             </div>
 
@@ -200,7 +194,7 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             <span class="button-text">Batal</span>
                         </button>
                         <button type="submit" class="btn btn-primary ms-1" id="submitBtn">
@@ -255,7 +249,6 @@
 
         var permissions = @json($permissions);
         var showActionColumn = (permissions['edit'] == 1 || permissions['hapus'] == 1);
-        var audio = new Audio('{{ asset('audio/notification.ogg') }}');
 
         $(function() {
             var table = $('.data-table').DataTable({
@@ -464,7 +457,14 @@
                 showCancelButton: true,
                 confirmButtonText: '<span class="swal-btn-text">Ya, Hapus</span>',
                 cancelButtonText: 'Batal',
-                didOpen: () => { const confirmButton = Swal.getConfirmButton(); confirmButton.disabled = true; document.getElementById("confirm-location-delete").addEventListener("change", function() { confirmButton.disabled = !this.checked; }); },
+                didOpen: () => {
+                    const confirmButton = Swal.getConfirmButton();
+                    confirmButton.disabled = true;
+                    document.getElementById("confirm-location-delete").addEventListener("change",
+                        function() {
+                            confirmButton.disabled = !this.checked;
+                        });
+                },
                 showLoaderOnConfirm: false,
                 buttonsStyling: false,
                 customClass: {
@@ -472,7 +472,10 @@
                     cancelButton: 'btn btn-secondary'
                 },
                 preConfirm: () => {
-                    if (!document.getElementById('confirm-location-delete')?.checked) { Swal.showValidationMessage('Centang persetujuan terlebih dahulu.'); return false; }
+                    if (!document.getElementById('confirm-location-delete')?.checked) {
+                        Swal.showValidationMessage('Centang persetujuan terlebih dahulu.');
+                        return false;
+                    }
                     return new Promise((resolve) => {
                         const confirmBtn = Swal.getConfirmButton();
                         const btnText = confirmBtn.querySelector('.swal-btn-text');

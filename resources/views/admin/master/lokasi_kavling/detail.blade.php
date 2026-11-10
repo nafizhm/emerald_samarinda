@@ -1,5 +1,6 @@
 @extends('admin.layout')
 @section('page_title', 'Detail Proyek')
+@section('search_placeholder', 'Cari lokasi, status...')
 @section('content')
     <div class="page-content dashboard-page workspace-page">
         <section class="section">
@@ -24,7 +25,6 @@
                 </div>
                 <div class="card-body">
                     <input type="hidden" id="lokasi_id" name="lokasi_id" value="{{ $id }}">
-                    <div class="table-responsive">
                         <table class="table data-table table-bordered table-striped">
                             <thead>
                                 <tr>
@@ -41,24 +41,24 @@
                             </thead>
                             <tbody></tbody>
                         </table>
-                    </div>
                 </div>
             </div>
         </section>
     </div>
 
-    <div class="modal fade" id="modalForm" tabindex="-1" aria-labelledby="modalFormLabel" aria-hidden="true"
-        data-bs-backdrop="static" data-bs-keyboard="false">
-        <div class="modal-dialog modal-dialog-centered modal-xl">
-            <div class="modal-content workspace-modal">
-                <div class="modal-header ">
-                    <h5 class="modal-title" id="modalFormLabel">Lokasi Kavling</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"
-                        aria-label="Tutup"></button>
+    <div class="modal fade text-left" id="modalForm" tabindex="-1" role="dialog" aria-labelledby="modalFormLabel"
+        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" data-focus="false">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
+            <div class="modal-content ">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title white" id="modalFormLabel">Lokasi Kavling</h5>
+                    <button type="button" class="close white" data-bs-dismiss="modal" aria-label="Tutup">
+                        <i data-feather="x"></i>
+                    </button>
                 </div>
                 <form id="formData">
                     @csrf
-                    <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                    <div class="modal-body">
                         <input type="hidden" id="primary_id" name="primary_id">
 
                         <div class="container-fluid">
@@ -132,17 +132,19 @@
                                     <input type="text" name="keterangan" id="keterangan" class="form-control">
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                                    <span class="button-text">Batal</span>
-                                </button>
-                                <button type="submit" class="btn btn-primary ms-1" id="submitBtn">
-                                    <span class="spinner-border spinner-border-sm me-2 d-none" role="status"
-                                        aria-hidden="true"></span>
-                                    <span class="button-text">Simpan</span>
-                                </button>
-                            </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <span class="button-text">Batal</span>
+                        </button>
+                        <button type="submit" class="btn btn-primary ms-1" id="submitBtn">
+                            <span class="spinner-border spinner-border-sm me-2 d-none" role="status"
+                                aria-hidden="true"></span>
+                            <span class="button-text">Simpan</span>
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -165,7 +167,6 @@
 
         var permissions = @json($permissions);
         var showActionColumn = (permissions['edit'] == 1 || permissions['hapus'] == 1);
-        var audio = new Audio('{{ asset('audio/notification.ogg') }}');
 
         $(function() {
             let lokasi_id = $('#lokasi_id').val();

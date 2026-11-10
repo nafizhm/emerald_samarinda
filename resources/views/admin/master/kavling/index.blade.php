@@ -1,39 +1,97 @@
 @extends('admin.layout')
 @section('page_title', 'Data Kavling')
+@section('search_placeholder', 'Cari kode kavling, proyek...')
 @push('styles')
 <link rel="stylesheet" href="{{ asset('template/assets/css/kavling-custom.css') }}?v={{ filemtime(public_path('template/assets/css/kavling-custom.css')) }}">
 @endpush
 @section('content')
-<div class="dashboard-page kavling-page">
-    <div class="dashboard-intro">
-        <div><p class="dashboard-eyebrow">Master data</p><h1>Data kavling</h1><p>Kelola ukuran, harga, dan keterangan kavling pada setiap proyek.</p></div>
-        <div class="kavling-exports">
-            <a id="export-pdf" href="{{ route('kavling.cetakPdf', 0) }}" target="_blank" rel="noopener" class="dashboard-action"><i class="bi bi-file-earmark-pdf"></i> Cetak PDF</a>
-            <a id="export-excel" href="{{ route('kavling.cetakExcel', 0) }}" target="_blank" rel="noopener" class="dashboard-action"><i class="bi bi-file-earmark-excel"></i> Ekspor Excel</a>
+<div class="page-content dashboard-page workspace-page kavling-page">
+    <section class="section">
+        <div class="card">
+            <div class="card-header workspace-page-header">
+                <div class="d-flex align-content-center justify-content-between">
+                    <div class="workspace-heading">
+                        <p class="dashboard-eyebrow">Master data</p>
+                        <h1>Data Kavling</h1>
+                        <p class="workspace-description">Kelola ukuran, harga, dan keterangan kavling pada setiap proyek.</p>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <a id="export-pdf" href="{{ route('kavling.cetakPdf', 0) }}" target="_blank" rel="noopener" class="btn btn-danger btn-sm">
+                            <i class="bi bi-file-earmark-pdf"></i> Cetak PDF
+                        </a>
+                        <a id="export-excel" href="{{ route('kavling.cetakExcel', 0) }}" target="_blank" rel="noopener" class="btn btn-success btn-sm">
+                            <i class="bi bi-file-earmark-excel"></i> Ekspor Excel
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="kavling-toolbar">
+                    <div>
+                        <label for="id_lokasi">Proyek / lokasi kavling</label>
+                        <select class="form-select" id="id_lokasi">
+                            <option value="">Semua proyek</option>
+                            @foreach($lokasiList as $lokasi)
+                                <option value="{{ $lokasi->id }}">{{ $lokasi->nama_kavling }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <p>Pilih proyek untuk menyaring daftar dan hasil ekspor.</p>
+                </div>
+                <table class="table data-table table-bordered table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Proyek</th>
+                            <th>Kode kavling</th>
+                            <th>Panjang</th>
+                            <th>Lebar</th>
+                            <th>Luas tanah</th>
+                            <th>Harga jual</th>
+                            <th>Keterangan</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
         </div>
-    </div>
-    <section class="dashboard-panel">
-        <div class="kavling-toolbar"><div><label for="id_lokasi">Proyek / lokasi kavling</label><select class="form-select" id="id_lokasi"><option value="">Semua proyek</option>@foreach($lokasiList as $lokasi)<option value="{{ $lokasi->id }}">{{ $lokasi->nama_kavling }}</option>@endforeach</select></div><p>Pilih proyek untuk menyaring daftar dan hasil ekspor.</p></div>
-        <div class="kavling-table-wrap"><table class="table data-table align-middle"><thead><tr><th>No</th><th>Proyek</th><th>Kode kavling</th><th>Panjang</th><th>Lebar</th><th>Luas tanah</th><th>Harga jual</th><th>Keterangan</th><th>Aksi</th></tr></thead><tbody></tbody></table></div>
     </section>
 </div>
-<div class="modal fade" id="kavlingEditModal" tabindex="-1" aria-labelledby="kavlingEditTitle" aria-hidden="true" data-bs-backdrop="static">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable"><div class="modal-content workspace-modal">
-        <div class="modal-header"><div><span class="kavling-eyebrow">Edit data kavling</span><h5 class="modal-title" id="kavlingEditTitle">Edit kavling</h5><p id="edit-project-name"></p></div><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button></div>
-        <div class="modal-body">
-            <div id="edit-loading" role="status">Memuat data kavling...</div>
-            <div id="edit-error" class="alert alert-danger" role="alert" hidden></div>
-            <form id="kavlingEditForm" hidden>@csrf
-                <div class="kavling-form-grid"><div class="kavling-field"><label for="edit_panjang">Panjang tanah (m)</label><input type="number" name="panjang" id="edit_panjang" class="form-control" step="0.1" max="9999999999.9" min="0" required></div>
+<div class="modal fade text-left" id="kavlingEditModal" tabindex="-1" role="dialog" aria-labelledby="kavlingEditTitle"
+    aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" data-focus="false">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+        <div class="modal-content ">
+            <div class="modal-header bg-primary">
+                <h5 class="modal-title white" id="kavlingEditTitle">Edit Kavling</h5>
+                <button type="button" class="close white" data-bs-dismiss="modal" aria-label="Tutup">
+                    <i data-feather="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="edit-project-name" class="fw-bold mb-2 text-primary"></p>
+                <div id="edit-loading" role="status">Memuat data kavling...</div>
+                <div id="edit-error" class="alert alert-danger" role="alert" hidden></div>
+                <form id="kavlingEditForm" hidden>@csrf
+                    <div class="kavling-form-grid"><div class="kavling-field"><label for="edit_panjang">Panjang tanah (m)</label><input type="number" name="panjang" id="edit_panjang" class="form-control" step="0.1" max="9999999999.9" min="0" required></div>
 <div class="kavling-field"><label for="edit_lebar">Lebar tanah (m)</label><input type="number" name="lebar" id="edit_lebar" class="form-control" step="0.1" max="9999999999.9" min="0" required></div>
 <div class="kavling-field"><label for="edit_luas_tanah">Luas tanah (m&sup2;)</label><input type="number" name="luas_tanah" id="edit_luas_tanah" class="form-control" step="1" min="0" required></div>
 <div class="kavling-field"><label for="edit_hrg_jual">Harga jual (Rp)</label><input type="text" name="hrg_jual" id="edit_hrg_jual" class="form-control format-number" inputmode="numeric" required></div>
 <div class="kavling-field kavling-field-wide"><label for="edit_keterangan">Keterangan</label><textarea name="keterangan" id="edit_keterangan" rows="3" maxlength="5000" class="form-control"></textarea></div></div>
-                <div class="kavling-bulk-option"><div class="form-check"><input class="form-check-input" type="checkbox" name="update_project" value="1" id="update_project"><label class="form-check-label" for="update_project">Update semua kavling dalam proyek yang sama</label></div><p id="bulk-description"></p><p>Jika dicentang, semua nilai di form ini, termasuk panjang, lebar, luas tanah, harga jual, dan keterangan, diterapkan ke seluruh kavling dalam proyek tersebut.</p></div>
-            </form>
+                    <div class="kavling-bulk-option"><div class="form-check"><input class="form-check-input" type="checkbox" name="update_project" value="1" id="update_project"><label class="form-check-label" for="update_project">Update semua kavling dalam proyek yang sama</label></div><p id="bulk-description"></p><p>Jika dicentang, semua nilai di form ini, termasuk panjang, lebar, luas tanah, harga jual, dan keterangan, diterapkan ke seluruh kavling dalam proyek tersebut.</p></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <span class="button-text">Batal</span>
+                </button>
+                <button type="submit" form="kavlingEditForm" class="btn btn-primary ms-1" id="save-kavling" disabled>
+                    <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+                    <span class="button-text">Simpan</span>
+                </button>
+            </div>
         </div>
-        <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button><button type="submit" form="kavlingEditForm" class="btn btn-primary" id="save-kavling" disabled>Simpan perubahan</button></div>
-    </div></div>
+    </div>
 </div>
 @endsection
 @push('scripts')

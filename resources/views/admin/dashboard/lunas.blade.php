@@ -1,5 +1,6 @@
 @extends('admin.layout')
 @section('page_title', 'Data Lunas')
+@section('search_placeholder', 'Cari nama customer, kode kavling...')
 @section('content')
     <div class="page-content dashboard-page workspace-page">
         <section class="section">
@@ -18,12 +19,11 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
                         <table id="data-table" class="table table-bordered table-striped table-hover table-sm">
                             <thead>
                                 <tr>
                                     <th width="5%">No</th>
-                                    <th>Nama Pelanggan</th>
+                                    <th>Nama Customer</th>
                                     <th>Lokasi Kavling</th>
                                     <th>Kode Kavling</th>
                                     <th>Harga Jual</th>
@@ -31,7 +31,6 @@
                                 </tr>
                             </thead>
                         </table>
-                    </div>
                 </div>
             </div>
         </section>

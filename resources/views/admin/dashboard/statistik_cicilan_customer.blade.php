@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Statistik Cicilan Pelanggan</title>
+    <title>Statistik Cicilan Customer</title>
     <link rel="stylesheet" href="{{ asset('template/assets/extensions/bootstrap-icons/font/bootstrap-icons.css') }}">
     <style>
         * {
@@ -54,7 +54,6 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            white-space: nowrap;
         }
 
         .cicilan-avatar {
@@ -166,7 +165,6 @@
         }
 
         .cicilan-table-wrap {
-            overflow-x: auto;
             border: 1px solid #e4eaf4;
             border-radius: 12px;
         }
@@ -175,7 +173,6 @@
             width: 100%;
             border-collapse: collapse;
             background: #fff;
-            min-width: 1180px;
         }
 
         #paymentTable th {
@@ -185,7 +182,6 @@
             text-transform: uppercase;
             padding: 12px;
             border-bottom: 1px solid #dce6f5;
-            white-space: nowrap;
         }
 
         #paymentTable td {
@@ -515,7 +511,7 @@
         <section class="cicilan-hero">
             <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
                 <div>
-                    <h1 class="cicilan-title">Statistik Cicilan Pelanggan</h1>
+                    <h1 class="cicilan-title">Statistik Cicilan Customer</h1>
                     <div class="cicilan-subtitle">Ringkasan status pembayaran cicilan kavling</div>
                 </div>
                 <div class="cicilan-user">
@@ -531,7 +527,7 @@
                 <div class="cicilan-kpi blue">
                     <div class="cicilan-icon"><i class="bi bi-people"></i></div>
                     <div>
-                        <div class="cicilan-label">Total Pelanggan</div>
+                        <div class="cicilan-label">Total Customer</div>
                         <div class="cicilan-value">{{ number_format($summary['total_customer'], 0, ',', '.') }}</div>
                         <div class="cicilan-note">Data valid</div>
                     </div>
@@ -621,7 +617,7 @@
                     <thead>
                         <tr>
                             <th>No</th>
-                            <th>Pelanggan<br>Lokasi Kavling</th>
+                            <th>Customer<br>Lokasi Kavling</th>
                             <th>Tgl Beli</th>
                             <th>Jatuh Tempo<br>Bulan Ini</th>
                             <th>Berjalan</th>
@@ -723,7 +719,7 @@
 
                     <div class="modal-grid">
                         <div class="modal-field">
-                            <label for="modalNamaCustomer">Nama Pelanggan</label>
+                            <label for="modalNamaCustomer">Nama Customer</label>
                             <input type="text" id="modalNamaCustomer" name="nama_customer" readonly>
                         </div>
                         <div class="modal-field">

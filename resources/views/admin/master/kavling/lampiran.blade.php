@@ -57,14 +57,14 @@
     </div>
 
     <div class="modal fade text-left" id="modalForm" tabindex="-1" role="dialog" aria-labelledby="modalFormLabel"
-        aria-hidden="true" data-backdrop="static" data-keyboard="false" data-focus="false">
+        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" data-focus="false">
 
-        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-            <div class="modal-content workspace-modal">
-                <div class="modal-header ">
-                    <h5 class="modal-title" id="myModalLabel160">Pengguna
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content ">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title white" id="myModalLabel160">Upload Foto Kavling
                     </h5>
-                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Tutup">
+                    <button type="button" class="close white" data-bs-dismiss="modal" aria-label="Tutup">
                         <i data-feather="x"></i>
                     </button>
                 </div>
@@ -117,7 +117,7 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             <span class="button-text">Batal</span>
                         </button>
                         <button type="submit" class="btn btn-primary ms-1" id="submitBtn">
@@ -133,7 +133,6 @@
 @endsection
 @push('scripts')
     <script>
-        var audio = new Audio('{{ asset('audio/notification.ogg') }}');
 
         $('#modalForm').on('hidden.bs.modal', function() {
             $('#tanggal').val('{{ date('Y-m-d') }}');

@@ -146,7 +146,7 @@ class PembayaranController extends Controller
         try {
         return DB::transaction(function () use ($input, $id, $request, &$proofPath) {
             $customer = Customer::lockForUpdate()->findOrFail($id);
-            abort_if($customer->stt_arsip, 422, 'Pelanggan telah diarsipkan.');
+            abort_if($customer->stt_arsip, 422, 'Customer telah diarsipkan.');
             $customer->setRelation('piutangs', Piutang::where('id_customer', $id)->lockForUpdate()->get());
             abort_unless($customer->piutangs->count() === 1 && in_array($customer->jenis_pembelian, ['Kredit', 'Cash Keras', 'Booking']), 422, 'Pembayaran ini memerlukan satu kontrak kavling.');
             $plan = app(\App\Services\InstallmentSchedule::class)->forCustomer($customer);
@@ -375,7 +375,7 @@ class PembayaranController extends Controller
             'telp'           => 'TELP. ' . ($konfigurasi->telp ?? '081250274777'),
             'tgl_angsuran'   => Carbon::parse($pembayaran->tanggal)->format('d/m/Y'),
             'faktur_no'      => $pembayaran->no_kwitansi ?? '-',
-            'no_pelanggan'   => 'CST-' . $customer->id,
+            'no_customer'   => 'CST-' . $customer->id,
             'terima_dari'    => strtoupper($customer->nama_lengkap),
             'sejumlah_uang'  => number_format($pembayaran->nominal, 0, ',', '.'),
             'terbilang'      => $this->terbilang($pembayaran->nominal) . ' Rupiah',
@@ -499,9 +499,9 @@ class PembayaranController extends Controller
         $pdf->Cell(35, 5, $data['faktur_no'], 0, 1, 'L');
 
         $pdf->SetX($xRight);
-        $pdf->Cell(30, 5, 'No Pelanggan', 0, 0, 'L');
+        $pdf->Cell(30, 5, 'No Customer', 0, 0, 'L');
         $pdf->Cell(3, 5, ':', 0, 0, 'C');
-        $pdf->Cell(35, 5, $data['no_pelanggan'], 0, 1, 'L');
+        $pdf->Cell(35, 5, $data['no_customer'], 0, 1, 'L');
 
         $pdf->SetLineWidth(0.3);
         $pdf->Line(10, 30, 202, 30);
@@ -855,15 +855,21 @@ class PembayaranController extends Controller
         ]);
 
         $rules = [
-            'id_kategori' => 'required',
-            'deskripsi'   => 'required',
-            'nominal'     => 'required',
+            'id_kategori' => 'required|integer|exists:kategori_transaksi,id',
+            'deskripsi'   => 'required|string|max:5000',
+            'nominal'     => 'required|integer|min:1',
         ];
 
         $messages = [
             'id_kategori.required' => 'Kategori Transaksi wajib dipilih.',
+            'id_kategori.integer' => 'Kategori transaksi tidak valid.',
+            'id_kategori.exists' => 'Kategori transaksi tidak ditemukan.',
             'deskripsi.required'   => 'Deskripsi tagihan wajib diisi.',
+            'deskripsi.string' => 'Deskripsi tagihan harus berupa teks.',
+            'deskripsi.max' => 'Deskripsi tagihan maksimal 5.000 karakter.',
             'nominal.required'     => 'Nominal wajib diisi.',
+            'nominal.integer' => 'Nominal harus berupa angka bulat.',
+            'nominal.min' => 'Nominal minimal Rp1.',
         ];
 
         $request->validate($rules, $messages);
@@ -871,7 +877,7 @@ class PembayaranController extends Controller
         DB::beginTransaction();
         try {
 
-            $cust = Customer::find($id);
+            $cust = Customer::findOrFail($id);
 
             Piutang::create([
                 'id_customer'           => $id,
@@ -910,13 +916,13 @@ class PembayaranController extends Controller
     {
         DB::beginTransaction();
         try {
-            $cust = Customer::with('kavling')->findOrFail($id);
+            $cust = Customer::with('kavling')->lockForUpdate()->findOrFail($id);
 
             $kavlingIds = $cust->kavling->pluck('id')->toArray();
 
             $kavlingPetaData = KavlingPeta::whereIn('id', $kavlingIds)->get();
 
-            $totalHargaKavlingBaru = $kavlingPetaData->sum('hrg_jual');
+            $totalHargaKavlingBaru = max(0, (int) $kavlingPetaData->sum('hrg_jual') - (int) $cust->discount);
 
             foreach ($kavlingPetaData as $kav) {
                 DB::table('transaksi_kavling')
@@ -925,7 +931,7 @@ class PembayaranController extends Controller
                     ->update(['hrg_rumah' => $kav->hrg_jual]);
             }
 
-            $piutangUtama = Piutang::where('id_customer', $id)->first();
+            $piutangUtama = Piutang::where('id_customer', $id)->orderBy('id')->lockForUpdate()->first();
 
             if (! $piutangUtama) {
                 DB::rollBack();
@@ -937,11 +943,16 @@ class PembayaranController extends Controller
             }
 
             $terbayarLama  = $piutangUtama->terbayar ?? 0;
-            $sisaBayarBaru = max(0, $totalHargaKavlingBaru - $terbayarLama);
+            if ($totalHargaKavlingBaru < $terbayarLama) {
+                DB::rollBack();
+                return response()->json(['success' => false, 'message' => 'Harga baru tidak boleh lebih kecil dari total pembayaran yang sudah tercatat.'], 422);
+            }
+            $sisaBayarBaru = $totalHargaKavlingBaru - $terbayarLama;
 
             $piutangUtama->update([
                 'nominal'    => $totalHargaKavlingBaru,
                 'sisa_bayar' => $sisaBayarBaru,
+                'tgl_pelunasan' => $sisaBayarBaru === 0 ? ($piutangUtama->tgl_pelunasan ?? now()->toDateString()) : null,
             ]);
 
             if ($terbayarLama >= $totalHargaKavlingBaru) {
@@ -1169,13 +1180,14 @@ class PembayaranController extends Controller
 
     public function tambahPemasukan(Request $request, $id)
     {
+        $request->merge(['nominal_bayar' => str_replace('.', '', (string) $request->nominal_bayar)]);
         $rules = [
             'tanggal_pembayaran'    => 'required|date',
-            'id_kategori_transaksi' => 'required',
-            'id_tagihan'            => 'required_if:id_kategori_transaksi,102',
-            'nominal_bayar'         => 'required',
-            'keterangan_pembayaran' => 'required',
-            'id_metode'             => 'nullable',
+            'id_kategori_transaksi' => 'required|integer|exists:kategori_transaksi,id',
+            'id_tagihan'            => 'nullable|required_if:id_kategori_transaksi,102|integer|exists:piutang,id',
+            'nominal_bayar'         => 'required|integer|min:1',
+            'keterangan_pembayaran' => 'required|string|max:5000',
+            'id_metode'             => 'nullable|integer|exists:metode_bayar,id',
             'file'                  => 'nullable|file|mimes:jpeg,png,jpg,webp,pdf|max:2048',
         ];
 
@@ -1183,9 +1195,19 @@ class PembayaranController extends Controller
             'tanggal_pembayaran.required'    => 'Tanggal Pembayaran wajib diisi.',
             'tanggal_pembayaran.date'        => 'Format Tanggal Pembayaran tidak valid.',
             'id_kategori_transaksi.required' => 'Kategori Transaksi wajib diisi.',
+            'id_kategori_transaksi.integer' => 'Kategori transaksi tidak valid.',
+            'id_kategori_transaksi.exists' => 'Kategori transaksi tidak ditemukan.',
             'id_tagihan.required_if'         => 'Tagihan wajib dipilih.',
+            'id_tagihan.integer' => 'Tagihan tidak valid.',
+            'id_tagihan.exists' => 'Tagihan tidak ditemukan.',
             'nominal_bayar.required'         => 'Nominal wajib diisi.',
+            'nominal_bayar.integer' => 'Nominal harus berupa angka bulat.',
+            'nominal_bayar.min' => 'Nominal minimal Rp1.',
             'keterangan_pembayaran.required' => 'Keterangan wajib diisi.',
+            'keterangan_pembayaran.string' => 'Keterangan harus berupa teks.',
+            'keterangan_pembayaran.max' => 'Keterangan maksimal 5.000 karakter.',
+            'id_metode.integer' => 'Metode pembayaran tidak valid.',
+            'id_metode.exists' => 'Metode pembayaran tidak ditemukan.',
             'file.file'                      => 'file harus berupa file.',
             'file.mimes'                     => 'Format file harus jpeg, png, jpg, atau pdf.',
             'file.max'                       => 'Ukuran file maksimal 2MB.',
@@ -1204,10 +1226,11 @@ class PembayaranController extends Controller
                 $file->move(public_path('assets/keuangan/pemasukan/'), $filename);
             }
 
-            $cust = Customer::find($id);
+            $cust = Customer::findOrFail($id);
 
-            if (! $cust) {
-                return response()->json(['error' => 'Customer tidak ditemukan.'], 404);
+            if ($request->filled('id_tagihan') && ! Piutang::whereKey($request->id_tagihan)->where('id_customer', $cust->id)->exists()) {
+                DB::rollBack();
+                return response()->json(['errors' => ['id_tagihan' => ['Tagihan tidak dimiliki oleh customer ini.']]], 422);
             }
 
             $jenis = $request->id_kategori_transaksi;

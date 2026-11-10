@@ -77,7 +77,7 @@
                                 <textarea class="form-control" id="pesan_jatuh_tempo" name="pesan_jatuh_tempo" rows="5">{{ old('pesan_jatuh_tempo', $data->pesan_jatuh_tempo ?? '') }}</textarea>
 
                                 <small class="text-danger">
-                                    [[nama_customer]] : Nama Pelanggan Jatuh Tempo <br>
+                                    [[nama_customer]] : Nama Customer Jatuh Tempo <br>
                                     [[jumlah_bulan]] : Jumlah Bulan Tunggakan <br>
                                     [[jumlah_tagihan]] : Total Nominal Tagihan
                                 </small>
@@ -106,7 +106,6 @@
 @push('scripts')
     <script>
         var permissions = @json($permissions);
-        var audio = new Audio('{{ asset('audio/notification.ogg') }}');
 
         $('#formData').on('submit', function(e) {
             e.preventDefault();

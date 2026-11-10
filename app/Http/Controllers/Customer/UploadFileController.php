@@ -180,4 +180,22 @@ class UploadFileController extends Controller
             'data' => $data
         ]);
     }
+
+    public function detail($id)
+    {
+        $file = UploadFile::find($id);
+
+        if (!$file) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data ditemukan',
+            'data' => $file
+        ]);
+    }
 }

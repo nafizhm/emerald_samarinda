@@ -11,6 +11,7 @@ use App\Models\Piutang;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -193,9 +194,24 @@ class PemasukanController extends Controller
             'id_piutang' => $request->id_piutang ?: null]);
         $values = $request->validate([
             'tanggal' => 'required|date', 'nominal' => 'required|integer|min:1',
-            'id_kategori_transaksi' => 'required|integer',
-            'id_piutang' => 'nullable|required_if:id_kategori_transaksi,6|integer|min:1|exists:piutang,id',
+            'id_kategori_transaksi' => ['required', 'integer', Rule::exists('kategori_transaksi', 'id')->where('jenis_kategori', 'PEMASUKAN')],
+            'id_piutang' => 'nullable|required_if:id_kategori_transaksi,102|integer|min:1|exists:piutang,id',
             'keterangan' => 'nullable|string|max:5000',
+        ], [
+            'tanggal.required' => 'Tanggal pemasukan wajib diisi.',
+            'tanggal.date' => 'Tanggal pemasukan tidak valid.',
+            'nominal.required' => 'Nominal pemasukan wajib diisi.',
+            'nominal.integer' => 'Nominal pemasukan harus berupa angka bulat.',
+            'nominal.min' => 'Nominal pemasukan minimal Rp1.',
+            'id_kategori_transaksi.required' => 'Kategori transaksi wajib dipilih.',
+            'id_kategori_transaksi.integer' => 'Kategori transaksi tidak valid.',
+            'id_kategori_transaksi.exists' => 'Kategori harus merupakan kategori pemasukan yang tersedia.',
+            'id_piutang.required_if' => 'Piutang wajib dipilih untuk kategori pencairan hutang.',
+            'id_piutang.integer' => 'Piutang yang dipilih tidak valid.',
+            'id_piutang.min' => 'Piutang yang dipilih tidak valid.',
+            'id_piutang.exists' => 'Piutang yang dipilih tidak ditemukan.',
+            'keterangan.string' => 'Keterangan harus berupa teks.',
+            'keterangan.max' => 'Keterangan maksimal 5.000 karakter.',
         ]);
         $values['id_piutang'] = $values['id_piutang'] ?? 0;
         $values['keterangan'] = $values['keterangan'] ?? '';

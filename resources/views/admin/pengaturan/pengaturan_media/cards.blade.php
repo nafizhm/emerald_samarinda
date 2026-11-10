@@ -3,8 +3,8 @@
 .media-picture {height:180px; display:flex; align-items:center; justify-content:center; background-color:#f1f5f9; background-image:linear-gradient(45deg,#e2e8f0 25%,transparent 25%),linear-gradient(-45deg,#e2e8f0 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#e2e8f0 75%),linear-gradient(-45deg,transparent 75%,#e2e8f0 75%); background-size:20px 20px; background-position:0 0,0 10px,10px -10px,-10px 0}
 .media-picture img {max-width:85%;max-height:145px;object-fit:contain}
 .media-drop {position:relative;border:2px dashed #b7c5df;border-radius:14px;padding:28px;text-align:center;background:#f8faff;color:#334155;cursor:pointer}
-.media-drop.dragging {border-color:#435ebe;background:#edf2ff}
-.media-drop:focus-within {outline:3px solid #a6b9ff}
+.media-drop.dragging {border-color:#166b53;background:#e8f5f0}
+.media-drop:focus-within {outline:3px solid #7dceb1}
 .media-drop input {position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
 #media-selected-preview {max-height:220px;max-width:100%;object-fit:contain}
 </style>

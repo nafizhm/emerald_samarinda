@@ -26,14 +26,14 @@ $bank = DB::table('bank')->value('id');
 $status = DB::table('progres_list_penjualan')->value('id');
 verify((bool) $bank && (bool) $status, 'Rekening dan status penjualan harus tersedia.');
 $persist = in_array('--persist', $argv, true);
-if ($persist && DB::table('lokasi_kavling')->where('nama_kavling', 'SIMULASI 30 PEMBELI')->exists()) {
-    echo 'Proyek SIMULASI 30 PEMBELI sudah tersedia; tidak menambahkan data duplikat.'.PHP_EOL;
+if ($persist && DB::table('lokasi_kavling')->where('nama_kavling', 'SIMULASI 30 CUSTOMER')->exists()) {
+    echo 'Proyek SIMULASI 30 CUSTOMER sudah tersedia; tidak menambahkan data duplikat.'.PHP_EOL;
     exit(0);
 }
 $level = DB::transactionLevel();
 DB::beginTransaction();
 try {
-    $project = DB::table('lokasi_kavling')->insertGetId(array_replace(requiredDefaults('lokasi_kavling'), ['nama_kavling' => 'SIMULASI 30 PEMBELI', 'nama_singkat' => 'SIMTEST', 'stt_tampil' => 1]));
+    $project = DB::table('lokasi_kavling')->insertGetId(array_replace(requiredDefaults('lokasi_kavling'), ['nama_kavling' => 'SIMULASI 30 CUSTOMER', 'nama_singkat' => 'SIMTEST', 'stt_tampil' => 1]));
     DB::table('master_svg')->insert(array_replace(requiredDefaults('master_svg'), [
         'id_lokasi' => $project,
         'header_xml' => '<?xml version="1.0" encoding="UTF-8"?>',
@@ -56,7 +56,7 @@ try {
             'jenis_pembelian' => $plan['kind'] === 'cash' ? 'Cash Keras' : 'Kredit', 'dp_kredit' => 20000000,
             'inhouse_tenor' => 10, 'inhouse_perbulan' => 10000000, 'inhouse_jatuh_tempo' => $date->toDateString()];
         $response = app(CustomerController::class)->store(Request::create('/simulation', 'POST', $input));
-        verify($response->getStatusCode() === 200 && $response->getData()->success, 'Input pembeli '.($index+1).' gagal: '.$response->getContent());
+        verify($response->getStatusCode() === 200 && $response->getData()->success, 'Input customer '.($index+1).' gagal: '.$response->getContent());
         $customer = DB::table('customer')->where('id_lokasi', $project)->orderByDesc('id')->value('id'); $ids[] = $customer;
         $payment = $plan['kind'] === 'paid' ? 100000000 : ($plan['kind'] === 'late' ? ($plan['variant'] === 'partial' ? 5000000 : ($plan['variant'] === 'installment' ? 10000000 : 0)) : 0);
         if ($payment) {
@@ -75,7 +75,7 @@ try {
         $report[] = ['buyer' => $index+1, 'scenario' => $plan, 'remaining' => (float) $balance->sisa_bayar];
     }
     $rows = (new JatuhTempoService)->rows()->whereIn('id', $ids)->keyBy('id');
-    verify($rows->count() === count($expected), 'Jumlah pelanggan jatuh tempo tidak sesuai.');
+    verify($rows->count() === count($expected), 'Jumlah customer jatuh tempo tidak sesuai.');
     foreach ($expected as $id => $amount) verify((float) $rows[$id]['due_amount'] === (float) $amount, 'Nominal jatuh tempo tidak sesuai.');
     $summary = ['date' => $today->toDateString(), 'database' => config('database.default'), 'buyers' => count($ids), 'cash' => 6, 'current_credit' => 3, 'paid_credit' => 3, 'late_scenarios' => 18, 'due_customers' => $rows->count(), 'due_amount' => $rows->sum('due_amount'), 'project_id' => $project, 'customer_ids' => $ids, 'persisted' => $persist, 'result' => 'PASS', 'scenarios' => $report];
     if (!is_dir(__DIR__.'/../docs/testing')) mkdir(__DIR__.'/../docs/testing', 0777, true);

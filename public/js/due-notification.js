@@ -10,9 +10,9 @@ document.addEventListener('DOMContentLoaded', function () {
     function render(data) {
         badge.textContent = data.count > 99 ? '99+' : data.count;
         badge.classList.toggle('is-empty', data.count === 0);
-        trigger.title = data.count + ' pelanggan jatuh tempo';
-        trigger.setAttribute('aria-label', data.count + ' pelanggan jatuh tempo. Buka popup pengingat.');
-        document.getElementById('due-popup-summary').textContent = Math.min(10, data.count) + ' dari ' + data.count + ' pelanggan / jatuh tempo terlama';
+        trigger.title = data.count + ' customer jatuh tempo';
+        trigger.setAttribute('aria-label', data.count + ' customer jatuh tempo. Buka popup pengingat.');
+        document.getElementById('due-popup-summary').textContent = Math.min(10, data.count) + ' dari ' + data.count + ' customer / jatuh tempo terlama';
         list.replaceChildren();
         if (!data.items.length) {state('Tidak ada cicilan jatuh tempo yang belum dibayar.'); return;}
         data.items.slice(0, 10).forEach(function (item) {
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function () {
     trigger.addEventListener('click', function () {
         if (!popup.hidden) {closePopup(false); return;}
         popup.hidden = false; trigger.setAttribute('aria-expanded', 'true');
-        state('Memuat pelanggan...'); refresh(); document.getElementById('due-popup-close').focus();
+        state('Memuat customer...'); refresh(); document.getElementById('due-popup-close').focus();
     });
     document.getElementById('due-popup-close').addEventListener('click', function () {closePopup(true);});
     document.addEventListener('click', function (event) {if (!document.getElementById('due-notification').contains(event.target)) closePopup(false);});

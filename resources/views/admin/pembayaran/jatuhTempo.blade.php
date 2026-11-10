@@ -1,12 +1,13 @@
 @extends('admin.layout')
 @section('page_title', 'Data Jatuh Tempo')
+@section('search_placeholder', 'Cari nama customer, lokasi unit...')
 @section('content')
     <div class="page-content dashboard-page workspace-page">
         <section class="section">
             <div class="card">
                 <div class="card-header workspace-page-header">
                     <div class="d-flex align-content-center justify-content-between">
-                        <div class="workspace-heading"><p class="dashboard-eyebrow">Pembayaran</p><h1>Data Jatuh Tempo</h1><p class="workspace-description">Tinjau tagihan, pembayaran, dan catatan transaksi pelanggan.</p></div>
+                        <div class="workspace-heading"><p class="dashboard-eyebrow">Pembayaran</p><h1>Data Jatuh Tempo</h1><p class="workspace-description">Tinjau tagihan, pembayaran, dan catatan transaksi customer.</p></div>
                         <div class="d-flex align-items-center">
                             <select id="statusFilter" class="select-filter form-select">
                                 <option value="">Semua Status</option>
@@ -33,7 +34,7 @@
                         <thead>
                             <tr>
                                 <th rowspan="2" width="2%">No</th>
-                                <th colspan="4" class="text-center">Pelanggan</th>
+                                <th colspan="4" class="text-center">Customer</th>
                                 <th colspan="1" class="text-center">Dana Masuk</th>
                                 <th rowspan="2" width="10%">Sisa Pembayaran</th>
                                 <th rowspan="2" width="10%">Keterlambatan</th>
@@ -41,7 +42,7 @@
                             </tr>
                             <tr>
                                 <th width="12%">Jatuh Tempo</th>
-                                <th width="12%">Nama Pelanggan</th>
+                                <th width="12%">Nama Customer</th>
                                 <th width="10%">Lokasi Unit</th>
                                 <th width="10%">Harga Tanah Kavling</th>
 
@@ -56,14 +57,14 @@
     </div>
 
     <div class="modal fade text-left" id="modalForm" tabindex="-1" role="dialog" aria-labelledby="modalFormLabel"
-        aria-hidden="true" data-backdrop="static" data-keyboard="false" data-focus="false">
+        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" data-focus="false">
 
-        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
-            <div class="modal-content workspace-modal">
-                <div class="modal-header ">
-                    <h5 class="modal-title" id="myModalLabel160">Pembayaran
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl" role="document">
+            <div class="modal-content ">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title white" id="myModalLabel160">Pembayaran
                     </h5>
-                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Tutup">
+                    <button type="button" class="close white" data-bs-dismiss="modal" aria-label="Tutup">
                         <i data-feather="x"></i>
                     </button>
                 </div>
@@ -80,7 +81,7 @@
                         </div>
 
                         <div class="form-group row">
-                            <label class="control-label col-sm-3">Nama Pelanggan</label>
+                            <label class="control-label col-sm-3">Nama Customer</label>
                             <div class="col-sm-6">
                                 <input name="nasabah_b" id="nasabah_b" value="" class="form-control" type="text"
                                     disabled>
@@ -164,7 +165,9 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <span class="button-text">Batal</span>
+                        </button>
                         <button type="submit" class="btn btn-primary ms-1" id="submitBtn">
                             <span class="spinner-border spinner-border-sm mx-1 d-none" role="status"
                                 aria-hidden="true"></span>
@@ -177,14 +180,14 @@
     </div>
 
     <div class="modal fade text-left" id="modalTempo" tabindex="-1" role="dialog" aria-labelledby="modalTempoLabel"
-        aria-hidden="true" data-backdrop="static" data-keyboard="false" data-focus="false">
+        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" data-focus="false">
 
-        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-            <div class="modal-content workspace-modal">
-                <div class="modal-header ">
-                    <h5 class="modal-title" id="myModalLabel160">Jatuh Tempo
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content ">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title white" id="myModalLabel160">Jatuh Tempo
                     </h5>
-                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Tutup">
+                    <button type="button" class="close white" data-bs-dismiss="modal" aria-label="Tutup">
                         <i data-feather="x"></i>
                     </button>
                 </div>
@@ -215,7 +218,9 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-danger" data-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <span class="button-text">Batal</span>
+                        </button>
                         <button type="submit" class="btn btn-primary ms-1" id="editBtn">
                             <span class="spinner-border spinner-border-sm mx-1 d-none" role="status"
                                 aria-hidden="true"></span>
@@ -229,7 +234,6 @@
 @endsection
 @push('scripts')
     <script>
-        var audio = new Audio('{{ asset('audio/notification.ogg') }}');
 
         $(document).ready(function() {
             $('.select-filter').select2({

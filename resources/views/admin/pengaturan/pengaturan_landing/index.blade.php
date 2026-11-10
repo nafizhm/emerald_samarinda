@@ -1,5 +1,6 @@
 @extends('admin.layout')
 @section('page_title', 'Konten Halaman Publik')
+@section('search_placeholder', 'Cari jenis konten, judul...')
 @section('content')
     <style>
         #icon-picker {
@@ -365,7 +366,6 @@
             });
         });
 
-        var audio = new Audio('{{ asset('audio/notification.ogg') }}');
 
         $(function() {
             var table = $('.data-table').DataTable({

@@ -1,12 +1,13 @@
 @extends('admin.layout')
-@section('page_title', 'Data Arsip Pelanggan')
+@section('page_title', 'Data Arsip Customer')
+@section('search_placeholder', 'Cari nama customer, lokasi kavling...')
 @section('content')
     <div class="page-content dashboard-page workspace-page">
         <section class="section">
             <div class="card">
                 <div class="card-header workspace-page-header">
                     <div class="d-flex align-content-center justify-content-between">
-                        <div class="workspace-heading"><p class="dashboard-eyebrow">Pelanggan</p><h1>Data Arsip Pelanggan</h1><p class="workspace-description">Telusuri data pelanggan yang telah diarsipkan.</p></div>
+                        <div class="workspace-heading"><p class="dashboard-eyebrow">Customer</p><h1>Data Arsip Customer</h1><p class="workspace-description">Telusuri data customer yang telah diarsipkan.</p></div>
                         <div class="d-flex align-items-center">
                             <a href="javascript:void(0);" onclick="reloadTable()" class="btn btn-light btn-rounded btn-sm ms-2"
                                 title="Perbarui daftar">
@@ -16,13 +17,12 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
                         <table class="table data-table table-bordered table-striped">
                             <thead>
                                 <tr>
                                     <th width="5%">No</th>
                                     <th>Tanggal Cancel</th>
-                                    <th>Nama Pelanggan</th>
+                                    <th>Nama Customer</th>
                                     <th>Marketing</th>
                                     <th>Lokasi Kavling</th>
                                     <th>Status Progres</th>
@@ -32,7 +32,6 @@
                             </thead>
                             <tbody></tbody>
                         </table>
-                    </div>
                 </div>
             </div>
         </section>

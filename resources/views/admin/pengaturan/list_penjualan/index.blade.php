@@ -1,5 +1,6 @@
 @extends('admin.layout')
 @section('page_title', 'Tahapan Penjualan')
+@section('search_placeholder', 'Cari kode, progres...')
 @section('content')
     <div class="page-content dashboard-page workspace-page">
         <section class="section">
@@ -21,7 +22,6 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
                         <table class="table data-table table-bordered table-striped">
                             <thead>
                                 <tr>
@@ -36,7 +36,6 @@
                             </thead>
                             <tbody></tbody>
                         </table>
-                    </div>
                 </div>
             </div>
         </section>
@@ -126,7 +125,6 @@
     <script>
         var permissions = @json($permissions);
         var showActionColumn = (permissions['edit'] == 1 || permissions['hapus'] == 1);
-        var audio = new Audio('{{ asset('audio/notification.ogg') }}');
 
         $(document).ready(function() {
             $('.select-status').select2({

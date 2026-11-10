@@ -21,10 +21,10 @@ $(function () {
         processing:true, serverSide:true, ordering:false, responsive:false, pageLength:10, autoWidth:false,
         dom:'rt<"payment-pagination"lip>',
         ajax:{url:page.dataset.url, data:function (data) {data.status=$('#payment-status').val(); data.lokasi=$('#payment-location').val(); data.jenis=$('#payment-method').val();}, error:function () {document.getElementById('payment-list-error').hidden=false; element.closest('.dataTables_wrapper').find('.dataTables_processing').hide();}},
-        language:{processing:'Memuat pembayaran...', lengthMenu:'Tampilkan _MENU_', info:'_START_ - _END_ dari _TOTAL_ pelanggan', infoEmpty:'Belum ada pelanggan', infoFiltered:'(dari _MAX_ pelanggan aktif)', emptyTable:'Belum ada data pembayaran pelanggan.', zeroRecords:'Tidak ada pelanggan yang cocok. Coba kata pencarian atau filter lain.', paginate:{previous:'Sebelumnya',next:'Berikutnya'}},
+        language:{processing:'Memuat pembayaran...', lengthMenu:'Tampilkan _MENU_', info:'_START_ - _END_ dari _TOTAL_ customer', infoEmpty:'Belum ada customer', infoFiltered:'(dari _MAX_ customer aktif)', emptyTable:'Belum ada data pembayaran customer.', zeroRecords:'Tidak ada customer yang cocok. Coba kata pencarian atau filter lain.', paginate:{previous:'Sebelumnya',next:'Berikutnya'}},
         columns:[{data:'customer',name:'customer'},{data:'unit',name:'unit'},{data:'method',searchable:false},{data:'payment_progress',searchable:false},{data:'balance',searchable:false},{data:'payment_status',searchable:false},{data:'action',searchable:false}],
-        createdRow:function (row) {const labels=['Pelanggan','Kavling / proyek','Jenis pembelian','Progres bayar','Sisa pembayaran','Status pembayaran','']; row.querySelectorAll('td').forEach((cell,index)=>cell.setAttribute('data-label',labels[index]));},
-        initComplete:function () {element.wrap('<div class="payment-table-viewport" role="region" aria-label="Daftar pembayaran pelanggan" tabindex="0"></div>');}
+        createdRow:function (row) {const labels=['Customer','Kavling / proyek','Jenis pembelian','Progres bayar','Sisa pembayaran','Status pembayaran','']; row.querySelectorAll('td').forEach((cell,index)=>cell.setAttribute('data-label',labels[index]));},
+        initComplete:function () {element.wrap('<div class="payment-table-viewport" role="region" aria-label="Daftar pembayaran customer" tabindex="0"></div>');}
     });
     $('#payment-status,#payment-location,#payment-method').on('change',function () {filterState(); table.ajax.reload();});
     page.querySelectorAll('[data-status]').forEach(button => button.addEventListener('click',()=>$('#payment-status').val(button.dataset.status).trigger('change')));

@@ -1,19 +1,19 @@
 @extends('admin.layout')
-@section('page_title', 'Dokumen Pelanggan')
+@section('page_title', 'Dokumen Customer')
 @section('content')
     <div class="page-content dashboard-page workspace-page">
         <section class="section">
             <div class="card">
                 <div class="card-header workspace-page-header">
                     <div class="d-flex align-content-center justify-content-between">
-                        <div class="workspace-heading"><p class="dashboard-eyebrow">Dokumen pelanggan</p><h1>Dokumen Pelanggan</h1><p class="workspace-description">Kelola berkas dan lampiran pelanggan.</p></div>
+                        <div class="workspace-heading"><p class="dashboard-eyebrow">Dokumen customer</p><h1>Dokumen Customer</h1><p class="workspace-description">Kelola berkas dan lampiran customer.</p></div>
                     </div>
                 </div>
                 <div class="card-body">
                     <input type="hidden" name="id" value="{{ $data ? $data->id : '' }}">
 
                     <div class="form-group row mb-3">
-                        <label class="col-sm-3 col-form-label">Nama Pelanggan</label>
+                        <label class="col-sm-3 col-form-label">Nama Customer</label>
                         <div class="col-sm-3">
                             <select class="form-control select-nasabah" id="nama_nasabah" name="nama_nasabah">
                             </select>
@@ -43,7 +43,7 @@
                     </div>
                     @if ($permissions['tambah'] == 1)
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-info mb-3" id="modal-button" data-bs-toggle="modal"
+                            <button type="button" class="btn btn-primary mb-3" id="modal-button" data-bs-toggle="modal"
                                 data-bs-target="#modalForm">
                                 <i class="bi bi-upload"></i> Upload File
                             </button>
@@ -67,54 +67,68 @@
     </div>
 
     <div class="modal fade text-left" id="modalForm" tabindex="-1" role="dialog" aria-labelledby="modalFormLabel"
-        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" data-bs-focus="false">
+        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" data-focus="false">
 
-        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-            <div class="modal-content workspace-modal">
-                <div class="modal-header ">
-                    <h5 class="modal-title" id="myModalLabel160">Upload File Pelanggan</h5>
-                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Tutup">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content ">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title white" id="myModalLabel160">Upload File Customer</h5>
+                    <button type="button" class="close white" data-bs-dismiss="modal" aria-label="Tutup">
                         <i data-feather="x"></i>
                     </button>
                 </div>
-                <form id="formData">
+                <form id="formData" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
                         <input type="hidden" id="primary_id" name="primary_id">
 
-                        <div class="form-group">
-                            <label for="tanggal">Tanggal Upload</label>
-                            <input type="date" class="form-control" id="tanggal" name="tanggal"
-                                value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}">
+                        <div class="form-group row">
+                            <label for="tanggal" class="col-sm-3 col-form-label">Tanggal Upload</label>
+                            <div class="col-sm-6">
+                                <input type="date" class="form-control" id="tanggal" name="tanggal"
+                                    value="{{ \Carbon\Carbon::now()->format('Y-m-d') }}">
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="nama_file">Nama File</label>
-                            <select name="nama_file" id="nama_file" class="form-control nama-file">
-                                <option value="">-- Pilih Nama File --</option>
-                                <option value="KTP">Foto KTP</option>
-                                <option value="KK">Foto Kartu Keluarga</option>
-                                <option value="Pemohon">Foto Pemohon</option>
-                                <option value="KTP Pasangan">Foto KTP Pasangan</option>
-                                <option value="NPWP">Foto NPWP</option>
-                                <option value="BPJS">Foto BPJS</option>
-                                <option value="Bukti Bayar">Bukti Bayar</option>
-                            </select>
+                        <div class="form-group row">
+                            <label for="nama_file" class="col-sm-3 col-form-label">Nama File</label>
+                            <div class="col-sm-6">
+                                <select name="nama_file" id="nama_file" class="form-control nama-file">
+                                    <option value="">Jenis File</option>
+                                    <option value="KTP">Foto KTP</option>
+                                    <option value="KK">Foto Kartu Keluarga</option>
+                                    <option value="Pemohon">Foto Pemohon</option>
+                                    <option value="KTP Pasangan">Foto KTP Pasangan</option>
+                                    <option value="NPWP">Foto NPWP</option>
+                                    <option value="BPJS">Foto BPJS</option>
+                                    <option value="Bukti Bayar">Bukti Bayar</option>
+                                </select>
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="lampiran">File Lampiran</label>
-                            <input type="file" is="lampiran" name="lampiran">
+                        <div class="form-group row">
+                            <label for="lampiran" class="col-sm-3 col-form-label">File Lampiran</label>
+                            <div class="col-sm-9">
+                                <input type="file" class="form-control" id="lampiran" name="lampiran">
+                                <div class="mt-2">
+                                    <div class="img-thumbnail border d-flex align-items-center justify-content-center"
+                                        id="previewLampiran"
+                                        style="max-width: 140px; height: 150px; background-color: #f8f9fa; border: 1px solid #dee2e6; overflow: hidden;">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="keterangan">Keterangan</label>
-                            <textarea class="form-control" name="keterangan"></textarea>
+                        <div class="form-group row">
+                            <label for="keterangan" class="col-sm-3 col-form-label">Keterangan</label>
+                            <div class="col-sm-9">
+                                <textarea name="keterangan" id="keterangan" class="form-control" rows="2"></textarea>
+                            </div>
                         </div>
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             <span class="button-text">Batal</span>
                         </button>
                         <button type="submit" class="btn btn-primary ms-1" id="submitBtn">
@@ -127,16 +141,67 @@
             </div>
         </div>
     </div>
+
+    {{-- MODAL DETAIL (VIEW ONLY) --}}
+    <div class="modal fade text-left" id="modalDetail" tabindex="-1" role="dialog" aria-labelledby="modalDetailLabel"
+        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" data-focus="false">
+
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title white" id="modalDetailLabel">Detail File Customer</h5>
+                    <button type="button" class="close white" data-bs-dismiss="modal" aria-label="Tutup">
+                        <i data-feather="x"></i>
+                    </button>
+                </div>
+                <input type="hidden" id="primary_id_detail" name="primary_id">
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <label for="tanggal_detail" class="col-sm-3 col-form-label">Tanggal Upload</label>
+                        <div class="col-sm-3">
+                            <input type="date" class="form-control" id="tanggal_detail" name="tanggal" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="nama_file_detail" class="col-sm-3 col-form-label">Nama File</label>
+                        <div class="col-sm-6">
+                            <input type="text" class="form-control" id="nama_file_detail" name="nama_file" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group row" id="rowLampiranDetail" style="display: none;">
+                        <label class="col-sm-3 col-form-label">File Lampiran</label>
+                        <div class="col-sm-8">
+                            <div class="img-thumbnail border d-flex align-items-center justify-content-center"
+                                id="previewDetail"
+                                style="max-width: 140px; height: 150px; background-color: #f8f9fa; border: 1px solid #dee2e6; overflow: hidden;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="keterangan_detail" class="col-sm-3 col-form-label">Keterangan</label>
+                        <div class="col-sm-9">
+                            <textarea name="keterangan" id="keterangan_detail" class="form-control" rows="2" readonly></textarea>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <span class="button-text">Tutup</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 @push('scripts')
     <script>
         var permissions = @json($permissions);
-        var audio = new Audio('{{ asset('audio/notification.ogg') }}');
 
         $(document).ready(function() {
             $('.select-nasabah').select2({
                 width: '100%',
-                placeholder: 'Pilih Pelanggan',
+                placeholder: 'Pilih Customer',
                 minimumResultsForSearch: 1,
                 ajax: {
                     url: '{{ route('nasabah.search') }}',
@@ -189,6 +254,28 @@
             loadTableFiles(nasabahId);
         });
 
+        $('#lampiran').on('change', function() {
+            var file = this.files[0];
+            var preview = $('#previewLampiran');
+            var fileExt = file ? file.name.split('.').pop().toLowerCase() : '';
+
+            if (file && ['jpg', 'jpeg', 'png', 'gif'].includes(fileExt)) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.html(
+                        `<img src="${e.target.result}" alt="File" style="max-height: 100%; max-width: 100%;">`
+                    );
+                };
+                reader.readAsDataURL(file);
+            } else if (file) {
+                preview.html(
+                    `<div class="text-center text-muted"><i class="bi bi-file-earmark-text"></i><br>${file.name}</div>`
+                );
+            } else {
+                preview.html('');
+            }
+        });
+
         function loadTableFiles(nasabahId) {
             $('#data-table tbody').empty();
 
@@ -208,7 +295,7 @@
                                     <td>${index + 1}</td>
                                     <td>${file.nama_file}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-info" onclick="viewFile('${file.folder}', '${file.lampiran}', '${file.nama_file}')">View</button>
+                                        <button class="btn btn-sm btn-info detail-button" data-url="/admin/customer/upload-file/detail/${file.id}">View</button>
                                         <a href="/berkas_user/${file.lampiran}" class="btn btn-sm btn-success" download>Download</a>
                                     </td>
                                     <td>
@@ -319,20 +406,21 @@
         function viewFile(folder, filename, nama_file) {
             var fileExt = filename.split('.').pop().toLowerCase();
             var fileUrl = '/berkas_user/' + filename;
+            var preview = $('#previewDetail');
+            var rowLampiran = $('#rowLampiranDetail');
 
-            let content = '';
+            $('#tanggal_detail').val($('#tanggal').val());
+            $('#nama_file_detail').val(nama_file);
+            $('#keterangan_detail').val($('#keterangan').val());
 
             if (['pdf'].includes(fileExt)) {
-                content = `<iframe src="${fileUrl}" width="100%" height="500px"></iframe>`;
+                preview.html(`<iframe src="${fileUrl}" width="100%" height="400px"></iframe>`);
             } else {
-                content = `<img src="${fileUrl}" class="img-fluid" />`;;
+                preview.html(`<img src="${fileUrl}" alt="File" style="max-height: 100%; max-width: 100%;">`);
             }
+            rowLampiran.show();
 
-            Swal.fire({
-                title: 'Preview File',
-                html: content,
-                width: 600
-            });
+            $('#modalDetail').modal('show');
         }
 
         function deleteFile(id_file) {
@@ -394,10 +482,11 @@
 
         $('#modalForm').on('hidden.bs.modal', function() {
             $('#formData')[0].reset();
-            // Hapus validasi error
+            $('#primary_id').val('');
+            $('#lampiran').val('');
+            $('#previewLampiran').html('');
             $('.is-invalid').removeClass('is-invalid');
             $('.invalid-feedback').remove();
-
             let submitBtn = $('#submitBtn');
             let spinner = submitBtn.find('.spinner-border');
             let btnText = submitBtn.find('.button-text');
@@ -405,6 +494,41 @@
             spinner.addClass('d-none');
             btnText.text('Simpan');
             submitBtn.prop('disabled', false);
+        });
+
+        $('#modalDetail').on('hidden.bs.modal', function() {
+            $('#previewDetail').html('');
+            $('#rowLampiranDetail').hide();
+        });
+
+        $(document).on('click', '.detail-button', function() {
+            var url = $(this).data('url');
+            $.get(url, function(response) {
+                if (response.status === 'success') {
+                    $('#tanggal_detail').val(response.data.tanggal);
+                    $('#nama_file_detail').val(response.data.nama_file);
+                    $('#keterangan_detail').val(response.data.keterangan);
+
+                    let lampiran = response.data.lampiran;
+                    let preview = $('#previewDetail');
+                    let rowLampiran = $('#rowLampiranDetail');
+                    if (lampiran && lampiran !== '') {
+                        let imageUrl = '/berkas_user/' + lampiran;
+                        let fileExt = lampiran.split('.').pop().toLowerCase();
+
+                        if (['pdf'].includes(fileExt)) {
+                            preview.html(`<iframe src="${imageUrl}" width="100%" height="400px"></iframe>`);
+                        } else {
+                            preview.html(`<img src="${imageUrl}" alt="File" style="max-height: 100%; max-width: 100%;">`);
+                        }
+                        rowLampiran.show();
+                    } else {
+                        rowLampiran.hide();
+                    }
+
+                    $('#modalDetail').modal('show');
+                }
+            });
         });
     </script>
 @endpush

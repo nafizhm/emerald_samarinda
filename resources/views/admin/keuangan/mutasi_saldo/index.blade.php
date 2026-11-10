@@ -1,23 +1,23 @@
 @extends('admin.layout')
-@section('page_title', 'Data Transfer Antar Rekening')
+@section('page_title', 'Data Mutasi Saldo')
+@section('search_placeholder', 'Cari rekening, keterangan...')
 @section('content')
     <div class="page-content dashboard-page workspace-page">
         <section class="section">
             <div class="card">
                 <div class="card-header workspace-page-header">
                     <div class="d-flex align-content-center justify-content-between">
-                        <div class="workspace-heading"><p class="dashboard-eyebrow">Keuangan</p><h1>Data Transfer Antar Rekening</h1><p class="workspace-description">Catat perpindahan saldo antar rekening.</p></div>
+                        <div class="workspace-heading"><p class="dashboard-eyebrow">Keuangan</p><h1>Data Mutasi Saldo</h1><p class="workspace-description">Catat perpindahan saldo antar rekening.</p></div>
                         <div class="d-flex align-items-center">
                             @if (isset($permissions['tambah']) && $permissions['tambah'] == 1)
                                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalForm">
-                                    <i class="bi bi-plus-lg"></i> Tambah Transfer Antar Rekening
+                                    <i class="bi bi-plus-lg"></i> Tambah Mutasi Saldo
                                 </button>
                             @endif
                         </div>
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
                         <table class="table data-table table-bordered table-striped w-100">
                             <thead>
                                 <tr>
@@ -32,21 +32,22 @@
                             </thead>
                             <tbody></tbody>
                         </table>
-                    </div>
                 </div>
             </div>
         </section>
     </div>
 
     <div class="modal fade text-left" id="modalForm" tabindex="-1" role="dialog" aria-labelledby="modalFormLabel"
-        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" data-focus="false">
 
-        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-            <div class="modal-content workspace-modal">
-                <div class="modal-header ">
-                    <h5 class="modal-title" id="myModalLabel160">Transfer Antar Rekening
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content ">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title white" id="myModalLabel160">Mutasi Saldo
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    <button type="button" class="close white" data-bs-dismiss="modal" aria-label="Tutup">
+                        <i data-feather="x"></i>
+                    </button>
                 </div>
                 <form id="formData" enctype="multipart/form-data">
                     @csrf
@@ -61,7 +62,7 @@
 
                         <div class="form-group row">
                             <label for="no_rek" class="col-sm-3 col-form-label">Rek. Asal</label>
-                            <div class="col-sm-3">
+                            <div class="col-sm-4">
                                 <select class="form-select select-rekening" name="rekening_asal" id="rekening_asal">
                                     <option value=""></option>
                                     @foreach ($bankList as $data)
@@ -70,8 +71,10 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <label for="no_rek" class="col-sm-2 col-form-label">Rek. Tujuan</label>
-                            <div class="col-sm-3">
+                        </div>
+                        <div class="form-group row">
+                            <label for="no_rek" class="col-sm-3 col-form-label">Rek. Tujuan</label>
+                            <div class="col-sm-4">
                                 <select class="form-select select-rekening" name="rekening_tujuan" id="rekening_tujuan">
                                     <option value=""></option>
                                     @foreach ($bankList as $data)
@@ -118,7 +121,7 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                             <span class="button-text">Batal</span>
                         </button>
                         <button type="submit" class="btn btn-primary ms-1" id="submitBtn">
@@ -164,7 +167,6 @@
             }
         });
 
-        var audio = new Audio('{{ asset('audio/notification.ogg') }}');
         var permissions = @json($permissions);
         var showActionColumn = (permissions['edit'] == 1 || permissions['hapus'] == 1);
 
@@ -308,8 +310,8 @@
                 success: function() {
                     $('#modalForm').modal('hide');
                     audio.play();
-                    let msg = id ? "Transfer Antar Rekening berhasil diupdate!" :
-                        "Transfer Antar Rekening berhasil ditambahkan!";
+                    let msg = id ? "Mutasi saldo berhasil diupdate!" :
+                        "Mutasi saldo berhasil ditambahkan!";
                     toastr.success(msg, "BERHASIL", {
                         progressBar: true,
                         timeOut: 3500,

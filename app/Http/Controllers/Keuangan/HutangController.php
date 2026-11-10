@@ -110,17 +110,22 @@ class HutangController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge(['nominal' => str_replace('.', '', (string) $request->nominal)]);
         $request->validate([
             'tanggal_hutang' => 'required|date',
-            'nominal'        => 'required',
-            'id_bank'        => 'required',
+            'nominal'        => 'required|integer|min:1',
+            'id_bank'        => 'required|integer|exists:bank,id',
             'lampiran'       => 'required|file|mimes:jpg,jpeg,png,pdf,webp|max:2048',
             'deskripsi'      => 'required',
         ], [
             'tanggal_hutang.required' => 'Tanggal hutang wajib diisi.',
             'tanggal_hutang.date'     => 'Tanggal hutang harus berupa tanggal.',
             'nominal.required'        => 'Nominal wajib diisi.',
+            'nominal.integer'         => 'Nominal harus berupa angka bulat.',
+            'nominal.min'             => 'Nominal minimal Rp1.',
             'id_bank.required'        => 'Bank wajib diisi.',
+            'id_bank.integer'         => 'Bank tidak valid.',
+            'id_bank.exists'          => 'Bank yang dipilih tidak ditemukan.',
             'lampiran.required'       => 'Lampiran wajib diisi.',
             'lampiran.file'           => 'Lampiran harus berupa file.',
             'lampiran.mimes'          => 'Format lampiran harus jpg, jpeg, png, atau pdf.',
@@ -160,7 +165,7 @@ class HutangController extends Controller
                 'nominal'               => str_replace('.', '', $request->nominal),
                 'id_bank'               => $request->id_bank,
                 'lampiran'              => $filename,
-                'id_kategori_transaksi' => 6,
+                'id_kategori_transaksi' => 37,
                 'keterangan'            => $request->deskripsi,
             ]);
 
@@ -180,11 +185,12 @@ class HutangController extends Controller
     public function update(Request $request, $id)
     {
         $data = Hutang::findOrFail($id);
+        $request->merge(['nominal' => str_replace('.', '', (string) $request->nominal)]);
 
         $rules = [
             'tanggal_hutang' => 'required|date',
-            'nominal'        => 'required',
-            'id_bank'        => 'required',
+            'nominal'        => 'required|integer|min:1',
+            'id_bank'        => 'required|integer|exists:bank,id',
             'deskripsi'      => 'required',
         ];
 
@@ -198,7 +204,11 @@ class HutangController extends Controller
             'tanggal_hutang.required' => 'Tanggal hutang wajib diisi.',
             'tanggal_hutang.date'     => 'Tanggal hutang harus berupa tanggal.',
             'nominal.required'        => 'Nominal wajib diisi.',
+            'nominal.integer'         => 'Nominal harus berupa angka bulat.',
+            'nominal.min'             => 'Nominal minimal Rp1.',
             'id_bank.required'        => 'Bank wajib diisi.',
+            'id_bank.integer'         => 'Bank tidak valid.',
+            'id_bank.exists'          => 'Bank yang dipilih tidak ditemukan.',
             'lampiran.required'       => 'Lampiran wajib diisi.',
             'lampiran.file'           => 'Lampiran harus berupa file.',
             'lampiran.mimes'          => 'Format lampiran harus jpg, jpeg, png, atau pdf.',
@@ -206,17 +216,23 @@ class HutangController extends Controller
             'deskripsi.required'      => 'Deskripsi wajib diisi.',
         ]);
 
+        $nominal = (int) str_replace('.', '', (string) $request->nominal);
+        if ($nominal < (int) $data->terbayar) {
+            return response()->json(['errors' => ['nominal' => ['Nominal tidak boleh lebih kecil dari pembayaran hutang yang sudah tercatat.']]], 422);
+        }
+
         DB::beginTransaction();
         try {
 
             $db = [
                 'tanggal_hutang' => $request->tanggal_hutang,
                 'deskripsi'      => $request->deskripsi,
-                'nominal'        => str_replace('.', '', $request->nominal),
+                'nominal'        => $nominal,
                 'id_bank'        => $request->id_bank,
-                'terbayar'       => 0,
-                'sisa_bayar'     => str_replace('.', '', $request->nominal),
-                'tgl_pelunasan'  => null,
+                'terbayar'       => $data->terbayar,
+                'sisa_bayar'     => $nominal - (int) $data->terbayar,
+                'status'         => $nominal === (int) $data->terbayar ? 2 : 1,
+                'tgl_pelunasan'  => $nominal === (int) $data->terbayar ? ($data->tgl_pelunasan ?? now()->toDateString()) : null,
             ];
 
             $filename = $data->lampiran;
@@ -240,6 +256,7 @@ class HutangController extends Controller
             $pemasukan->update([
                 'tanggal'  => $request->tanggal_hutang,
                 'nominal'  => str_replace('.', '', $request->nominal),
+                'id_bank'  => $request->id_bank,
                 'lampiran' => $filename,
             ]);
 

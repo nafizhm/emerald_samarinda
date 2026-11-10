@@ -106,7 +106,7 @@ class PenggunaController extends Controller
             'password'     => 'required|min:6',
             'status'       => 'required|in:AKTIF,BLOKIR',
             'id_role'      => 'required',
-            'id_marketing' => 'required_if:role,1',
+            'id_marketing' => 'required_if:id_role,1|nullable|integer|exists:marketing,id',
         ], [
             'surname.required'         => 'Nama lengkap wajib diisi.',
             'username.required'        => 'Username wajib diisi.',
@@ -120,6 +120,8 @@ class PenggunaController extends Controller
             'status.in'                => 'Status tidak valid.',
             'id_role.required'         => 'Role wajib dipilih.',
             'id_marketing.required_if' => 'Marketing wajib dipilih.',
+            'id_marketing.integer'     => 'Marketing yang dipilih tidak valid.',
+            'id_marketing.exists'      => 'Marketing yang dipilih tidak ditemukan.',
         ]);
 
         DB::beginTransaction();
@@ -177,11 +179,11 @@ class PenggunaController extends Controller
         $request->validate([
             'surname'      => 'required',
             'username'     => 'required|unique:users,username,' . $data->id . ',id',
-            'email'        => 'required|unique:users,email,' . $data->id . ',id',
+            'email'        => 'required|email|unique:users,email,' . $data->id . ',id',
             'password'     => 'nullable|string|min:5',
             'status'       => 'required|in:AKTIF,BLOKIR',
             // 'id_role'      => 'required',
-            'id_marketing' => 'required_if:role,1',
+            'id_marketing' => 'nullable|integer|exists:marketing,id',
 
         ], [
             'surname.required'         => 'Nama lengkap wajib diisi.',
@@ -195,6 +197,8 @@ class PenggunaController extends Controller
             'status.in'                => 'Status tidak valid.',
             'id_role.required'         => 'Role wajib dipilih.',
             'id_marketing.required_if' => 'Marketing wajib dipilih.',
+            'id_marketing.integer'     => 'Marketing yang dipilih tidak valid.',
+            'id_marketing.exists'      => 'Marketing yang dipilih tidak ditemukan.',
 
         ]);
 

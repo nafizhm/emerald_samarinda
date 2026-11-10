@@ -91,20 +91,27 @@ class MutasiSaldoController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge(['nominal' => str_replace('.', '', (string) $request->nominal)]);
         $request->validate([
             'tanggal'         => 'required|date',
-            'rekening_asal'   => 'required',
-            'rekening_tujuan' => 'required|different:rekening_asal',
-            'nominal'         => 'required',
+            'rekening_asal'   => 'required|integer|exists:bank,id',
+            'rekening_tujuan' => 'required|integer|different:rekening_asal|exists:bank,id',
+            'nominal'         => 'required|integer|min:1',
             'lampiran'        => 'required|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'keterangan'      => 'nullable',
         ], [
             'tanggal.required'          => 'Tanggal harus diisi.',
             'tanggal.date'              => 'Format tanggal tidak valid.',
             'rekening_asal.required'    => 'Rekening asal harus diisi.',
+            'rekening_asal.integer'     => 'Rekening asal tidak valid.',
+            'rekening_asal.exists'      => 'Rekening asal tidak ditemukan.',
             'rekening_tujuan.required'  => 'Rekening tujuan harus diisi.',
+            'rekening_tujuan.integer'   => 'Rekening tujuan tidak valid.',
             'rekening_tujuan.different' => 'Rekening tujuan harus berbeda dengan rekening asal.',
+            'rekening_tujuan.exists'    => 'Rekening tujuan tidak ditemukan.',
             'nominal.required'          => 'Nominal harus diisi.',
+            'nominal.integer'           => 'Nominal harus berupa angka bulat.',
+            'nominal.min'               => 'Nominal minimal Rp1.',
             'lampiran.required'         => 'Lampiran harus diunggah.',
             'lampiran.file'             => 'Lampiran harus berupa file.',
             'lampiran.mimes'            => 'Format lampiran harus jpg, jpeg, png, atau pdf.',
@@ -145,7 +152,7 @@ class MutasiSaldoController extends Controller
                 'id_bank'               => $request->rekening_tujuan,
                 'tanggal'               => $request->tanggal,
                 'nominal'               => $nominal,
-                'id_kategori_transaksi' => 7,
+                'id_kategori_transaksi' => 44,
                 'keterangan'            => $request->keterangan ?? '',
                 'lampiran'              => $filename,
             ]);
@@ -155,7 +162,7 @@ class MutasiSaldoController extends Controller
                 'id_bank'               => $request->rekening_asal,
                 'tanggal'               => $request->tanggal,
                 'nominal'               => $nominal,
-                'id_kategori_transaksi' => 8,
+                'id_kategori_transaksi' => 101,
                 'keterangan'            => $request->keterangan ?? '',
                 'lampiran'              => $filename,
             ]);
@@ -164,7 +171,8 @@ class MutasiSaldoController extends Controller
 
             return response()->json(['status' => 'success']);
         } catch (\Exception $e) {
-            Log::info('Mutasi Store Error: ' . $e->getMessage());
+            DB::rollBack();
+            Log::error('Mutasi Store Error: ' . $e->getMessage());
             return response()->json(['status' => 'error', 'message' => 'Terjadi kesalahan saat menyimpan data.'], 500);
         }
     }
@@ -172,29 +180,52 @@ class MutasiSaldoController extends Controller
     public function update(Request $request, $id)
     {
         $data = MutasiSaldo::findOrFail($id);
+        $request->merge(['nominal' => str_replace('.', '', (string) $request->nominal)]);
 
         $request->validate([
             'tanggal'         => 'required|date',
-            'rekening_asal'   => 'required',
-            'rekening_tujuan' => 'required|different:rekening_asal',
-            'nominal'         => 'required',
+            'rekening_asal'   => 'required|integer|exists:bank,id',
+            'rekening_tujuan' => 'required|integer|different:rekening_asal|exists:bank,id',
+            'nominal'         => 'required|integer|min:1',
             'lampiran'        => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'keterangan'      => 'nullable|string|max:255',
+        ], [
+            'tanggal.required' => 'Tanggal mutasi wajib diisi.',
+            'tanggal.date' => 'Tanggal mutasi tidak valid.',
+            'rekening_asal.required' => 'Rekening asal wajib dipilih.',
+            'rekening_asal.integer' => 'Rekening asal tidak valid.',
+            'rekening_asal.exists' => 'Rekening asal tidak ditemukan.',
+            'rekening_tujuan.required' => 'Rekening tujuan wajib dipilih.',
+            'rekening_tujuan.integer' => 'Rekening tujuan tidak valid.',
+            'rekening_tujuan.different' => 'Rekening tujuan harus berbeda dari rekening asal.',
+            'rekening_tujuan.exists' => 'Rekening tujuan tidak ditemukan.',
+            'nominal.required' => 'Nominal mutasi wajib diisi.',
+            'nominal.integer' => 'Nominal mutasi harus berupa angka bulat.',
+            'nominal.min' => 'Nominal mutasi minimal Rp1.',
+            'lampiran.file' => 'Lampiran harus berupa file.',
+            'lampiran.mimes' => 'Lampiran harus berformat JPG, JPEG, PNG, atau PDF.',
+            'lampiran.max' => 'Ukuran lampiran maksimal 2 MB.',
+            'keterangan.string' => 'Keterangan harus berupa teks.',
+            'keterangan.max' => 'Keterangan maksimal 255 karakter.',
         ]);
+
+        DB::beginTransaction();
+        try {
 
         if ($request->hasFile('lampiran')) {
             if (! empty($data->lampiran) && file_exists(public_path('assets/keuangan/mutasi_saldo/' . $data->lampiran))) {
-                unlink(public_path('assets/keuangan/mutasi_saldo/' . $data->lampiran));
-                unlink(public_path('assets/keuangan/pemasukan/' . $data->lampiran));
-                unlink(public_path('assets/keuangan/pengeluaran/' . $data->lampiran));
+                foreach (['mutasi_saldo', 'pemasukan', 'pengeluaran'] as $folder) {
+                    @unlink(public_path('assets/keuangan/' . $folder . '/' . $data->lampiran));
+                }
             }
 
             $file     = $request->file('lampiran');
             $ext      = $file->getClientOriginalExtension();
             $filename = Str::random(20) . '.' . $ext;
-            $file->move(public_path('assets/keuangan/mutasi_saldo/'), $filename);
-            $file->move(public_path('assets/keuangan/pemasukan/'), $filename);
-            $file->move(public_path('assets/keuangan/pengeluaran/'), $filename);
+            $pathMutasi = public_path('assets/keuangan/mutasi_saldo/');
+            $file->move($pathMutasi, $filename);
+            copy($pathMutasi . $filename, public_path('assets/keuangan/pemasukan/' . $filename));
+            copy($pathMutasi . $filename, public_path('assets/keuangan/pengeluaran/' . $filename));
         }
 
         $nominal = (int) str_replace('.', '', $request->nominal);
@@ -225,7 +256,7 @@ class MutasiSaldoController extends Controller
                 'id_bank'               => $request->rekening_tujuan,
                 'tanggal'               => $request->tanggal,
                 'nominal'               => $nominal,
-                'id_kategori_transaksi' => 7,
+                'id_kategori_transaksi' => 44,
                 'keterangan'            => $request->keterangan ?? '',
                 'lampiran'              => $filename ?? $data->lampiran,
             ]);
@@ -246,13 +277,19 @@ class MutasiSaldoController extends Controller
                 'id_bank'               => $request->rekening_asal,
                 'tanggal'               => $request->tanggal,
                 'nominal'               => $nominal,
-                'id_kategori_transaksi' => 8,
+                'id_kategori_transaksi' => 101,
                 'keterangan'            => $request->keterangan ?? '',
                 'lampiran'              => $filename ?? $data->lampiran,
             ]);
         }
 
+        DB::commit();
         return response()->json(['status' => 'success']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Mutasi Update Error: ' . $e->getMessage());
+            return response()->json(['status' => 'error', 'message' => 'Perubahan mutasi gagal disimpan.'], 500);
+        }
     }
 
     public function destroy($id)

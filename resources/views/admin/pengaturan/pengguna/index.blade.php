@@ -1,12 +1,17 @@
 @extends('admin.layout')
 @section('page_title', 'Pengaturan Pengguna')
+@section('search_placeholder', 'Cari nama lengkap, username...')
 @section('content')
     <div class="page-content dashboard-page workspace-page">
         <section class="section">
             <div class="card">
                 <div class="card-header workspace-page-header">
                     <div class="d-flex align-content-center justify-content-between">
-                        <div class="workspace-heading"><p class="dashboard-eyebrow">Pengaturan</p><h1>Pengaturan Pengguna</h1><p class="workspace-description">Kelola akun pengguna yang mengakses aplikasi.</p></div>
+                        <div class="workspace-heading">
+                            <p class="dashboard-eyebrow">Pengaturan</p>
+                            <h1>Pengaturan Pengguna</h1>
+                            <p class="workspace-description">Kelola akun pengguna yang mengakses aplikasi.</p>
+                        </div>
                         <div class="d-flex align-items-center">
                             @if (isset($permissions['tambah']) && $permissions['tambah'] == 1)
                                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalForm">
@@ -21,41 +26,39 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table data-table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th width="50px">No</th>
-                                    <th>Nama Lengkap</th>
-                                    <th>Username</th>
-                                    <th>Email</th>
-                                    <th class="text-center">Role</th>
-                                    <th width="100px" class="text-center">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
+                    <table class="table data-table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th width="50px">No</th>
+                                <th>Nama Lengkap</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th class="text-center">Role</th>
+                                <th width="100px" class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
         </section>
     </div>
 
     <div class="modal fade text-left" id="modalForm" tabindex="-1" role="dialog" aria-labelledby="modalFormLabel"
-        aria-hidden="true" data-backdrop="static" data-keyboard="false" data-focus="false">
+        aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" data-focus="false">
 
-        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-            <div class="modal-content workspace-modal">
-                <div class="modal-header ">
-                    <h5 class="modal-title" id="myModalLabel160">Pengguna
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg" role="document">
+            <div class="modal-content ">
+                <div class="modal-header bg-primary">
+                    <h5 class="modal-title white" id="myModalLabel160">Pengguna
                     </h5>
-                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Tutup">
+                    <button type="button" class="close white" data-bs-dismiss="modal" aria-label="Tutup">
                         <i data-feather="x"></i>
                     </button>
                 </div>
-                <form id="formData">
-                    @csrf
-                    <div class="modal-body">
+                <div class="modal-body">
+                    <form id="formData">
+                        @csrf
                         <input type="hidden" id="primary_id" name="primary_id">
 
                         <div class="row mb-3 align-items-center">
@@ -105,18 +108,18 @@
                                 </select>
                             </div>
                         </div>
-                    </div>
+                </div>
 
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                            <span class="button-text">Batal</span>
-                        </button>
-                        <button type="submit" class="btn btn-primary ms-1" id="submitBtn">
-                            <span class="spinner-border spinner-border-sm me-2 d-none" role="status"
-                                aria-hidden="true"></span>
-                            <span class="button-text">Simpan</span>
-                        </button>
-                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <span class="button-text">Batal</span>
+                    </button>
+                    <button type="submit" class="btn btn-primary ms-1" id="submitBtn">
+                        <span class="spinner-border spinner-border-sm me-2 d-none" role="status"
+                            aria-hidden="true"></span>
+                        <span class="button-text">Simpan</span>
+                    </button>
+                </div>
                 </form>
             </div>
         </div>
@@ -146,7 +149,6 @@
 
         var permissions = @json($permissions);
         var showActionColumn = (permissions['edit'] == 1 || permissions['hapus'] == 1);
-        var audio = new Audio('{{ asset('audio/notification.ogg') }}');
 
         $(function() {
             var table = $('.data-table').DataTable({
@@ -282,19 +284,20 @@
                 success: function(res) {
                     if (res.success) {
                         $('#modalForm').modal('hide');
-                        audio.play();
+                        audioSuccess.play();
                         let msg = id ? "Pengguna berhasil diupdate!" : "Pengguna berhasil ditambahkan!";
-                        toastr.success(msg, "BERHASIL", {
-                            progressBar: true,
-                            timeOut: 3500,
-                            positionClass: "toast-bottom-right",
+                        Swal.fire({
+                            icon: 'success',
+                            title: msg,
+                            showConfirmButton: false,
+                            timer: 2000,
                         });
                         $('.data-table').DataTable().ajax.reload();
                     }
                 },
                 error: function(xhr) {
                     if (xhr.status === 422) {
-                        audio.play();
+                        audioAlert.play();
                         toastr.error("Ada inputan yang salah!", "GAGAL!", {
                             progressBar: true,
                             timeOut: 3500,
@@ -312,7 +315,7 @@
                             );
                         });
                     } else {
-                        audio.play();
+                        audioAlert.play();
                         let msg = xhr.responseJSON?.message || "Terjadi kesalahan server!";
                         toastr.error(msg, "ERROR!", {
                             progressBar: true,
@@ -363,21 +366,21 @@
                             data: form.serialize(),
                             success: function(res) {
                                 if (res.success) {
-                                    audio.play();
-                                    toastr.success("Data berhasil dihapus!",
-                                        "BERHASIL", {
-                                            progressBar: true,
-                                            timeOut: 3500,
-                                            positionClass: "toast-bottom-right"
-                                        });
-
                                     $('.data-table').DataTable().ajax.reload(null,
                                         false);
                                     Swal.close();
+                                    audioSuccess.play();
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Berhasil!',
+                                        text: 'Pengguna telah dihapus.',
+                                        showConfirmButton: false,
+                                        timer: 2000,
+                                    });
                                 }
                             },
                             error: function() {
-                                audio.play();
+                                audioAlert.play();
                                 toastr.error("Gagal menghapus Pengguna.",
                                     "GAGAL!", {
                                         progressBar: true,

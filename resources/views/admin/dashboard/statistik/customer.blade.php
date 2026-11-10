@@ -1,13 +1,14 @@
 @extends('admin.layout')
-@section('page_title', 'Statistik Pelanggan')
+@section('page_title', 'Statistik Customer')
+@section('search_placeholder', 'Cari nama customer, marketing...')
 @section('content')
     <div class="page-content dashboard-page workspace-page">
         <section class="section">
             <div class="card">
                 <div class="card-header workspace-page-header">
                     <div class="d-flex align-content-center justify-content-between">
-                        <div class="workspace-heading"><p class="dashboard-eyebrow">Ringkasan penjualan</p><h1>Data Pelanggan berdasarkan {{ $scope }}
-                            {{ $nama }}</h1><p class="workspace-description">Tinjau pelanggan menurut kelompok yang dipilih.</p></div>
+                        <div class="workspace-heading"><p class="dashboard-eyebrow">Ringkasan penjualan</p><h1>Data Customer berdasarkan {{ $scope }}
+                            {{ $nama }}</h1><p class="workspace-description">Tinjau customer menurut kelompok yang dipilih.</p></div>
                         <div class="d-flex align-items-center">
                             <a href="{{ route('dashboard') }}" class="btn btn-secondary align-items-center d-flex btn-sm"><i
                                     class="fas fa-arrow-left mr-2"></i>
@@ -20,20 +21,18 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
                         <table id="data-table" class="table table-bordered table-striped table-hover table-sm data-table">
                             <thead>
                                 <tr>
                                     <th width="5%">No</th>
                                     <th>Tanggal</th>
-                                    <th>Nama Pelanggan</th>
+                                    <th>Nama Customer</th>
                                     <th>Marketing</th>
                                     <th>Lokasi Kavling</th>
                                     <th>Status Progres</th>
                                 </tr>
                             </thead>
                         </table>
-                    </div>
                 </div>
             </div>
         </section>

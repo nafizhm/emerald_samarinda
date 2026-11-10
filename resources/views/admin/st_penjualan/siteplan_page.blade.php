@@ -22,7 +22,7 @@
             <div class="siteplan-legend-items">
                 @foreach($legend as $item)<div class="siteplan-legend-item"><span class="siteplan-swatch" style="background:{{ $item->warna }}"></span><span>{{ $item->status_progres }}</span></div>@endforeach
             </div>
-            <div class="siteplan-legend-note"><i class="bi bi-info-circle"></i><p>Warna mengikuti tahapan pelanggan. Kavling tanpa tahapan penjualan ditampilkan sebagai Ready.</p></div>
+            <div class="siteplan-legend-note"><i class="bi bi-info-circle"></i><p>Warna mengikuti tahapan customer. Kavling tanpa tahapan penjualan ditampilkan sebagai Ready.</p></div>
         </aside>
     </div>
     @else

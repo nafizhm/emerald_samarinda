@@ -1,5 +1,6 @@
 @extends('admin.layout')
 @section('page_title', 'Hak Akses')
+@section('search_placeholder', 'Cari judul menu, route...')
 @section('content')
     <div class="page-content dashboard-page workspace-page">
         <section class="section">
@@ -21,7 +22,6 @@
                             </select>
                         </div>
                     </div>
-                    <div class="table-responsive">
                         <table class="table data-table">
                             <thead>
                                 <tr>
@@ -48,7 +48,6 @@
                                 </button>
                             </div>
                         @endif
-                    </div>
                 </div>
             </div>
         </section>
@@ -100,7 +99,6 @@
             }
         });
 
-        var audio = new Audio('{{ asset('audio/notification.ogg') }}');
 
         var permissions = @json($permissions);
 

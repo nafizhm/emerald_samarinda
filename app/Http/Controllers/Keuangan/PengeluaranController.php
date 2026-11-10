@@ -10,6 +10,7 @@ use App\Models\Pengeluaran;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 class PengeluaranController extends Controller
@@ -101,9 +102,7 @@ class PengeluaranController extends Controller
                 ->make(true);
         }
 
-        $kategoriTransaksi = KategoriTransaksi::where('jenis_kategori', 'PENGELUARAN')
-            ->whereNotIn('id', [8, 11])
-            ->get();
+        $kategoriTransaksi = KategoriTransaksi::where('jenis_kategori', 'PENGELUARAN')->get();
 
         $kategoriTransaksiDetail = KategoriTransaksi::where('jenis_kategori', 'PENGELUARAN')
             ->whereIn('id', [8, 11])
@@ -138,17 +137,23 @@ class PengeluaranController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge(['nominal' => str_replace('.', '', (string) $request->nominal)]);
         $request->validate([
             'tanggal'               => 'required|date',
-            'nominal'               => 'required',
-            'id_kategori_transaksi' => 'required',
-            'id_hutang'             => 'required_if:id_kategori_transaksi,3',
+            'nominal'               => 'required|integer|min:1',
+            'id_kategori_transaksi' => 'required|integer|exists:kategori_transaksi,id',
+            'id_hutang'             => 'nullable|integer|exists:hutang,id',
         ], [
             'tanggal.required'               => 'Tanggal wajib diisi.',
             'tanggal.date'                   => 'Tanggal harus berupa tanggal.',
             'nominal.required'               => 'Nominal wajib diisi.',
+            'nominal.integer'                => 'Nominal harus berupa angka bulat.',
+            'nominal.min'                    => 'Nominal minimal Rp1.',
             'id_kategori_transaksi.required' => 'Kategori transaksi wajib dipilih.',
-            'id_hutang.required_if'          => 'Hutang wajib dipilih',
+            'id_kategori_transaksi.integer'  => 'Kategori transaksi tidak valid.',
+            'id_kategori_transaksi.exists'   => 'Kategori transaksi tidak ditemukan.',
+            'id_hutang.integer'              => 'Hutang tidak valid.',
+            'id_hutang.exists'               => 'Hutang tidak ditemukan.',
         ]);
 
         if (! empty($request->id_hutang)) {
@@ -178,10 +183,11 @@ class PengeluaranController extends Controller
             'lampiran'              => '',
         ];
 
+        DB::transaction(function () use ($db, $request) {
         Pengeluaran::create($db);
 
         if (! empty($request->id_hutang)) {
-            $hutang = Hutang::find($request->id_hutang);
+            $hutang = Hutang::lockForUpdate()->find($request->id_hutang);
 
             if ($hutang) {
                 $nominalBayar  = $hutang->terbayar + str_replace('.', '', $request->nominal);
@@ -200,6 +206,7 @@ class PengeluaranController extends Controller
                 $hutang->update($updateData);
             }
         }
+        });
 
         return response()->json(['status' => 'success']);
     }
@@ -207,10 +214,12 @@ class PengeluaranController extends Controller
     public function update(Request $request, $id)
     {
         $data = Pengeluaran::findOrFail($id);
+        $request->merge(['nominal' => str_replace('.', '', (string) $request->nominal)]);
 
         $rules = [
             'tanggal' => 'required|date',
-            'nominal' => 'required',
+            'nominal' => 'required|integer|min:1',
+            'id_hutang' => 'nullable|integer|exists:hutang,id',
         ];
 
         if ($request->id_kategori_transaksi == 5) {
@@ -221,6 +230,10 @@ class PengeluaranController extends Controller
             'tanggal.required'               => 'Tanggal wajib diisi.',
             'tanggal.date'                   => 'Tanggal harus berupa tanggal.',
             'nominal.required'               => 'Nominal wajib diisi.',
+            'nominal.integer'                => 'Nominal harus berupa angka bulat.',
+            'nominal.min'                    => 'Nominal minimal Rp1.',
+            'id_hutang.integer'              => 'Hutang tidak valid.',
+            'id_hutang.exists'               => 'Hutang tidak ditemukan.',
         ]);
 
         $db = [
@@ -229,7 +242,7 @@ class PengeluaranController extends Controller
             'nominal'    => str_replace('.', '', $request->nominal),
         ];
 
-        if ($data->id_kategori_transaksi == 10) {
+        if ($data->id_hutang != 0) {
             if ($request->id_hutang != $data->id_hutang) {
                 $hutanglama = Hutang::find($data->id_hutang);
                 if ($hutanglama) {
@@ -243,7 +256,10 @@ class PengeluaranController extends Controller
 
                 $hutangbaru = Hutang::find($request->id_hutang);
                 if ($hutangbaru) {
-                    $nominalBayar  = str_replace('.', '', $request->nominal);
+                    if ((int) $request->nominal > (int) $hutangbaru->sisa_bayar) {
+                        return response()->json(['errors' => ['nominal' => ['Nominal tidak boleh melebihi sisa hutang baru.']]], 422);
+                    }
+                    $nominalBayar  = $hutangbaru->terbayar + (int) $request->nominal;
                     $sisaBayarBaru = $hutangbaru->sisa_bayar - $nominalBayar;
 
                     $updateData = [

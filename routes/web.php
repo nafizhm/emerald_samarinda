@@ -148,12 +148,11 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::post('customer/{id}/restore', [CustomerController::class, 'restore'])->name('customer.restore');
         Route::resource('customer', CustomerController::class);
 
-        Route::get('/get-harga-kavling/{id_kavling}', [CustomerController::class, 'getHargaKavling'])->name('customer.getHargaKavling');
-        Route::get('/customer/cetak', [CustomerController::class, 'cetakData'])->name('customer.cetak');
         Route::get('customer-data/{id_customer}/subsidi-cetak', [CustomerController::class, 'cetakFormSubsidi'])->name('subsidi.cetak');
 
 
         Route::resource('upload-file', UploadFileController::class);
+        Route::get('/file-nasabah/detail/{id}', [UploadFileController::class, 'detail'])->name('uploadFile.detail');
         Route::get('/search', [UploadFileController::class, 'getNasabah'])->name('nasabah.search');
         Route::get('/{id}/details', [UploadFileController::class, 'getNasabahDetails'])->name('nasabah.details');
         Route::get('/{id}/files', [UploadFileController::class, 'getFiles'])->name('nasabah.files');

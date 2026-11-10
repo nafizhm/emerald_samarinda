@@ -1,5 +1,6 @@
 @extends('admin.layout')
 @section('page_title', 'Laporan Arus Kas')
+@section('search_placeholder', 'Cari kategori, tanggal...')
 @section('content')
     <div class="page-content dashboard-page workspace-page">
         <section class="section">
@@ -70,7 +71,6 @@
             </div>
             <div class="card">
                 <div class="card-body">
-                    <div class="table-responsive">
                         <table class="table data-table table-striped table-bordered w-100">
                             <thead>
                                 <tr>
@@ -84,7 +84,6 @@
                             <tbody>
                             </tbody>
                         </table>
-                    </div>
                     <div class="row mb-3 mt-3">
                         <label for="pemasukan" class="col-sm-2 col-form-label">Total Pemasukan</label>
                         <div class="col-sm-4">
@@ -137,7 +136,6 @@
             }
         });
 
-        var audio = new Audio('{{ asset('audio/notification.ogg') }}');
 
         $(function() {
             var table = $('.data-table').DataTable({
