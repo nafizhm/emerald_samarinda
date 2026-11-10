@@ -1,7 +1,7 @@
 @extends('admin.layout')
 @section('page_title', 'Data Kavling')
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/kavling-custom.css') }}?v={{ filemtime(public_path('css/kavling-custom.css')) }}">
+<link rel="stylesheet" href="{{ asset('template/assets/css/kavling-custom.css') }}?v={{ filemtime(public_path('template/assets/css/kavling-custom.css')) }}">
 @endpush
 @section('content')
 <div class="dashboard-page kavling-page">

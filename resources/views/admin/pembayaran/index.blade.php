@@ -1,7 +1,7 @@
 @extends('admin.layout')
 @section('page_title', 'Pembayaran')
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/payment-list.css') }}?v={{ filemtime(public_path('css/payment-list.css')) }}">
+<link rel="stylesheet" href="{{ asset('template/assets/css/payment-list.css') }}?v={{ filemtime(public_path('template/assets/css/payment-list.css')) }}">
 @endpush
 @section('content')
 <div class="dashboard-page payment-list-page" id="payment-list-page" data-url="{{ route('pembayaran.index') }}">

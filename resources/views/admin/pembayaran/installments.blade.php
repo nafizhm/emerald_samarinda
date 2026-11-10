@@ -1,7 +1,7 @@
 @extends('admin.layout')
 @section('page_title', 'Pembayaran Kavling')
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/installments.css') }}?v={{ filemtime(public_path('css/installments.css')) }}">
+<link rel="stylesheet" href="{{ asset('template/assets/css/installments.css') }}?v={{ filemtime(public_path('template/assets/css/installments.css')) }}">
 @endpush
 @section('content')
 @php
