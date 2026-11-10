@@ -345,11 +345,11 @@
         }
     </style>
 
-    <link rel="stylesheet" href="{{ asset('template/assets/css/sidebar-custom.css') }}?v={{ filemtime(public_path('template/assets/css/sidebar-custom.css')) }}">
-    <link rel="stylesheet" href="{{ asset('template/assets/css/workspace-custom.css') }}?v={{ filemtime(public_path('template/assets/css/workspace-custom.css')) }}">
-    <link rel="stylesheet" href="{{ asset('template/assets/css/due-reminder.css') }}?v={{ filemtime(public_path('template/assets/css/due-reminder.css')) }}">
-    <link rel="stylesheet" href="{{ asset('template/assets/css/admin-pages.css') }}?v={{ filemtime(public_path('template/assets/css/admin-pages.css')) }}">
-    <link rel="stylesheet" href="{{ asset('template/assets/css/select2-custom.css') }}?v={{ filemtime(public_path('template/assets/css/select2-custom.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/sidebar-custom.css') }}?v={{ filemtime(public_path('css/sidebar-custom.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/workspace-custom.css') }}?v={{ filemtime(public_path('css/workspace-custom.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/due-reminder.css') }}?v={{ filemtime(public_path('css/due-reminder.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/admin-pages.css') }}?v={{ filemtime(public_path('css/admin-pages.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/select2-custom.css') }}?v={{ filemtime(public_path('css/select2-custom.css')) }}">
     @stack('styles')
 </head>
 

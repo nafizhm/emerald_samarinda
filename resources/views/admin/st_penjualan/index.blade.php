@@ -1,7 +1,7 @@
 @extends('admin.layout')
 @section('page_title', 'Denah Penjualan')
 @push('styles')
-<link rel="stylesheet" href="{{ asset('template/assets/css/siteplan-custom.css') }}?v={{ filemtime(public_path('template/assets/css/siteplan-custom.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/siteplan-custom.css') }}?v={{ filemtime(public_path('css/siteplan-custom.css')) }}">
 @endpush
 @section('content')
 @include('admin.st_penjualan.siteplan_page')

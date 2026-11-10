@@ -1,7 +1,7 @@
 @extends('admin.layout')
 @section('page_title', 'Transaksi pembelian baru')
 @push('styles')
-<link rel="stylesheet" href="{{ asset('template/assets/css/customer-custom.css') }}?v={{ filemtime(public_path('template/assets/css/customer-custom.css')) }}">
+<link rel="stylesheet" href="{{ asset('css/customer-custom.css') }}?v={{ filemtime(public_path('css/customer-custom.css')) }}">
 @endpush
 @section('content')
     <div class="dashboard-page customer-page purchase-page">
