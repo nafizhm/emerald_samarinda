@@ -1,0 +1,581 @@
+/**
+ * Universal Select2 & Select Styling - Emerald Samarinda Admin
+ * Menyeragamkan tampilan single & multiple select di seluruh modul admin
+ */
+
+/* ==========================================================================
+   Base Container & Global
+   ========================================================================== */
+.select2-container {
+    max-width: 100%;
+    vertical-align: middle;
+    font-family: inherit;
+}
+
+/* Hanya container select inline di form yang mengambil 100% lebar parent */
+.select2.select2-container,
+.select2-container:not(.select2-container--open) {
+    width: 100% !important;
+    max-width: 100%;
+}
+
+/* Container dropdown saat terbuka tidak boleh dipaksa 100% lebar body agar tidak memicu scrollbar horizontal & vertikal */
+.select2-container--open {
+    width: auto !important;
+    max-width: 100vw !important;
+}
+
+.select2-container .select2-selection {
+    font-family: inherit;
+    outline: none !important;
+}
+
+/* ==========================================================================
+   Single Select
+   ========================================================================== */
+.select2-container--default .select2-selection--single {
+    display: flex !important;
+    align-items: center !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 38px 0 14px !important;
+    background-color: var(--panel-bg, #ffffff) !important;
+    border: 1px solid var(--panel-border, #ced4da) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    position: relative !important;
+    box-sizing: border-box !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.select2-container--default.select2-container--open .select2-selection--single,
+.select2-container--default.select2-container--focus .select2-selection--single {
+    border-color: var(--accent, #3659b8) !important;
+    box-shadow: 0 0 0 3px rgba(54, 89, 184, 0.15) !important;
+}
+
+/* Rendered value & Placeholder - Vertically Centered on Left */
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    line-height: 1 !important;
+    color: var(--text-main, #24334b) !important;
+    font-size: 13.5px !important;
+    font-weight: 400 !important;
+    text-align: left !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+    color: var(--text-secondary, #75839a) !important;
+    font-size: 13.5px !important;
+    font-weight: 400 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    line-height: 1 !important;
+    height: 100% !important;
+    text-align: left !important;
+}
+
+/* Single Arrow / Chevron - Pixel Perfect Vertical Centering */
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    position: absolute !important;
+    top: 50% !important;
+    right: 14px !important;
+    width: 12px !important;
+    height: 12px !important;
+    transform: translateY(-50%) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    pointer-events: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    border: none !important;
+    width: 6.5px !important;
+    height: 6.5px !important;
+    border-right: 1.5px solid #64748b !important;
+    border-bottom: 1.5px solid #64748b !important;
+    transform: translateY(-1px) rotate(45deg) !important;
+    transition: transform 0.2s ease, border-color 0.15s ease !important;
+}
+
+.select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+    transform: translateY(1px) rotate(225deg) !important;
+    border-color: var(--accent, #3659b8) !important;
+}
+
+/* Clear button */
+.select2-container--default .select2-selection--single .select2-selection__clear {
+    position: absolute !important;
+    right: 32px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 17px !important;
+    line-height: 1 !important;
+    color: var(--text-secondary, #75839a) !important;
+    font-weight: 500 !important;
+    padding: 0 4px !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    z-index: 2 !important;
+    transition: color 0.15s ease;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__clear:hover {
+    color: #dc3545 !important;
+}
+
+/* ==========================================================================
+   Multiple Select
+   ========================================================================== */
+.select2-container--default .select2-selection--multiple {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    min-height: 42px !important;
+    height: auto !important;
+    padding: 4px 54px 4px 14px !important;
+    background-color: var(--panel-bg, #ffffff) !important;
+    border: 1px solid var(--panel-border, #ced4da) !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    position: relative !important;
+    box-sizing: border-box !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.select2-container--default.select2-container--open .select2-selection--multiple,
+.select2-container--default.select2-container--focus .select2-selection--multiple {
+    border-color: var(--accent, #3659b8) !important;
+    box-shadow: 0 0 0 3px rgba(54, 89, 184, 0.15) !important;
+}
+
+/* Multiple Arrow / Chevron - Pixel Perfect Vertical Centering */
+.select2-container--default .select2-selection--multiple::after {
+    content: '' !important;
+    position: absolute !important;
+    right: 14px !important;
+    top: 50% !important;
+    width: 6.5px !important;
+    height: 6.5px !important;
+    border: none !important;
+    border-right: 1.5px solid #64748b !important;
+    border-bottom: 1.5px solid #64748b !important;
+    transform: translateY(-50%) rotate(45deg) !important;
+    pointer-events: none !important;
+    transition: transform 0.2s ease, border-color 0.15s ease !important;
+}
+
+.select2-container--default.select2-container--open .select2-selection--multiple::after {
+    transform: translateY(-50%) rotate(225deg) !important;
+    border-color: var(--accent, #3659b8) !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__rendered {
+    display: inline-flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 5px !important;
+    width: auto !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    list-style: none !important;
+    line-height: normal !important;
+}
+
+/* Hilangkan ruang kosong dari rendered list jika belum ada badge pilihan */
+.select2-container--default .select2-selection--multiple .select2-selection__rendered:empty {
+    display: none !important;
+}
+
+/* Placeholder untuk Multiple Select (Search Field bawaan Select2) - Rata Kiri Sejajar Select Single */
+.select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field::placeholder {
+    color: var(--text-secondary, #75839a) !important;
+    font-size: 13.5px !important;
+    font-weight: 400 !important;
+    opacity: 1 !important;
+    line-height: 32px !important;
+    text-align: left !important;
+}
+
+/* Placeholder Fallback Span jika ada adapter custom */
+.select2-container--default .select2-selection--multiple .select2-selection__placeholder {
+    position: absolute !important;
+    left: 14px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    color: var(--text-secondary, #75839a) !important;
+    font-size: 13.5px !important;
+    font-weight: 400 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    line-height: 1 !important;
+    height: auto !important;
+    text-align: left !important;
+    pointer-events: none !important;
+    z-index: 1 !important;
+    white-space: nowrap !important;
+}
+
+/* Sembunyikan span placeholder jika sudah ada badge pilihan */
+.select2-container--default .select2-selection--multiple:has(.select2-selection__choice) .select2-selection__placeholder {
+    display: none !important;
+}
+
+/* Multiple choice badges */
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    background-color: var(--surface-soft, #f1f5f9) !important;
+    border: 1px solid var(--panel-border, #e2e8f0) !important;
+    border-radius: 6px !important;
+    color: var(--text-main, #24334b) !important;
+    font-size: 12.5px !important;
+    font-weight: 500 !important;
+    padding: 3px 8px !important;
+    margin: 2px 0 !important;
+    line-height: 1.4 !important;
+    transition: background-color 0.12s ease;
+    z-index: 2 !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    position: static !important;
+    border: none !important;
+    background: transparent !important;
+    color: var(--text-secondary, #75839a) !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    cursor: pointer !important;
+    float: none !important;
+    transition: color 0.15s ease;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    vertical-align: middle !important;
+    width: 14px !important;
+    height: 14px !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove span {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    margin-top: -1px !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove:hover {
+    color: #dc3545 !important;
+    background-color: transparent !important;
+}
+
+/* Inline search in multiple select */
+.select2-container--default .select2-selection--multiple .select2-search--inline {
+    display: inline-flex !important;
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex: 1 1 auto !important;
+    min-width: 30px !important;
+    height: 32px !important;
+    z-index: 2 !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field {
+    width: 100% !important;
+    height: 32px !important;
+    line-height: 32px !important;
+    font-size: 13.5px !important;
+    font-weight: 400 !important;
+    font-family: inherit !important;
+    color: var(--text-main, #24334b) !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    text-align: left !important;
+    resize: none !important;
+    vertical-align: middle !important;
+}
+
+
+
+/* Clear button (allowClear icon x) - Presisi Center Vertikal Mengikuti Style Single Select */
+.select2-container--default .select2-selection--multiple .select2-selection__clear {
+    position: absolute !important;
+    right: 32px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 18px !important;
+    height: 18px !important;
+    font-size: 17px !important;
+    line-height: 1 !important;
+    color: var(--text-secondary, #75839a) !important;
+    font-weight: 500 !important;
+    padding: 0 4px !important;
+    margin: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    cursor: pointer !important;
+    z-index: 2 !important;
+    transition: color 0.15s ease;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__clear:hover {
+    color: #dc3545 !important;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__clear span {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
+    margin-top: -1px !important;
+}
+
+/* ==========================================================================
+   Dropdown & Option List
+   ========================================================================== */
+.select2-dropdown {
+    background-color: var(--panel-bg, #ffffff) !important;
+    border: 1px solid var(--panel-border, #ced4da) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 14px 34px rgba(20, 35, 61, 0.16) !important;
+    z-index: 99999 !important;
+    overflow: hidden !important;
+    padding: 6px 0 !important;
+    box-sizing: border-box !important;
+    max-width: 100vw !important;
+}
+
+.select2-dropdown--below {
+    margin-top: 4px !important;
+}
+
+.select2-dropdown--above {
+    margin-top: -4px !important;
+}
+
+/* Search Box Inside Dropdown */
+.select2-dropdown .select2-search--dropdown {
+    padding: 8px 10px !important;
+    display: block !important;
+}
+
+.select2-dropdown .select2-search--dropdown .select2-search__field {
+    width: 100% !important;
+    height: 38px !important;
+    min-height: 38px !important;
+    background-color: var(--surface-soft, #f8fafc) !important;
+    border: 1px solid var(--panel-border, #ced4da) !important;
+    border-radius: 7px !important;
+    padding: 6px 12px !important;
+    font-size: 13px !important;
+    color: var(--text-main, #24334b) !important;
+    outline: none !important;
+    box-sizing: border-box !important;
+    transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.select2-dropdown .select2-search--dropdown .select2-search__field:focus {
+    border-color: var(--accent, #3659b8) !important;
+    background-color: var(--panel-bg, #ffffff) !important;
+    box-shadow: 0 0 0 3px rgba(54, 89, 184, 0.14) !important;
+}
+
+/* Option List */
+.select2-container--default .select2-results > .select2-results__options {
+    max-height: 230px !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    padding: 4px 6px !important;
+    margin: 0 !important;
+    list-style: none !important;
+}
+
+.select2-container--default .select2-results__option {
+    padding: 9px 12px !important;
+    font-size: 13.5px !important;
+    line-height: 1.45 !important;
+    border-radius: 6px !important;
+    color: var(--text-main, #24334b) !important;
+    cursor: pointer !important;
+    margin-bottom: 2px !important;
+    transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+/* Hover / Highlighted */
+.select2-container--default .select2-results__option--highlighted[aria-selected],
+.select2-container--default .select2-results__option--highlighted[aria-selected]:hover {
+    background-color: #eef3ff !important;
+    color: var(--accent, #3659b8) !important;
+    font-weight: 500 !important;
+}
+
+/* Selected */
+.select2-container--default .select2-results__option[aria-selected="true"] {
+    background-color: var(--surface-soft, #f1f5f9) !important;
+    color: var(--accent, #3659b8) !important;
+    font-weight: 600 !important;
+}
+
+.select2-container--default .select2-results__option--disabled {
+    opacity: 0.45 !important;
+    cursor: not-allowed !important;
+}
+
+/* Disabled State */
+.select2-container--default.select2-container--disabled .select2-selection--single,
+.select2-container--default.select2-container--disabled .select2-selection--multiple {
+    background-color: var(--surface-soft, #f1f5f9) !important;
+    cursor: not-allowed !important;
+    opacity: 0.75 !important;
+}
+
+/* Validation Invalid State */
+.is-invalid + .select2-container--default .select2-selection,
+.was-validated select:invalid + .select2-container--default .select2-selection {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.15) !important;
+}
+
+/* ==========================================================================
+   Native Select Fallback Alignment
+   ========================================================================== */
+#main .workspace-page select.form-select,
+#main .workspace-page select.form-control,
+.workspace-modal select.form-select,
+.workspace-modal select.form-control {
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 36px 0 14px !important;
+    line-height: 40px !important;
+    border-radius: 8px !important;
+}
+
+/* ==========================================================================
+   Dark Mode Support
+   ========================================================================== */
+[data-bs-theme="dark"] .select2-container--default .select2-selection--single,
+[data-bs-theme="dark"] .select2-container--default .select2-selection--multiple,
+body.theme-dark .select2-container--default .select2-selection--single,
+body.theme-dark .select2-container--default .select2-selection--multiple,
+body.dark .select2-container--default .select2-selection--single,
+body.dark .select2-container--default .select2-selection--multiple {
+    background-color: #1c2535 !important;
+    border-color: #2d394e !important;
+    color: #e1e9f5 !important;
+}
+
+[data-bs-theme="dark"] .select2-container--default.select2-container--open .select2-selection,
+[data-bs-theme="dark"] .select2-container--default.select2-container--focus .select2-selection,
+body.theme-dark .select2-container--default.select2-container--open .select2-selection,
+body.dark .select2-container--default.select2-container--open .select2-selection {
+    border-color: #7d99d9 !important;
+    box-shadow: 0 0 0 3px rgba(125, 153, 217, 0.2) !important;
+}
+
+[data-bs-theme="dark"] .select2-container--default .select2-selection--single .select2-selection__rendered,
+body.theme-dark .select2-container--default .select2-selection--single .select2-selection__rendered,
+body.dark .select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #e1e9f5 !important;
+}
+
+[data-bs-theme="dark"] .select2-container--default .select2-selection--single .select2-selection__placeholder,
+[data-bs-theme="dark"] .select2-container--default .select2-selection--multiple .select2-selection__placeholder,
+[data-bs-theme="dark"] .select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field::placeholder,
+body.theme-dark .select2-container--default .select2-selection--single .select2-selection__placeholder,
+body.theme-dark .select2-container--default .select2-selection--multiple .select2-selection__placeholder,
+body.theme-dark .select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field::placeholder,
+body.dark .select2-container--default .select2-selection--single .select2-selection__placeholder,
+body.dark .select2-container--default .select2-selection--multiple .select2-selection__placeholder,
+body.dark .select2-container--default .select2-selection--multiple .select2-search--inline .select2-search__field::placeholder {
+    color: #7d8da5 !important;
+}
+
+[data-bs-theme="dark"] .select2-container--default .select2-selection--single .select2-selection__arrow b,
+[data-bs-theme="dark"] .select2-container--default .select2-selection--multiple::after,
+body.theme-dark .select2-container--default .select2-selection--single .select2-selection__arrow b,
+body.dark .select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border-color: #8b9db5 !important;
+}
+
+[data-bs-theme="dark"] .select2-container--default .select2-selection--multiple .select2-selection__choice,
+body.theme-dark .select2-container--default .select2-selection--multiple .select2-selection__choice,
+body.dark .select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #222e42 !important;
+    border-color: #2d394e !important;
+    color: #e1e9f5 !important;
+}
+
+[data-bs-theme="dark"] .select2-container--default .select2-selection--multiple .select2-selection__choice__remove,
+body.theme-dark .select2-container--default .select2-selection--multiple .select2-selection__choice__remove,
+body.dark .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: #8b9db5 !important;
+}
+
+[data-bs-theme="dark"] .select2-dropdown,
+body.theme-dark .select2-dropdown,
+body.dark .select2-dropdown {
+    background-color: #1c2535 !important;
+    border-color: #2d394e !important;
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45) !important;
+}
+
+[data-bs-theme="dark"] .select2-dropdown .select2-search--dropdown .select2-search__field,
+body.theme-dark .select2-dropdown .select2-search--dropdown .select2-search__field,
+body.dark .select2-dropdown .select2-search--dropdown .select2-search__field {
+    background-color: #141b28 !important;
+    border-color: #2d394e !important;
+    color: #e1e9f5 !important;
+}
+
+[data-bs-theme="dark"] .select2-container--default .select2-results__option,
+body.theme-dark .select2-container--default .select2-results__option,
+body.dark .select2-container--default .select2-results__option {
+    color: #c9d5e7 !important;
+}
+
+[data-bs-theme="dark"] .select2-container--default .select2-results__option--highlighted[aria-selected],
+body.theme-dark .select2-container--default .select2-results__option--highlighted[aria-selected],
+body.dark .select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: #26354d !important;
+    color: #a9bfff !important;
+}
+
+[data-bs-theme="dark"] .select2-container--default .select2-results__option[aria-selected="true"],
+body.theme-dark .select2-container--default .select2-results__option[aria-selected="true"],
+body.dark .select2-container--default .select2-results__option[aria-selected="true"] {
+    background-color: #202d42 !important;
+    color: #a9bfff !important;
+}

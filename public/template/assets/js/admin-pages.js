@@ -75,6 +75,27 @@
             viewport.appendChild(table);
         });
     }
+    function enhanceSelects(root) {
+        if (!window.jQuery || !window.jQuery.fn.select2) return;
+        const $ = window.jQuery;
+        $(root).find('select').each(function () {
+            const $el = $(this);
+            if ($el.hasClass('select2-hidden-accessible')) return;
+            if ($el.closest('.dataTables_length').length || $el.hasClass('swal2-select') || $el.is('[data-no-select2]')) return;
+
+            const modal = $el.closest('.modal');
+            const dropdownParent = modal.length ? modal : $(document.body);
+            const isMultiple = $el.prop('multiple');
+            const placeholder = $el.attr('placeholder') || $el.data('placeholder') || $el.find('option[value=""]').first().text() || (isMultiple ? 'Pilih beberapa opsi...' : 'Pilih opsi...');
+
+            $el.select2({
+                width: '100%',
+                placeholder: placeholder,
+                allowClear: !$el.prop('required'),
+                dropdownParent: dropdownParent
+            });
+        });
+    }
     function start() {
         const flashMessage = document.getElementById('workspace-success-message');
         if (flashMessage) window.showSuccessAlert(flashMessage.textContent);
@@ -84,8 +105,9 @@
             window.showSuccessAlert(kavlingMessage);
         }
         containTables(document); requiredHints(document); enhanceSearch(document); menuSearch();
+        setTimeout(function () { enhanceSelects(document); }, 0);
         if (window.jQuery) window.jQuery(document).on('init.dt.workspace', function () { containTables(document); enhanceSearch(document); });
-        document.addEventListener('shown.bs.modal', function (event) { containTables(event.target); requiredHints(event.target); });
+        document.addEventListener('shown.bs.modal', function (event) { containTables(event.target); requiredHints(event.target); enhanceSelects(event.target); });
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
     else start();

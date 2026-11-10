@@ -33,15 +33,6 @@
 #main .purchase-errors { margin:20px 26px 0; padding:16px; border:1px solid #db8383; border-radius:10px; background:var(--surface-soft); color:var(--text-main); font-size:13px; }
 #main .purchase-errors ul { margin:8px 0 0; padding-left:20px; }
 #main .customer-page .invalid-feedback { display:block; font-size:12px; }
-#main .customer-page .select2-container--default .select2-selection { background:var(--panel-bg); border:1px solid var(--panel-border); min-height:42px; border-radius:8px; }
-#main .customer-page .select2-selection__rendered { color:var(--text-main); font-size:13px; line-height:40px; }
-#main .customer-page .select2-selection__arrow { top:8px; }
-#main .customer-page .select2-selection--multiple .select2-selection__rendered { line-height:1.6; }
-#main .customer-page .select2-selection__choice { background:var(--surface-soft); border-color:var(--panel-border); color:var(--text-main); }
-#main .customer-page .is-invalid + .select2 .select2-selection { border-color:#dc3545; }
-[data-bs-theme="dark"] .select2-dropdown { background:#1c2535; border-color:#2d394e; color:#e1e9f5; }
-[data-bs-theme="dark"] .select2-search__field { background:#222e42; color:#e1e9f5; }
-[data-bs-theme="dark"] .select2-results__option[aria-selected="true"] { background:#35465e; }
 .customer-modal .modal-content { background:var(--panel-bg); color:var(--text-main); border:1px solid var(--panel-border); border-radius:14px; overflow:hidden; }
 .customer-modal .modal-header,.customer-modal .modal-footer { border-color:var(--panel-border); padding:18px 22px; }
 .customer-modal .modal-header:not(.bg-danger) { background:var(--surface-soft); }
