@@ -12,7 +12,6 @@ use App\Models\LokasiKavling;
 use App\Models\MasterSVG;
 use App\Models\KavlingPeta;
 use App\Models\Customer;
-use App\Models\ListPenjualan;
 
 class PengaturanLandingController extends Controller
 {
@@ -442,13 +441,9 @@ class PengaturanLandingController extends Controller
             'kavlingPeta.customer' => function ($q) {
                 $q->where('stt_arsip', 0);
             },
-            'kavlingPeta.customer.progres',
         ])->findOrFail($id);
 
-        $legend = ListPenjualan::whereNotNull('warna')
-            ->where('warna', '!=', '')
-            ->orderBy('urutan', 'asc')
-            ->get();
+        $legend = [];
 
         return view('homepage.kavling', compact('kav', 'legend',  'navItems', 'footer', 'kantor', 'heroSection',));
     }

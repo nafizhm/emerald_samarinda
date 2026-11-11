@@ -150,8 +150,8 @@
                                     $warna = '#ffffff';
                                     $customer = $pt->customer->first();
 
-                                    if ($customer && $customer->progres) {
-                                        $warna = $customer->progres->warna;
+                                    if ($customer && $customer->tahap_pembayaran) {
+                                        $warna = ['Booking Fee' => '#f97316', 'Down Payment' => '#0ea5e9', 'Proses Cicilan' => '#8b5cf6', 'Pelunasan' => '#16a34a'][$customer->tahap_pembayaran] ?? $warna;
                                     } elseif ($pt->status == 1) {
                                         $warna = '#42f202';
                                     }

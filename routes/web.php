@@ -24,7 +24,6 @@ use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\Pengaturan\HakAksesController;
 use App\Http\Controllers\Pengaturan\KonfigurasiAplikasiController;
 use App\Http\Controllers\Pengaturan\KonfigurasiMediaController;
-use App\Http\Controllers\Pengaturan\ListPenjualanController;
 use App\Http\Controllers\Pengaturan\PengaturanLandingController;
 use App\Http\Controllers\Pengaturan\PenggunaController;
 use App\Http\Controllers\PengaturanWA\PengaturanKoneksiController;
@@ -96,6 +95,10 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::prefix('/')->controller(PembayaranController::class)->group(function () {
         Route::get('pembayaran/{id}/detail', 'show')->name('pembayaran.detail');
         Route::post('pembayaran/{id}/bayar-cicilan', 'payInstallments')->name('pembayaran.bayar-cicilan');
+        Route::post('pembayaran/{id}/tambah-transaksi', 'addInstallmentTransaction')->name('pembayaran.tambah-transaksi-cicilan');
+        Route::get('pembayaran/{id}/transaksi/{payment}', 'installmentTransaction')->name('pembayaran.transaksi-cicilan');
+        Route::put('pembayaran/{id}/transaksi/{payment}', 'updateInstallmentTransaction')->name('pembayaran.update-transaksi-cicilan');
+        Route::delete('pembayaran/{id}/transaksi/{payment}', 'deleteInstallmentTransaction')->name('pembayaran.hapus-transaksi-cicilan');
         Route::delete('pembayaran/{id}/cicilan/{payment}', 'cancelInstallment')->name('pembayaran.batalkan-cicilan');
         Route::get('pembayaran/detail-tagihan/{id}', 'detailTagihan')->name('pembayaran.detail-tagihan');
         Route::get('pembayaran/detail-pemasukan/{id}', 'detailPemasukan')->name('pembayaran.detail-pemasukan');
@@ -152,7 +155,8 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
 
 
         Route::resource('upload-file', UploadFileController::class);
-        Route::get('/file-nasabah/detail/{id}', [UploadFileController::class, 'detail'])->name('uploadFile.detail');
+        Route::get('/upload-file/detail/{id}', [UploadFileController::class, 'detail'])->name('uploadFile.detail');
+        Route::get('/file-nasabah/detail/{id}', [UploadFileController::class, 'detail']);
         Route::get('/search', [UploadFileController::class, 'getNasabah'])->name('nasabah.search');
         Route::get('/{id}/details', [UploadFileController::class, 'getNasabahDetails'])->name('nasabah.details');
         Route::get('/{id}/files', [UploadFileController::class, 'getFiles'])->name('nasabah.files');
@@ -203,7 +207,6 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         Route::resource('hak-akses', HakAksesController::class)->only('index');
         Route::get('get-hak-akses', [HakAksesController::class, 'getHakAkses'])->name('admin.getHakAkses');
         Route::put('updateHakAkses', [HakAksesController::class, 'updateHakAkses'])->name('admin.updateHakAkses');
-        Route::resource('list-penjualan', ListPenjualanController::class);
     });
 
     Route::prefix('pengaturan-wa')->group(function () {

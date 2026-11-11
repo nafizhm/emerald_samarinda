@@ -25,7 +25,6 @@ return [
         'kavling.index' => 'Data Kavling',
         'marketing.index' => 'Tim Marketing',
         'notaris.index' => 'Notaris',
-        'list-penjualan.index' => 'Tahapan Penjualan',
     ]],
     ['id' => 8, 'title' => 'Pengaturan', 'icon' => 'bi bi-gear-fill', 'section' => 'Sistem', 'children' => [
         'pengaturan-profile.index' => 'Profil & Media',

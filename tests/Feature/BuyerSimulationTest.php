@@ -38,7 +38,7 @@ class BuyerSimulationTest extends CustomerPurchaseTest
             $input = $this->purchase(['nama_lengkap' => 'SIMULASI '.str_pad($index + 1, 2, '0', STR_PAD_LEFT), 'id_kavling' => [$unit],
                 'no_ktp' => '990000000000'.str_pad($index + 1, 4, '0', STR_PAD_LEFT), 'discount' => 0,
                 'tgl_terima' => Carbon::parse($firstDue)->subMonthNoOverflow()->toDateString(),
-                'jenis_pembelian' => $plan['kind'] === 'cash' ? 'Cash Keras' : 'Kredit',
+                'skema_pembayaran' => $plan['kind'] === 'cash' ? 'Cash Keras' : 'Kredit',
                 'dp_kredit' => 20000000, 'inhouse_tenor' => 10, 'inhouse_perbulan' => 10000000, 'inhouse_jatuh_tempo' => $firstDue]);
             $this->postJson(route('customer.store'), $input)->assertOk()->assertJson(['success' => true]);
             $customer = DB::table('customer')->orderByDesc('id')->value('id');
@@ -71,7 +71,7 @@ class BuyerSimulationTest extends CustomerPurchaseTest
     }
     public function test_rounded_installment_does_not_count_down_payment_as_installment(): void
     {
-        $this->postJson(route('customer.store'), $this->purchase(['id_kavling' => [1], 'jenis_pembelian' => 'Kredit', 'discount' => 1,
+        $this->postJson(route('customer.store'), $this->purchase(['id_kavling' => [1], 'skema_pembayaran' => 'Kredit', 'discount' => 1,
             'dp_kredit' => 20000000, 'inhouse_tenor' => 6, 'inhouse_perbulan' => 13333334, 'inhouse_jatuh_tempo' => '2026-10-14']))->assertOk();
         $row = (new JatuhTempoService)->rows()->first();
         $this->assertEquals(13333334, $row['due_amount']);
@@ -101,7 +101,7 @@ class BuyerSimulationTest extends CustomerPurchaseTest
 
     public function test_fractional_tenor_is_rejected_instead_of_becoming_fifteen_months(): void
     {
-        $this->postJson(route('customer.store'), $this->purchase(['jenis_pembelian' => 'Kredit', 'dp_kredit' => 10000000,
+        $this->postJson(route('customer.store'), $this->purchase(['skema_pembayaran' => 'Kredit', 'dp_kredit' => 10000000,
             'inhouse_tenor' => '1.5', 'inhouse_perbulan' => 1000000, 'inhouse_jatuh_tempo' => '2026-11-14']))
             ->assertUnprocessable()->assertJsonValidationErrors('inhouse_tenor');
         $this->assertDatabaseCount('customer', 0);

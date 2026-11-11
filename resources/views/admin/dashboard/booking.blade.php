@@ -60,8 +60,8 @@
                         name: 'id_lokasi'
                     },
                     {
-                        data: 'id_status_progres',
-                        name: 'id_status_progres'
+                        data: 'tahap_pembayaran',
+                        name: 'tahap_pembayaran'
                     },
                 ]
             });

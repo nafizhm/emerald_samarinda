@@ -36,28 +36,19 @@ class LokasiKavlingController extends Controller
                     return $row->kavling_peta_count;
                 })
                 ->addColumn('detail', function ($row) {
-                    $btn = '<a href="' . route('lokasi-kavling.detail', $row->id) . '" class="btn btn-sm btn-warning text-white">Detail Kavling</a>';
+                    $url = route('kavling.index') . '?lokasi=' . $row->id;
+                    $btn = '<a href="' . $url . '" class="btn btn-sm btn-warning text-white">Detail Kavling</a>';
 
                     return $btn;
                 })
                 ->addColumn('action', function ($row) use ($permissions) {
-                    $editUrl   = route('lokasi-kavling.edit', $row->id);
-                    $deleteUrl = route('lokasi-kavling.destroy', $row->id);
+                    $editUrl = route('lokasi-kavling.edit', $row->id);
 
                     $btn = '<div class="d-flex justify-content-center">';
                     if ($permissions['edit'] && $permissions['edit'] == 1) {
                         $btn .= '<button class="btn btn-primary btn-sm me-1 edit-button"
                                 data-id="' . e($row->id) . '"
                                 data-url="' . e($editUrl) . '">Edit</button>';
-                    }
-
-                    if ($permissions['hapus'] && $permissions['hapus'] == 1) {
-                        $btn .= '<form action="' . e($deleteUrl) . '" method="POST" style="display:inline;">
-                    ' . csrf_field() . method_field('DELETE') . '
-                    <button type="submit" class="delete-button btn btn-danger btn-sm">
-                        Hapus
-                    </button>
-                    </form>';
                     }
                     $btn .= '</div>';
 
@@ -96,11 +87,11 @@ class LokasiKavlingController extends Controller
                 })
                 ->addColumn('status_progres', function ($row) {
                     $customer = $row->customer->first();
-                    if ($customer && $customer->progres) {
+                    if ($customer && $customer->tahap_pembayaran) {
                         return [
-                            'name'            => $customer->progres->status_progres,
-                            'warna'           => $customer->progres->warna,
-                            'warna_bootstrap' => $customer->progres->warna_bootstrap,
+                            'name'            => $customer->tahap_pembayaran,
+                            'warna'           => '#0ea5e9',
+                            'warna_bootstrap' => 'info',
                         ];
                     }
                     return [

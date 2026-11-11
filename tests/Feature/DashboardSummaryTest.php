@@ -23,7 +23,7 @@ class DashboardSummaryTest extends TestCase
         });
         Schema::create('customer', function (Blueprint $table) {
             $table->increments('id'); $table->integer('stt_arsip')->default(0); $table->integer('id_status_progres');
-            $table->integer('id_marketing')->default(1); $table->string('jenis_pembelian')->default('Kredit');
+            $table->integer('id_marketing')->default(1); $table->string('skema_pembayaran')->default('Kredit');
         });
         Schema::create('transaksi_kavling', function (Blueprint $table) { $table->increments('id'); $table->integer('id_customer'); $table->integer('id_kavling'); });
         Schema::create('progres_list_penjualan', function (Blueprint $table) {
@@ -55,7 +55,7 @@ class DashboardSummaryTest extends TestCase
         $this->assertSame(1, $data['sudahLaku']);
         $this->assertSame(1, $data['sisaLaku']);
         $this->assertEquals(2, $data['dataLokasi']->first()['id']);
-        $this->assertSame(1, $data['dataLokasi']->last()['hold']);
+        $this->assertSame(0, $data['dataLokasi']->last()['hold']);
         $this->assertSame(1, $data['dataLokasi']->last()['kredit']);
     }
 

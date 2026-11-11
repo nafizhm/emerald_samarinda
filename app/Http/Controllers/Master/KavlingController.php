@@ -34,8 +34,8 @@ class KavlingController extends Controller
 
             return DataTables::of($data)
                 ->addIndexColumn()
-                ->editColumn('panjang', fn ($row) => $row->panjang . ' m')
-                ->editColumn('lebar', fn ($row) => $row->lebar . ' m')
+                ->editColumn('panjang', fn($row) => $row->panjang . ' m')
+                ->editColumn('lebar', fn($row) => $row->lebar . ' m')
                 ->addColumn('luas', function ($row) {
                     return '
                 <p>luas tanah: <strong>' . $row->luas_tanah . ' m&sup2;</strong></p>
@@ -49,13 +49,13 @@ class KavlingController extends Controller
                 </div>';
                 })
                 ->addColumn('action', function ($row) use ($permissions) {
-                    $btn = '<div class="kavling-row-actions">';
+                    $btn = '';
 
                     if ($permissions['edit']) {
-                        $btn .= '<a href="' . route('kavling.edit', $row->id) . '" class="edit-kavling btn btn-outline-primary btn-sm">Edit</a>';
+                        $btn .= '<a href="' . route('kavling.edit', $row->id) . '" class="edit-kavling btn btn-primary btn-sm mx-1">Edit</a>';
                     }
 
-                    $btn .= '<a href="' . route('kavling.lampiran', $row->id) . '" class="btn btn-success btn-sm">Lampiran</a>';
+                    $btn .= '<a href="' . route('kavling.lampiran', $row->id) . '" class="btn btn-dark btn-sm">Lampiran</a>';
 
                     return $btn . '</div>';
                 })
@@ -84,11 +84,11 @@ class KavlingController extends Controller
             'hrg_jual' => str_replace('.', '', (string) $request->hrg_jual),
         ]);
         $values = $request->validate([
-            'panjang' => 'required|numeric|min:0|max:9999999999.9|decimal:0,1',
-            'lebar' => 'required|numeric|min:0|max:9999999999.9|decimal:0,1',
-            'luas_tanah' => 'required|integer|min:0|max:2147483647',
-            'hrg_jual' => 'required|integer|min:0|max:2147483647',
-            'keterangan' => 'nullable|string|max:5000',
+            'panjang'        => 'required|numeric|min:0|max:9999999999.9|decimal:0,1',
+            'lebar'          => 'required|numeric|min:0|max:9999999999.9|decimal:0,1',
+            'luas_tanah'     => 'required|integer|min:0|max:2147483647',
+            'hrg_jual'       => 'required|integer|min:0|max:2147483647',
+            'keterangan'     => 'nullable|string|max:5000',
             'update_project' => 'sometimes|boolean',
         ]);
         unset($values['update_project']);
@@ -109,9 +109,9 @@ class KavlingController extends Controller
                 return $count;
             });
             return response()->json([
-                'success' => true,
+                'success'       => true,
                 'updated_count' => $count,
-                'message' => $request->boolean('update_project')
+                'message'       => $request->boolean('update_project')
                     ? "Data {$count} kavling dalam proyek ini berhasil diperbarui."
                     : 'Data kavling berhasil diperbarui.',
             ]);

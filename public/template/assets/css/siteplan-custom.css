@@ -1,13 +1,15 @@
 #main .siteplan-tabs { gap:8px; margin:0 0 18px; flex-wrap:wrap; border:0; }
 #main .siteplan-tabs .nav-link { display:flex; align-items:center; gap:7px; border:1px solid var(--panel-border); color:var(--text-secondary); background:var(--panel-bg); border-radius:9px; padding:9px 14px; font-size:13px; font-weight:500; }
 #main .siteplan-tabs .nav-link.active { background:#e8f5f0; border-color:#b7dfd0; color:#166b53; }
-#main .siteplan-workspace { display:grid; grid-template-columns:minmax(0,1fr) 230px; gap:18px; align-items:start; }
+#main .siteplan-workspace { display:grid; grid-template-columns:minmax(0,1fr) 280px; gap:18px; align-items:start; }
 #main .siteplan-workspace.legend-collapsed { grid-template-columns:minmax(0,1fr); }
 #main .siteplan-map-panel { min-width:0; overflow:hidden; }
 #main .siteplan-map-panel .tab-content { padding:0; }
 #main .siteplan-legend { overflow:hidden; }
 #main .siteplan-legend[hidden] { display:none; }
 #main .siteplan-legend .panel-heading { padding:18px 18px 14px; }
+#main .siteplan-color-mode-wrap { padding:0 18px 16px; }
+#main .siteplan-color-mode-wrap #siteplan-color-mode { width:100%; font-size:13px; padding-top:.45rem; padding-bottom:.45rem; }
 #main .siteplan-legend-items { padding:0 18px 16px; display:flex; flex-direction:column; gap:13px; }
 #main .siteplan-legend-item { display:flex; align-items:center; gap:10px; font-size:13px; color:var(--text-main); line-height:1.5; }
 #main .siteplan-swatch { width:17px; height:17px; flex:0 0 17px; border:1px solid #b9c5d6; border-radius:5px; }

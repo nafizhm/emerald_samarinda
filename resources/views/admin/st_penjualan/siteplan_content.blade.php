@@ -21,18 +21,20 @@
     {{-- Loop kavling --}}
     @foreach ($lokasi->kavlingPeta as $pt)
         @php
-            $warna = $pt->progres?->warna ?: $readyColor;
+            $customer = $pt->customer;
+            $warna_skema = $warnaSkema[$customer?->skema_pembayaran] ?? $readyColor;
+            $warna_tahap = $warnaTahap[$customer?->tahap_pembayaran] ?? $readyColor;
         @endphp
 
         @php $svg_code = $pt->jenis_map === 'polygon' ? $lokasi->masterSvg->polygon_svg : $lokasi->masterSvg->path_svg; @endphp
 
-        <a href="javascript:void(0);" data-id="{{ $pt->id }}"
+        <a href="javascript:void(0);" data-id="{{ $pt->id }}" data-warna-skema="{{ $warna_skema }}" data-warna-tahap="{{ $warna_tahap }}"
             data-available="{{ $pt->customer ? '0' : '1' }}" tabindex="0" role="button" aria-label="Rincian kavling {{ $pt->kode_kavling }}"
             data-url="{{ route('st-penjualan.detail', $pt->id) }}" data-bs-toggle="modal"
             data-bs-target="#modalDetail" class="detail-button">
             {!! str_replace(
                 ['[[1]]', '[[2]]', '[[3]]', '[[4]]'],
-                [$pt->map, $warna, $pt->matrik, $pt->kode_kavling],
+                [$pt->map, $warna_skema, $pt->matrik, $pt->kode_kavling],
                 $svg_code,
             ) !!}
         </a>

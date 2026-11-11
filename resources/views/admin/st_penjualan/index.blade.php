@@ -77,7 +77,7 @@
 <div class="unit-detail-item"><dt>Jenis kelamin</dt><dd id="jenis_kelamin_id">-</dd></div>
 <div class="unit-detail-item"><dt>NPWP</dt><dd id="npwp_id">-</dd></div></dl></section>
 <section class="unit-detail-section"><h6>Kontak & pembelian</h6><dl class="unit-detail-grid"><div class="unit-detail-item"><dt>Telepon / WhatsApp</dt><dd id="no_telp_id">-</dd></div>
-<div class="unit-detail-item"><dt>Jenis pembelian</dt><dd id="jenis_pembelian_id">-</dd></div>
+<div class="unit-detail-item"><dt>Jenis pembelian</dt><dd id="skema_pembayaran_id">-</dd></div>
 <div class="unit-detail-item unit-detail-wide"><dt>Alamat KTP</dt><dd id="alamat_id">-</dd></div>
 <div class="unit-detail-item unit-detail-wide"><dt>Alamat domisili</dt><dd id="alamat_domisili_id">-</dd></div></dl></section>
 <section class="unit-detail-section"><h6>Dokumen customer</h6><div class="unit-detail-documents"><div class="unit-detail-document"><span>KTP</span><a href="#" class="view-photo-link" id="fotoKtpLink" target="_blank" rel="noopener" style="display:none"><i class="bi bi-box-arrow-up-right"></i> Lihat dokumen</a><span id="noFotoKtp">Belum tersedia</span></div><div class="unit-detail-document"><span>Pemohon</span><a href="#" class="view-photo-link" id="fotoPemohonLink" target="_blank" rel="noopener" style="display:none"><i class="bi bi-box-arrow-up-right"></i> Lihat dokumen</a><span id="noFotoPemohon">Belum tersedia</span></div><div class="unit-detail-document"><span>Kartu keluarga</span><a href="#" class="view-photo-link" id="fotoKkLink" target="_blank" rel="noopener" style="display:none"><i class="bi bi-box-arrow-up-right"></i> Lihat dokumen</a><span id="noFotoKk">Belum tersedia</span></div><div class="unit-detail-document"><span>KTP pasangan</span><a href="#" class="view-photo-link" id="fotoKtpPasanganLink" target="_blank" rel="noopener" style="display:none"><i class="bi bi-box-arrow-up-right"></i> Lihat dokumen</a><span id="noFotoKtpPasangan">Belum tersedia</span></div><div class="unit-detail-document"><span>NPWP</span><a href="#" class="view-photo-link" id="fotoNpwpLink" target="_blank" rel="noopener" style="display:none"><i class="bi bi-box-arrow-up-right"></i> Lihat dokumen</a><span id="noFotoNpwp">Belum tersedia</span></div><div class="unit-detail-document"><span>BPJS</span><a href="#" class="view-photo-link" id="fotoBpjsLink" target="_blank" rel="noopener" style="display:none"><i class="bi bi-box-arrow-up-right"></i> Lihat dokumen</a><span id="noFotoBpjs">Belum tersedia</span></div></div></section></div></div>
@@ -221,6 +221,9 @@
         const loadingSiteplans = new Set();
 
         $(document).ready(function() {
+            $('#siteplan-color-mode').on('change', function() {
+                applySiteplanColorMode($(this).val());
+            });
             const firstLocationId = $('[data-id-lokasi]').first().data('id-lokasi');
             if (firstLocationId) {
                 loadSiteplanData(firstLocationId);
@@ -266,6 +269,7 @@
                 success: function(response) {
                     if (response.success) {
                         contentDiv.html(response.html);
+                        applySiteplanColorMode($('#siteplan-color-mode').val());
                         loadedSiteplans.push(idLokasi);
 
                         const svgElement = tabPane.find('svg').get(0);
@@ -282,6 +286,15 @@
                     showLoadError('Denah gagal dimuat. Periksa koneksi dan coba kembali.');
                 },
                 complete: function() { loadingSiteplans.delete(idLokasi); }
+            });
+        }
+
+        function applySiteplanColorMode(mode) {
+            $('[data-legend]').prop('hidden', true);
+            $('[data-legend="' + mode + '"]').prop('hidden', false);
+            $('.detail-button').each(function() {
+                const color = $(this).data(mode === 'tahap' ? 'warna-tahap' : 'warna-skema');
+                $(this).find('[fill]').attr('fill', color);
             });
         }
 
@@ -376,7 +389,7 @@
                             $('#alamat_domisili_id').text(response.customer.alamat_domisili ?? '-');
                             $('#no_telp_id').text(response.customer.no_telp ?? '-');
                             $('#npwp_id').text(response.customer.npwp ?? '-');
-                            $('#jenis_pembelian_id').text(response.customer.jenis_pembelian ?? '-');
+                            $('#skema_pembayaran_id').text(response.customer.skema_pembayaran ?? '-');
                         }
                         $('#id_lokasi').val(response.kavling.id_lokasi);
 

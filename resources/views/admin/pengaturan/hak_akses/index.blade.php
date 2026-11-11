@@ -22,7 +22,7 @@
                             </select>
                         </div>
                     </div>
-                        <table class="table data-table">
+                        <table class="table data-table table-striped table-bordered">
                             <thead>
                                 <tr>
                                     <th width="50px">No</th>

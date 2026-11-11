@@ -52,11 +52,5 @@ class KavlingPeta extends Model
         )->withPivot('tgl_terima', 'hrg_rumah');
     }
 
-    
-    public function progres()
-    {
-        return $this->belongsTo(ListPenjualan::class, 'id_status_progres');
-    }
-
     public $timestamps = false;
 }

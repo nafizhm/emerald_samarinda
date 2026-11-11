@@ -25,7 +25,7 @@
                                 <tr>
                                     <th width="5%">No</th>
                                     <th>Blok/Kavling</th>
-                                    <th>Status Penjualan</th>
+                                    <th>Tahap Pembayaran</th>
                                     <th>Nama Customer</th>
                                     <th>Marketing</th>
                                 </tr>
@@ -57,8 +57,8 @@
                         searchable: true
                     },
                     {
-                        data: 'id_status_progres',
-                        name: 'id_status_progres',
+                        data: 'tahap_pembayaran',
+                        name: 'tahap_pembayaran',
                         orderable: false,
                         searchable: true
                     },

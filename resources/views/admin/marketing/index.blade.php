@@ -7,7 +7,11 @@
             <div class="card">
                 <div class="card-header workspace-page-header">
                     <div class="d-flex align-content-center justify-content-between">
-                        <div class="workspace-heading"><p class="dashboard-eyebrow">Tim penjualan</p><h1>Tim Marketing</h1><p class="workspace-description">Kelola anggota marketing dan informasi kontak.</p></div>
+                        <div class="workspace-heading">
+                            <p class="dashboard-eyebrow">Tim penjualan</p>
+                            <h1>Tim Marketing</h1>
+                            <p class="workspace-description">Kelola anggota marketing dan informasi kontak.</p>
+                        </div>
                         <div class="d-flex align-items-center">
                             @if (isset($permissions['tambah']) && $permissions['tambah'] == 1)
                                 <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalForm">
@@ -22,19 +26,19 @@
                     </div>
                 </div>
                 <div class="card-body">
-                        <table class="table data-table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <th width="5%">No</th>
-                                    <th>Kode Marketing</th>
-                                    <th>Nama Marketing</th>
-                                    <th>Alamat</th>
-                                    <th class="text-center">Status</th>
-                                    <th class="text-center" width="10%">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
+                    <table class="table data-table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th width="5%">No</th>
+                                <th>Kode Marketing</th>
+                                <th>Nama Marketing</th>
+                                <th>Alamat</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center" width="10%">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
                 </div>
             </div>
         </section>
@@ -55,65 +59,64 @@
                     <div class="modal-body">
                         <input type="hidden" id="primary_id" name="primary_id">
 
-                        <div class="container-fluid">
-                            <div class="row mb-3">
-                                <label for="nama_marketing" class="col-sm-3 col-form-label">Nama Marketing</label>
-                                <div class="col-sm-6">
-                                    <input type="text" name="nama_marketing" id="nama_marketing" class="form-control">
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <label for="alamat" class="col-sm-3 col-form-label">Alamat</label>
-                                <div class="col-sm-6">
-                                    <input type="text" name="alamat" id="alamat" class="form-control">
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <label for="jenis_kelamin" class="col-sm-3 col-form-label">Jenis Kelamin</label>
-                                <div class="col-sm-3">
-                                    <select name="jenis_kelamin" id="jenis_kelamin" class="form-control select-jk">
-                                        <option value=""></option>
-                                        <option value="Laki-laki">Laki-Laki</option>
-                                        <option value="Perempuan">Perempuan</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <label for="pekerjaan" class="col-sm-3 col-form-label">Pekerjaan</label>
-                                <div class="col-sm-6">
-                                    <input type="text" name="pekerjaan" id="pekerjaan" class="form-control">
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <label for="no_telp" class="col-sm-3 col-form-label">No. Telp</label>
-                                <div class="col-sm-6">
-                                    <input type="number" name="no_telp" id="no_telp" class="form-control">
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <label for="foto" class="col-sm-3 col-form-label">Foto</label>
-                                <div class="col-sm-6">
-                                    <input type="file" name="foto" id="foto">
-                                    <small id="error-foto" class="error-text text-danger"></small>
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <label for="status" class="col-sm-3 col-form-label">Status</label>
-                                <div class="col-sm-3">
-                                    <select name="status" id="status" class="form-control select-status">
-                                        <option value=""></option>
-                                        <option value="1">Aktif</option>
-                                        <option value="0">Tidak Aktif</option>
-                                    </select>
-                                </div>
+                        <div class="row mb-3">
+                            <label for="nama_marketing" class="col-sm-3 col-form-label">Nama Marketing</label>
+                            <div class="col-sm-9">
+                                <input type="text" name="nama_marketing" id="nama_marketing" class="form-control">
                             </div>
                         </div>
+
+                        <div class="row mb-3">
+                            <label for="alamat" class="col-sm-3 col-form-label">Alamat</label>
+                            <div class="col-sm-9">
+                                <textarea name="alamat" id="alamat" class="form-control" rows="3"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label for="jenis_kelamin" class="col-sm-3 col-form-label">Jenis Kelamin</label>
+                            <div class="col-sm-4">
+                                <select name="jenis_kelamin" id="jenis_kelamin" class="form-control select-jk">
+                                    <option value=""></option>
+                                    <option value="Laki-laki">Laki-Laki</option>
+                                    <option value="Perempuan">Perempuan</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label for="pekerjaan" class="col-sm-3 col-form-label">Pekerjaan</label>
+                            <div class="col-sm-4">
+                                <input type="text" name="pekerjaan" id="pekerjaan" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label for="no_telp" class="col-sm-3 col-form-label">No. Telp</label>
+                            <div class="col-sm-4">
+                                <input type="number" name="no_telp" id="no_telp" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label for="foto" class="col-sm-3 col-form-label">Foto</label>
+                            <div class="col-sm-6">
+                                <input type="file" name="foto" id="foto">
+                                <small id="error-foto" class="error-text text-danger"></small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label for="status" class="col-sm-3 col-form-label">Status</label>
+                            <div class="col-sm-4">
+                                <select name="status" id="status" class="form-control select-status">
+                                    <option value=""></option>
+                                    <option value="1">Aktif</option>
+                                    <option value="0">Tidak Aktif</option>
+                                </select>
+                            </div>
+                        </div>
+
                     </div>
 
                     <div class="modal-footer">

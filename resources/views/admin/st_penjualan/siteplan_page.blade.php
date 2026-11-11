@@ -1,6 +1,6 @@
 <div class="dashboard-page siteplan-page">
     <div class="dashboard-intro">
-        <div><p class="dashboard-eyebrow">Ketersediaan & penjualan</p><h1>Denah penjualan</h1><p>Pilih lokasi, lihat status kavling, lalu klik unit untuk membuka rinciannya.</p></div>
+        <div><p class="dashboard-eyebrow">Ketersediaan & penjualan</p><h1>Denah Penjualan</h1><p>Pilih lokasi, lihat status kavling, lalu klik unit untuk membuka rinciannya.</p></div>
         <button type="button" class="dashboard-action" id="legend-toggle" aria-controls="legend" aria-expanded="true" onclick="toggleLegend()"><i class="bi bi-palette"></i><span>Keterangan warna</span></button>
     </div>
     @if($lokasiKavling->isNotEmpty())
@@ -18,11 +18,18 @@
             </div>
         </section>
         <aside class="dashboard-panel siteplan-legend" id="legend" aria-label="Keterangan warna kavling">
-            <div class="panel-heading"><div><h2>Keterangan warna</h2><p>Status setiap kavling</p></div><i class="bi bi-palette text-muted"></i></div>
-            <div class="siteplan-legend-items">
-                @foreach($legend as $item)<div class="siteplan-legend-item"><span class="siteplan-swatch" style="background:{{ $item->warna }}"></span><span>{{ $item->status_progres }}</span></div>@endforeach
+            <div class="panel-heading"><div><h2>Keterangan warna</h2><p>Dasar pewarnaan kavling</p></div><i class="bi bi-palette text-muted"></i></div>
+            <div class="siteplan-color-mode-wrap">
+                <select class="form-select" id="siteplan-color-mode" aria-label="Pilih dasar warna denah">
+                    <option value="skema">Skema Pembayaran</option>
+                    <option value="tahap">Tahap Pembayaran</option>
+                </select>
             </div>
-            <div class="siteplan-legend-note"><i class="bi bi-info-circle"></i><p>Warna mengikuti tahapan customer. Kavling tanpa tahapan penjualan ditampilkan sebagai Ready.</p></div>
+            <div class="siteplan-legend-items">
+                @foreach($legend['skema'] as $nama => $warna)<div class="siteplan-legend-item" data-legend="skema"><span class="siteplan-swatch" style="background:{{ $warna }}"></span><span>{{ $nama }}</span></div>@endforeach
+                @foreach($legend['tahap'] as $nama => $warna)<div class="siteplan-legend-item" data-legend="tahap" hidden><span class="siteplan-swatch" style="background:{{ $warna }}"></span><span>{{ $nama }}</span></div>@endforeach
+            </div>
+            <div class="siteplan-legend-note"><i class="bi bi-info-circle"></i><p>Kavling yang belum memiliki customer ditampilkan putih.</p></div>
         </aside>
     </div>
     @else

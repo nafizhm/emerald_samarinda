@@ -7,7 +7,6 @@ use App\Models\Customer;
 use App\Models\FotoKavling;
 use App\Models\KavlingPeta;
 use App\Models\KonfigurasiMedia;
-use App\Models\ListPenjualan;
 use App\Models\ListrikAir;
 use App\Models\LokasiKavling;
 use App\Models\MasterSVG;
@@ -25,11 +24,19 @@ class SiteplanPenjualanController extends Controller
             ->orderBy('urutan', 'asc')
             ->get();
 
-        $legend = ListPenjualan::whereNotNull('warna')
-            ->where('warna', '!=', '')
-            ->where('stt_tampil', '!=', 0)
-            ->orderBy('urutan', 'asc')
-            ->get();
+        $legend = [
+            'skema' => [
+                'Cash Keras' => '#1d4ed8',
+                'Cash Tempo' => '#f59e0b',
+                'Kredit' => '#7c3aed',
+            ],
+            'tahap' => [
+                'Booking Fee' => '#f97316',
+                'Down Payment' => '#0ea5e9',
+                'Proses Cicilan' => '#8b5cf6',
+                'Pelunasan' => '#16a34a',
+            ],
+        ];
 
         return view('admin.st_penjualan.index', compact('lokasiKavling', 'legend'));
     }
@@ -56,7 +63,7 @@ class SiteplanPenjualanController extends Controller
             // Eager load customer untuk menghindari N+1 Query
             $kavlingPeta = KavlingPeta::with(['customer' => function ($q) {
                     $q->where('stt_arsip', 0);
-                }, 'customer.progres'])
+                }])
                 ->where('id_lokasi', $lokasi->id)
                 ->get();
             $lokasi->setRelation('kavlingPeta', $kavlingPeta);
@@ -72,12 +79,9 @@ class SiteplanPenjualanController extends Controller
                     // Set manual properti customer dengan data owner
                     $kavling->setRelation('customer', $owner);
 
-                    // Ambil progres berdasarkan status customer
-                    $kavling->setRelation('progres', $owner->progres);
                 } else {
                     // Kosongkan relasi jika tidak ada owner
                     $kavling->setRelation('customer', null);
-                    $kavling->setRelation('progres', null);
                 }
 
                 // Logika registrasi (Jika menggunakan logika hold/booking lama)
@@ -85,8 +89,10 @@ class SiteplanPenjualanController extends Controller
                 $kavling->registrasi = $owner;
             }
 
-            $readyColor = ListPenjualan::where('status_progres', 'Ready')->value('warna') ?: '#ffffff';
-            $html = view('admin.st_penjualan.siteplan_content', compact('lokasi', 'readyColor'))->render();
+            $warnaSkema = ['Cash Keras' => '#1d4ed8', 'Cash Tempo' => '#f59e0b', 'Kredit' => '#7c3aed'];
+            $warnaTahap = ['Booking Fee' => '#f97316', 'Down Payment' => '#0ea5e9', 'Proses Cicilan' => '#8b5cf6', 'Pelunasan' => '#16a34a'];
+            $readyColor = '#ffffff';
+            $html = view('admin.st_penjualan.siteplan_content', compact('lokasi', 'readyColor', 'warnaSkema', 'warnaTahap'))->render();
 
             return response()->json([
                 'success' => true,
@@ -154,7 +160,7 @@ class SiteplanPenjualanController extends Controller
     {
         $request->validate(['id_kavling' => ['required', 'integer']]);
         $kavling = KavlingPeta::with(['lokasi', 'customer' => function ($query) {
-            $query->where('stt_arsip', 0)->with(['marketing', 'progres']);
+            $query->where('stt_arsip', 0)->with(['marketing']);
         }])->findOrFail($request->integer('id_kavling'));
 
         if (!$kavling) {
@@ -172,7 +178,7 @@ class SiteplanPenjualanController extends Controller
         $listrikAir = ListrikAir::where('id_kavling', $kavling->id)->first();
 
         $kavlingData = [
-            'status'        => $cust?->progres?->status_progres ?? 'Ready',
+            'status'        => $cust?->tahap_pembayaran ?? 'Ready',
             'marketing'     => $cust && $cust->marketing ? $cust->marketing->nama_marketing : '-',
             'lokasi'        => $namaLokasi,
             'blok'          => $kavling->kode_kavling ?? '-',
@@ -405,16 +411,14 @@ class SiteplanPenjualanController extends Controller
             abort(404, "Data master_svg tidak ditemukan");
         }
 
-        // 2. Ambil List Warna Progres Sekaligus (Optimasi Query)
-        // Format: [id_progres => 'warna', ...]
-        $listWarna = \App\Models\ListPenjualan::pluck('warna', 'id')->toArray();
+        $warnaTahap = ['Booking Fee' => '#f97316', 'Down Payment' => '#0ea5e9', 'Proses Cicilan' => '#8b5cf6', 'Pelunasan' => '#16a34a'];
 
         ob_start();
 
         // Render Header SVG
         echo str_replace(['[[lebar]]', '[[tinggi]]'], [$width, $height], $lokasi->masterSvg->header_svg);
 
-        $readyColor = ListPenjualan::where('status_progres', 'Ready')->value('warna') ?: '#ffffff';
+        $readyColor = '#ffffff';
 
         // 3. Loop Kavling
         foreach ($lokasi->kavlingPeta as $pt) {
@@ -425,9 +429,8 @@ class SiteplanPenjualanController extends Controller
             $owner = $pt->customer->first();
 
             if ($owner) {
-                // Cek apakah punya status progres dan warnanya ada di list
-                if ($owner->id_status_progres && isset($listWarna[$owner->id_status_progres])) {
-                    $warna = $listWarna[$owner->id_status_progres];
+                if ($owner->tahap_pembayaran && isset($warnaTahap[$owner->tahap_pembayaran])) {
+                    $warna = $warnaTahap[$owner->tahap_pembayaran];
                 }
 
             }

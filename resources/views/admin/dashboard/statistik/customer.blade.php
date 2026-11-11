@@ -29,7 +29,7 @@
                                     <th>Nama Customer</th>
                                     <th>Marketing</th>
                                     <th>Lokasi Kavling</th>
-                                    <th>Status Progres</th>
+                                    <th>Tahap Pembayaran</th>
                                 </tr>
                             </thead>
                         </table>
@@ -77,8 +77,8 @@
                         searchable: false
                     },
                     {
-                        data: 'id_status_progres',
-                        name: 'id_status_progres',
+                        data: 'tahap_pembayaran',
+                        name: 'tahap_pembayaran',
                         orderable: false,
                         searchable: false
                     },
