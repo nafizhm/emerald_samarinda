@@ -16,8 +16,8 @@ class PaymentListTest extends CustomerPurchaseTest
     }
     private function seedPayments(): void
     {
-        $this->postJson(route('customer.store'),$this->purchase(['id_kavling'=>[1],'discount'=>0,'jenis_pembelian'=>'Cash Keras','nama_lengkap'=>'<script>contoh</script>']))->assertOk();
-        $this->postJson(route('customer.store'),$this->purchase(['id_kavling'=>[2],'discount'=>0,'jenis_pembelian'=>'Kredit','nama_lengkap'=>'Pembeli Kredit','dp_kredit'=>20000000,'inhouse_tenor'=>18,'inhouse_perbulan'=>10000000,'inhouse_jatuh_tempo'=>'2026-09-15']))->assertOk();
+        $this->postJson(route('customer.store'),$this->purchase(['id_kavling'=>[1],'discount'=>0,'skema_pembayaran'=>'Cash Keras','nama_lengkap'=>'<script>contoh</script>']))->assertOk();
+        $this->postJson(route('customer.store'),$this->purchase(['id_kavling'=>[2],'discount'=>0,'skema_pembayaran'=>'Kredit','nama_lengkap'=>'Pembeli Kredit','dp_kredit'=>20000000,'inhouse_tenor'=>18,'inhouse_perbulan'=>10000000,'inhouse_jatuh_tempo'=>'2026-09-15']))->assertOk();
         Customer::create(['nama_lengkap'=>'Tanpa kontrak','kode_customer'=>'UNSET','id_lokasi'=>1,'email'=>'']);
     }
     protected function tearDown(): void {Carbon::setTestNow();parent::tearDown();}

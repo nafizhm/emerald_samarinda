@@ -28,22 +28,36 @@ class InstallmentSchedule
         $firstDate = $customer->kavling->pluck('pivot.tgl_terima')->filter()->sort()->first();
         $transactionDate = $this->date($firstDate);
         $valid = true;
-        if ($customer->jenis_pembelian === 'Kredit') {
-            $tenor = (int) $customer->inhouse_tenor;
-            $monthly = (int) $customer->inhouse_perbulan;
-            $start = $this->date($customer->inhouse_jatuh_tempo);
+        if ($customer->skema_pembayaran === 'Kredit') {
+            // Kredit: jadwal cicilan berdasarkan data kredit bank (belum diimplementasi penuh)
+            $tenor = (int) ($customer->lama_cicilan ?: 0);
+            $monthly = (int) ($customer->nominal_cicilan ?: 0);
+            $start = $this->date($customer->tgl_jatuh_tempo);
             $valid = $tenor >= 1 && $tenor <= 600 && $monthly > 0 && $start !== null;
-            $deposit = min($contract, max(0, (int) ($customer->dp_kredit ?? max(0, $contract - $tenor * $monthly))));
-            $add(0, 'Uang muka (DP)', $deposit, $transactionDate);
+            $add(0, 'Uang muka (DP)', max(0, $contract - $tenor * $monthly), $transactionDate);
             if ($valid) {
                 for ($month = 1; $month <= $tenor; $month++) {
                     $amount = $month === $tenor ? max(0, $contract - $total) : min($monthly, max(0, $contract - $total));
                     $add($month, 'Cicilan ke-'.$month, $amount, $start->copy()->addMonthsNoOverflow($month - 1));
                 }
             }
+        } elseif ($customer->skema_pembayaran === 'Cash Tempo') {
+            // Cash Tempo: cicilan berkala berdasarkan nominal_cicilan, lama_cicilan, tgl_jatuh_tempo
+            $tenor = (int) ($customer->lama_cicilan ?: 0);
+            $monthly = (int) ($customer->nominal_cicilan ?: 0);
+            $start = $this->date($customer->tgl_jatuh_tempo);
+            $valid = $tenor >= 1 && $tenor <= 600 && $monthly > 0 && $start !== null;
+            if ($valid) {
+                for ($month = 1; $month <= $tenor; $month++) {
+                    $amount = $month === $tenor ? max(0, $contract - $total) : min($monthly, max(0, $contract - $total));
+                    $add($month, 'Cicilan ke-'.$month, $amount, $start->copy()->addMonthsNoOverflow($month - 1));
+                }
+            } else {
+                $add(1, 'Pelunasan kavling', max(0, $contract - $total), $transactionDate);
+            }
         } else {
-            if ($customer->jenis_pembelian === 'Booking') $add(0, 'Pembayaran booking', min($contract, max(0, (int) $customer->pembayaran_booking)), $transactionDate);
-            $add(1, $customer->jenis_pembelian === 'Booking' ? 'Sisa pelunasan kavling' : 'Pelunasan kavling', max(0, $contract - $total), $this->date($customer->tgl_batas_booking) ?? $transactionDate);
+            // Cash Keras: satu kali pelunasan
+            $add(1, 'Pelunasan kavling', max(0, $contract - $total), $transactionDate);
         }
         return ['contract' => $contract, 'paid' => $paid, 'remaining' => $remaining, 'rows' => collect($rows), 'valid' => $valid,
             'percent' => $contract > 0 ? min(100, round($paid / $contract * 100, 1)) : 0,

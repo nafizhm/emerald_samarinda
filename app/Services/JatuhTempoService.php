@@ -15,9 +15,10 @@ class JatuhTempoService
         if ($this->cachedRows !== null) return $this->cachedRows;
         $today = Carbon::today('Asia/Jakarta');
         $customers = Customer::where('stt_arsip', 0)
-            ->where('inhouse_perbulan', '>', 0)->where('inhouse_tenor', '>', 0)
-            ->whereNotNull('inhouse_jatuh_tempo')->where('inhouse_jatuh_tempo', '!=', '0000-00-00')
-            ->whereDate('inhouse_jatuh_tempo', '<=', $today->toDateString())
+            ->where('skema_pembayaran', 'Cash Tempo')
+            ->where('nominal_cicilan', '>', 0)->where('lama_cicilan', '>', 0)
+            ->whereNotNull('tgl_jatuh_tempo')->where('tgl_jatuh_tempo', '!=', '0000-00-00')
+            ->whereDate('tgl_jatuh_tempo', '<=', $today->toDateString())
             ->with(['kavling' => fn ($query) => $query->select('kavling_peta.id', 'id_lokasi', 'kode_kavling', 'hrg_jual'), 'kavling.lokasi:id,nama_kavling'])
             ->withSum('piutangs', 'nominal')
             ->withSum(['pemasukans' => fn ($query) => $query->where(fn ($q) => $q->whereNull('keterangan')->orWhere('keterangan', '!=', 'GANTI NAMA'))], 'nominal')
@@ -49,14 +50,14 @@ class JatuhTempoService
     private function calculate(Customer $customer, Carbon $today): ?array
     {
         try {
-            $dateText = substr((string) $customer->inhouse_jatuh_tempo, 0, 10);
+            $dateText = substr((string) $customer->tgl_jatuh_tempo, 0, 10);
             $start = Carbon::createFromFormat('!Y-m-d', $dateText, 'Asia/Jakarta');
             if (!$start || $start->format('Y-m-d') !== $dateText || $start->year < 1900 || $start->gt($today)) return null;
         } catch (\Throwable) {
             return null;
         }
-        $monthly = (float) $customer->inhouse_perbulan;
-        $tenor = (int) $customer->inhouse_tenor;
+        $monthly = (float) $customer->nominal_cicilan;
+        $tenor = (int) $customer->lama_cicilan;
         $installmentsTotal = $monthly * $tenor;
         $price = $customer->kavling->sum(fn ($kavling) => (float) ($kavling->pivot->hrg_rumah ?? $kavling->hrg_jual ?? 0));
         $contract = (float) $customer->piutangs_sum_nominal;
@@ -64,10 +65,8 @@ class JatuhTempoService
         $paid = max(0, (float) $customer->pemasukans_sum_nominal);
         $remaining = max(0, $contract - $paid);
         if ($remaining <= 0) return null;
-        // Payments first cover the amount outside the installment schedule (e.g. down payment).
-        $deposit = $customer->dp_kredit !== null
-            ? min($contract, max(0, (float) $customer->dp_kredit))
-            : max(0, $contract - $installmentsTotal);
+        // Untuk Cash Tempo: tidak ada DP kredit, sisa kontrak = seluruh piutang
+        $deposit = max(0, $contract - $installmentsTotal);
         $installmentsPaid = max(0, $paid - $deposit);
         $months = ($today->year - $start->year) * 12 + $today->month - $start->month;
         if ($start->copy()->addMonthsNoOverflow($months)->gt($today)) $months--;

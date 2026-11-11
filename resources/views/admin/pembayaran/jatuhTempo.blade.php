@@ -198,21 +198,24 @@
                         <div class="row mb-3">
                             <label class="col-sm-3 col-form-label">Cicilan Per Bulan</label>
                             <div class="col-sm-9">
-                                <input type="text" name="inhouse_perbulan" id="inhouse_perbulan"
+                                <input type="text" name="nominal_cicilan" id="inhouse_perbulan"
                                     class="form-control format-number" min="0">
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <label class="col-sm-3 col-form-label">Tenor Per Bulan</label>
+                            <label class="col-sm-3 col-form-label">Lama Cicilan (Bulan)</label>
                             <div class="col-sm-9">
-                                <input type="number" name="inhouse_tenor" id="inhouse_tenor" min="0"
-                                    max="60" class="form-control">
+                                <div class="input-group">
+                                    <input type="number" name="lama_cicilan" id="inhouse_tenor" min="0"
+                                        max="600" class="form-control">
+                                    <span class="input-group-text">Bulan</span>
+                                </div>
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <label class="col-sm-3 col-form-label">Jatuh Tempo</label>
+                            <label class="col-sm-3 col-form-label">Tanggal Jatuh Tempo</label>
                             <div class="col-sm-9">
-                                <input type="date" name="inhouse_jatuh_tempo" id="inhouse_jatuh_tempo"
+                                <input type="date" name="tgl_jatuh_tempo" id="inhouse_jatuh_tempo"
                                     class="form-control">
                             </div>
                         </div>
@@ -426,11 +429,11 @@
                     let customer = response.data.customer;
 
                     $('#id_cust').val(customer.id);
-                    $('#inhouse_perbulan').val(Number(customer.inhouse_perbulan || 0).toLocaleString(
+                    $('#inhouse_perbulan').val(Number(customer.nominal_cicilan || 0).toLocaleString(
                         'id-ID'));
-                    $('#inhouse_tenor').val(customer.inhouse_tenor || '');
+                    $('#inhouse_tenor').val(customer.lama_cicilan || '');
 
-                    let jatuhTempo = customer.inhouse_jatuh_tempo;
+                    let jatuhTempo = customer.tgl_jatuh_tempo;
                     if (jatuhTempo) {
                         let formattedDate = jatuhTempo.split(' ')[0];
                         $('#inhouse_jatuh_tempo').val(formattedDate);

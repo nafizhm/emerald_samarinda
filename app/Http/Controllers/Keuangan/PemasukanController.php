@@ -22,6 +22,10 @@ class PemasukanController extends Controller
         Carbon::setLocale('id');
 
         $permissions = HakAksesController::getUserPermissions();
+        $kategoriTetapIds = KategoriTransaksi::where('jenis_kategori', 'PEMASUKAN')
+            ->where('stt_fix', 1)
+            ->pluck('id')
+            ->all();
 
         if ($request->ajax()) {
             $data = Pemasukan::orderBy('tanggal', 'desc')->orderBy('id', 'desc');
@@ -66,12 +70,12 @@ class PemasukanController extends Controller
                         $q->WhereDate('tanggal', 'like', "%{$keyword}%");
                     });
                 })
-                ->addColumn('action', function ($row) use ($permissions) {
+                ->addColumn('action', function ($row) use ($permissions, $kategoriTetapIds) {
                     $editUrl   = route('pemasukan.edit', $row->id);
                     $detailUrl = route('pemasukan.show', $row->id);
                     $deleteUrl = route('pemasukan.destroy', $row->id);
 
-                    $disabledKategori = in_array($row->id_kategori_transaksi, [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36]);
+                    $disabledKategori = in_array($row->id_kategori_transaksi, $kategoriTetapIds);
 
                     $btn = '<div class="d-flex justify-content-center">';
 
@@ -107,11 +111,11 @@ class PemasukanController extends Controller
         }
 
         $kategoriTransaksi = KategoriTransaksi::where('jenis_kategori', 'PEMASUKAN')
-            ->whereNotIn('id', [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36])
+            ->where(fn ($query) => $query->whereNull('stt_fix')->orWhere('stt_fix', '!=', 1))
             ->get();
 
         $kategoriTransaksiDetail = KategoriTransaksi::where('jenis_kategori', 'PEMASUKAN')
-            ->whereIn('id', [25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36])
+            ->where('stt_fix', 1)
             ->get();
 
         $PiutangList = Piutang::where('status', 1)->where('id_customer', 0)->get();

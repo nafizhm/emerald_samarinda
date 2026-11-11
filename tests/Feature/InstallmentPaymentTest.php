@@ -64,7 +64,7 @@ class InstallmentPaymentTest extends CustomerPurchaseTest
     }
     private function credit(array $extra=[]): int
     {
-        $this->postJson(route('customer.store'), $this->purchase(array_replace(['id_kavling'=>[1], 'discount'=>0, 'jenis_pembelian'=>'Kredit', 'dp_kredit'=>10000000, 'inhouse_tenor'=>6, 'inhouse_perbulan'=>15000000, 'inhouse_jatuh_tempo'=>'2026-08-31'], $extra)))->assertOk();
+        $this->postJson(route('customer.store'), $this->purchase(array_replace(['id_kavling'=>[1], 'discount'=>0, 'skema_pembayaran'=>'Kredit', 'dp_kredit'=>10000000, 'inhouse_tenor'=>6, 'inhouse_perbulan'=>15000000, 'inhouse_jatuh_tempo'=>'2026-08-31'], $extra)))->assertOk();
         return DB::table('customer')->value('id');
     }
     private function payment(array $extra=[]): array {return array_replace(['mode'=>'through','month'=>3,'expected_paid'=>10000000,'date'=>'2026-10-14','bank_id'=>1], $extra);}
@@ -127,7 +127,7 @@ class InstallmentPaymentTest extends CustomerPurchaseTest
     }
     public function test_cash_and_booking_do_not_show_fake_monthly_installments(): void
     {
-        $this->postJson(route('customer.store'),$this->purchase(['id_kavling'=>[1],'discount'=>0,'jenis_pembelian'=>'Cash Keras']))->assertOk();
+        $this->postJson(route('customer.store'),$this->purchase(['id_kavling'=>[1],'discount'=>0,'skema_pembayaran'=>'Cash Keras']))->assertOk();
         $cash=(new InstallmentSchedule)->forCustomer(Customer::first());
         $this->assertCount(1,$cash['rows']); $this->assertEquals(0,$cash['remaining']);
         $this->postJson(route('customer.store'),$this->purchase(['id_kavling'=>[2],'discount'=>0]))->assertOk();
