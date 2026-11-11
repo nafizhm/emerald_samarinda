@@ -6,7 +6,11 @@
             <div class="card">
                 <div class="card-header workspace-page-header">
                     <div class="d-flex align-content-center justify-content-between">
-                        <div class="workspace-heading"><p class="dashboard-eyebrow">Dokumen customer</p><h1>Dokumen Customer</h1><p class="workspace-description">Kelola berkas dan lampiran customer.</p></div>
+                        <div class="workspace-heading">
+                            <p class="dashboard-eyebrow">Dokumen customer</p>
+                            <h1>Dokumen Customer</h1>
+                            <p class="workspace-description">Kelola berkas dan lampiran customer.</p>
+                        </div>
                     </div>
                 </div>
                 <div class="card-body">
@@ -16,6 +20,11 @@
                         <label class="col-sm-3 col-form-label">Nama Customer</label>
                         <div class="col-sm-3">
                             <select class="form-control select-nasabah" id="nama_nasabah" name="nama_nasabah">
+                                <option value="">Pilih Customer</option>
+                                @foreach ($customers as $c)
+                                    <option value="{{ $c->id }}">{{ $c->kode_customer }} - {{ $c->nama_lengkap }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
                     </div>
@@ -23,11 +32,11 @@
                     <div class="form-group row mb-3">
                         <label class="col-sm-3 col-form-label">No. KTP</label>
                         <div class="col-sm-3">
-                            <input type="number" name="no_ktp" class="form-control" disabled>
+                            <input type="text" name="no_ktp" class="form-control" disabled>
                         </div>
                         <label class="col-sm-2 col-form-label">No. Telp</label>
                         <div class="col-sm-3">
-                            <input type="number" name="no_ktp_p" class="form-control" disabled>
+                            <input type="text" name="no_telp" class="form-control" disabled>
                         </div>
                     </div>
 
@@ -43,18 +52,17 @@
                     </div>
                     @if ($permissions['tambah'] == 1)
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-primary mb-3" id="modal-button" data-bs-toggle="modal"
-                                data-bs-target="#modalForm">
+                            <button type="button" class="btn btn-primary mb-3" id="modal-button">
                                 <i class="bi bi-upload"></i> Upload File
                             </button>
                         </div>
                     @endif
 
-                    <table id="data-table" class="table table-bordered table-hover">
+                    <table id="data-table" class="table table-striped table-bordered table-hover">
                         <thead>
                             <tr>
                                 <th>No</th>
-                                <th>Nama File</th>
+                                <th>Jenis File</th>
                                 <th>File Lampiran</th>
                                 <th>Aksi</th>
                             </tr>
@@ -91,10 +99,10 @@
                         </div>
 
                         <div class="form-group row">
-                            <label for="nama_file" class="col-sm-3 col-form-label">Nama File</label>
+                            <label for="jenis_file" class="col-sm-3 col-form-label">Jenis File</label>
                             <div class="col-sm-6">
-                                <select name="nama_file" id="nama_file" class="form-control nama-file">
-                                    <option value="">Jenis File</option>
+                                <select name="jenis_file" id="jenis_file" class="form-select nama-file">
+                                    <option value="">Pilih Jenis File</option>
                                     <option value="KTP">Foto KTP</option>
                                     <option value="KK">Foto Kartu Keluarga</option>
                                     <option value="Pemohon">Foto Pemohon</option>
@@ -109,7 +117,8 @@
                         <div class="form-group row">
                             <label for="lampiran" class="col-sm-3 col-form-label">File Lampiran</label>
                             <div class="col-sm-9">
-                                <input type="file" class="form-control" id="lampiran" name="lampiran">
+                                <input type="file" class="form-control" id="lampiran" name="lampiran"
+                                    accept=".pdf,.jpg,.jpeg,.png">
                                 <div class="mt-2">
                                     <div class="img-thumbnail border d-flex align-items-center justify-content-center"
                                         id="previewLampiran"
@@ -163,7 +172,7 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="nama_file_detail" class="col-sm-3 col-form-label">Nama File</label>
+                        <label for="nama_file_detail" class="col-sm-3 col-form-label">Jenis File</label>
                         <div class="col-sm-6">
                             <input type="text" class="form-control" id="nama_file_detail" name="nama_file" readonly>
                         </div>
@@ -202,24 +211,7 @@
             $('.select-nasabah').select2({
                 width: '100%',
                 placeholder: 'Pilih Customer',
-                minimumResultsForSearch: 1,
-                ajax: {
-                    url: '{{ route('nasabah.search') }}',
-                    dataType: 'json',
-                    delay: 250,
-                    processResults: function(response) {
-                        return {
-                            results: response.data.map(function(item) {
-                                return {
-                                    id: item.id,
-                                    text: item.kode_customer + '-' + item.nama_lengkap
-                                };
-                            })
-                        };
-                    },
-                    cache: true
-                },
-                minimumInputLength: 1
+                allowClear: true
             });
 
             $('.select-nasabah').on('change', function() {
@@ -231,10 +223,11 @@
                         method: 'GET',
                         success: function(response) {
                             let data = response.data;
-                            $('input[name="no_ktp"]').val(data.no_ktp);
-                            $('input[name="no_ktp_p"]').val(data.no_telp);
-                            $('input[name="lokasi_perumahan"]').val(data.lokasi_perumahan);
-                            $('input[name="kode_kavling"]').val(data.lokasi_kav_blok);
+                            $('input[name="no_ktp"]').val(data.no_ktp || '');
+                            $('input[name="no_telp"]').val(data.no_telp || '');
+                            $('input[name="lokasi_perumahan"]').val(data.lokasi_perumahan ||
+                            '');
+                            $('input[name="kode_kavling"]').val(data.lokasi_kav_blok || '');
                         },
                         error: function() {
                             Swal.fire({
@@ -289,14 +282,16 @@
                         );
                     } else {
                         data.data.forEach(function(file, index) {
-                            console.log(file);
+                            let namaFile = file.jenis_file || file.nama_file || '-';
+                            let fileUrl = '/assets/berkas_customer/' + file.lampiran;
+
                             $('#data-table tbody').append(`
                                 <tr>
                                     <td>${index + 1}</td>
-                                    <td>${file.nama_file}</td>
+                                    <td>${namaFile}</td>
                                     <td>
                                         <button class="btn btn-sm btn-info detail-button" data-url="/admin/customer/upload-file/detail/${file.id}">View</button>
-                                        <a href="/berkas_user/${file.lampiran}" class="btn btn-sm btn-success" download>Download</a>
+                                        <a href="${fileUrl}" class="btn btn-sm btn-success" download>Download</a>
                                     </td>
                                     <td>
                                         <button class="btn btn-sm btn-danger" onclick="deleteFile(${file.id})">Hapus</button>
@@ -312,16 +307,22 @@
             });
         }
 
-        $('#modal-btn').on('click', function(event) {
+        $('#modal-button').on('click', function(event) {
             event.preventDefault();
 
             var namaNasabah = $('#nama_nasabah').val();
 
-            if (namaNasabah === "") {
-                alert("Pilih nama nasabah terlebih dahulu");
-            } else {
-                $('#modalForm').modal('show');
+            if (!namaNasabah) {
+                toastr.warning("Pilih customer terlebih dahulu sebelum upload file!", "PERHATIAN", {
+                    progressBar: true,
+                    timeOut: 3500,
+                    positionClass: "toast-bottom-right",
+                });
+                return;
             }
+
+            $('#primary_id').val(namaNasabah);
+            $('#modalForm').modal('show');
         });
 
         $('#formData').on('submit', function(e) {
@@ -335,7 +336,7 @@
             btnText.text('Menyimpan...');
             submitBtn.prop('disabled', true);
 
-            let id = $('#primary_id').val();
+            let id = $('#nama_nasabah').val() || $('#primary_id').val();
             let url = `{{ route('uploadFile') }}`;
             let method = 'POST';
 
@@ -381,7 +382,7 @@
                             input.addClass('is-invalid');
                             input.parent().find('.invalid-feedback').remove();
                             input.parent().append(
-                                '<span class="invalid-feedback" role="alert"><strong>' +
+                                '<span class="invalid-feedback d-block" role="alert"><strong>' +
                                 val[0] + '</strong></span>'
                             );
                         });
@@ -403,9 +404,9 @@
             });
         });
 
-        function viewFile(folder, filename, nama_file) {
+        function viewFile(filename, nama_file) {
             var fileExt = filename.split('.').pop().toLowerCase();
-            var fileUrl = '/berkas_user/' + filename;
+            var fileUrl = '/assets/berkas_customer/' + filename;
             var preview = $('#previewDetail');
             var rowLampiran = $('#rowLampiranDetail');
 
@@ -484,6 +485,8 @@
             $('#formData')[0].reset();
             $('#primary_id').val('');
             $('#lampiran').val('');
+            $('.form-select').val('').trigger('change');
+
             $('#previewLampiran').html('');
             $('.is-invalid').removeClass('is-invalid');
             $('.invalid-feedback').remove();
@@ -504,22 +507,24 @@
         $(document).on('click', '.detail-button', function() {
             var url = $(this).data('url');
             $.get(url, function(response) {
-                if (response.status === 'success') {
+                if (response.success && response.data) {
                     $('#tanggal_detail').val(response.data.tanggal);
-                    $('#nama_file_detail').val(response.data.nama_file);
-                    $('#keterangan_detail').val(response.data.keterangan);
+                    $('#nama_file_detail').val(response.data.jenis_file || response.data.nama_file || '');
+                    $('#keterangan_detail').val(response.data.keterangan || '');
 
                     let lampiran = response.data.lampiran;
                     let preview = $('#previewDetail');
                     let rowLampiran = $('#rowLampiranDetail');
                     if (lampiran && lampiran !== '') {
-                        let imageUrl = '/berkas_user/' + lampiran;
+                        let imageUrl = '/assets/berkas_customer/' + lampiran;
                         let fileExt = lampiran.split('.').pop().toLowerCase();
 
                         if (['pdf'].includes(fileExt)) {
                             preview.html(`<iframe src="${imageUrl}" width="100%" height="400px"></iframe>`);
                         } else {
-                            preview.html(`<img src="${imageUrl}" alt="File" style="max-height: 100%; max-width: 100%;">`);
+                            preview.html(
+                                `<img src="${imageUrl}" alt="File" style="max-height: 100%; max-width: 100%;">`
+                            );
                         }
                         rowLampiran.show();
                     } else {

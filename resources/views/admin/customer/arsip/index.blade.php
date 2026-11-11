@@ -25,7 +25,7 @@
                                     <th>Nama Customer</th>
                                     <th>Marketing</th>
                                     <th>Lokasi Kavling</th>
-                                    <th>Status Progres</th>
+                                    <th>Tahap Pembayaran</th>
                                     <th>Alasan Cancel</th>
                                     <th class="text-center" width="15%">Aksi</th>
                                 </tr>
@@ -73,8 +73,8 @@
                     name: 'id_lokasi',
                     searchable: false
                 }, {
-                    data: 'id_status_progres',
-                    name: 'id_status_progres',
+                    data: 'tahap_pembayaran',
+                    name: 'tahap_pembayaran',
                     className: 'text-center',
                     searchable: false
                 }, {

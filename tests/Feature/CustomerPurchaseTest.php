@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Models\{Bank, Customer, KavlingPeta, ListPenjualan, LokasiKavling, Marketing, Pemasukan, PersyaratanLegal, Piutang, TransaksiKavling};
+use App\Models\{Bank, Customer, KavlingPeta, LokasiKavling, Marketing, Pemasukan, Piutang, TransaksiKavling};
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -17,7 +17,7 @@ class CustomerPurchaseTest extends TestCase
         config(['database.default' => 'sqlite', 'database.connections.sqlite.database' => ':memory:']);
         DB::purge('sqlite');
         $this->withoutMiddleware();
-        foreach ([Bank::class, Customer::class, KavlingPeta::class, ListPenjualan::class, LokasiKavling::class, Marketing::class, Pemasukan::class, PersyaratanLegal::class, Piutang::class, TransaksiKavling::class] as $class) {
+        foreach ([Bank::class, Customer::class, KavlingPeta::class, LokasiKavling::class, Marketing::class, Pemasukan::class, Piutang::class, TransaksiKavling::class] as $class) {
             $model = new $class;
             Schema::create($model->getTable(), function (Blueprint $table) use ($model) {
                 $table->increments('id');
@@ -32,7 +32,6 @@ class CustomerPurchaseTest extends TestCase
         DB::table('lokasi_kavling')->insert(['id' => 1, 'nama_kavling' => 'Lokasi Uji', 'nama_singkat' => 'UJI']);
         DB::table('lokasi_kavling')->insert(['id' => 2, 'nama_kavling' => 'Lokasi Lain']);
         DB::table('bank')->insert(['id' => 1]);
-        DB::table('progres_list_penjualan')->insert(['id' => 1, 'status_progres' => 'Booking']);
         DB::table('kavling_peta')->insert([
             ['id' => 1, 'id_lokasi' => 1, 'kode_kavling' => 'A1', 'hrg_jual' => 100000000],
             ['id' => 2, 'id_lokasi' => 1, 'kode_kavling' => 'A2', 'hrg_jual' => 200000000],
@@ -46,9 +45,9 @@ class CustomerPurchaseTest extends TestCase
             'tgl_terima' => '2026-10-13', 'nama_lengkap' => 'Pembeli Uji',
             'no_ktp' => '0012345678901234', 'tempat_lahir' => 'Balikpapan',
             'tgl_lahir' => '1990-01-01', 'no_telp' => '081234567890', 'alamat' => 'Alamat Uji',
-            'id_lokasi' => 1, 'id_kavling' => [1, 2], 'id_status_progres' => 1,
+            'id_lokasi' => 1, 'id_kavling' => [1, 2],
             'id_bank' => 1, 'hrg_jual' => '1', 'discount' => '1.001',
-            'jenis_pembelian' => 'Booking', 'pembayaran_booking' => '1.000.000',
+            'skema_pembayaran' => 'Cash Tempo', 'pembayaran_booking' => '1.000.000',
             'tgl_batas_booking' => '2026-10-20',
         ], $overrides);
     }
@@ -65,14 +64,14 @@ class CustomerPurchaseTest extends TestCase
 
     public function test_cash_purchase_records_full_payment(): void
     {
-        $this->postJson(route('customer.store'), $this->purchase(['jenis_pembelian' => 'Cash Keras']))->assertOk();
+        $this->postJson(route('customer.store'), $this->purchase(['skema_pembayaran' => 'Cash Keras']))->assertOk();
         $this->assertDatabaseHas('piutang', ['nominal' => 299998999, 'sisa_bayar' => 0, 'status' => 2]);
         $this->assertDatabaseHas('pemasukan', ['nominal' => 299998999]);
     }
 
     public function test_credit_requires_positive_tenor_and_records_dp(): void
     {
-        $input = $this->purchase(['jenis_pembelian' => 'Kredit', 'dp_kredit' => 10000000, 'inhouse_tenor' => 0, 'inhouse_perbulan' => 5000000, 'inhouse_jatuh_tempo' => '2026-11-13']);
+        $input = $this->purchase(['skema_pembayaran' => 'Kredit', 'dp_kredit' => 10000000, 'inhouse_tenor' => 0, 'inhouse_perbulan' => 5000000, 'inhouse_jatuh_tempo' => '2026-11-13']);
         $this->postJson(route('customer.store'), $input)->assertUnprocessable()->assertJsonValidationErrors('inhouse_tenor');
         $input['inhouse_tenor'] = 60;
         $this->postJson(route('customer.store'), $input)->assertOk();

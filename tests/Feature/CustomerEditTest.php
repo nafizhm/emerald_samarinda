@@ -7,7 +7,7 @@ class CustomerEditTest extends CustomerPurchaseTest
 {
     private function existing(): array
     {
-        $this->postJson(route('customer.store'),$this->purchase(['id_kavling'=>[1],'jenis_pembelian'=>'Cash Keras','discount'=>0]))->assertOk();
+        $this->postJson(route('customer.store'),$this->purchase(['id_kavling'=>[1],'skema_pembayaran'=>'Cash Keras','discount'=>0]))->assertOk();
         $customer=Customer::first();
         return [$customer->id, ['nama_lengkap'=>$customer->nama_lengkap,'no_ktp'=>$customer->no_ktp,'tempat_lahir'=>$customer->tempat_lahir,
             'tgl_lahir'=>$customer->tgl_lahir,'no_telp'=>$customer->no_telp,'alamat'=>$customer->alamat,'id_status_progres'=>$customer->id_status_progres,'email'=>'']];
@@ -23,16 +23,15 @@ class CustomerEditTest extends CustomerPurchaseTest
         [$id,$values]=$this->existing();
         $this->putJson(route('customer.update',$id),array_replace($values,['email'=>'invalid','nama_lengkap'=>'Unexpected change']))
             ->assertUnprocessable()->assertJsonValidationErrors('email');
-        $this->putJson(route('customer.update',$id),array_replace($values,['id_status_progres'=>999]))->assertUnprocessable()->assertJsonValidationErrors('id_status_progres');
         $this->assertDatabaseHas('customer',['id'=>$id,'nama_lengkap'=>'Pembeli Uji']);
     }
     public function test_profile_update_does_not_modify_contract_or_payment_records(): void
     {
         [$id,$values]=$this->existing();
         $before=DB::table('piutang')->where('id_customer',$id)->first();
-        $this->putJson(route('customer.update',$id),$values+['hrg_jual'=>1,'discount'=>99999999,'dp_kredit'=>0,'jenis_pembelian'=>'Kredit','id_bank'=>999])
+        $this->putJson(route('customer.update',$id),$values+['hrg_jual'=>1,'discount'=>99999999,'dp_kredit'=>0,'skema_pembayaran'=>'Kredit','id_bank'=>999])
             ->assertOk()->assertJsonPath('success',true);
-        $this->assertDatabaseHas('customer',['id'=>$id,'jenis_pembelian'=>'Cash Keras','discount'=>0,'id_bank'=>1]);
+        $this->assertDatabaseHas('customer',['id'=>$id,'skema_pembayaran'=>'Cash Keras','discount'=>0,'id_bank'=>1]);
         $this->assertEquals($before,DB::table('piutang')->where('id_customer',$id)->first());
         $this->assertDatabaseCount('pemasukan',1);
     }

@@ -3,24 +3,20 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Pengaturan\HakAksesController;
-use App\Models\Bank;
 use App\Models\Customer;
 use App\Models\KavlingPeta;
 use App\Models\KonfigurasiAplikasi;
 use App\Models\KonfigurasiMedia;
-use App\Models\ListPenjualan;
 use App\Models\LokasiKavling;
 use App\Models\Marketing;
-use App\Models\Pemasukan;
-use App\Models\PersyaratanLegal;
 use App\Models\Piutang;
 use App\Models\TransaksiKavling;
 use App\Services\PurchaseSelection;
-use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use PhpOffice\PhpWord\TemplateProcessor;
 use TCPDF;
 use Yajra\DataTables\Facades\DataTables;
@@ -32,7 +28,7 @@ class CustomerController extends Controller
         $permissions = HakAksesController::getUserPermissions();
 
         if ($request->ajax()) {
-            $data = Customer::with(['marketing', 'kavling.lokasi', 'progres'])
+            $data = Customer::with(['marketing', 'kavling.lokasi'])
                 ->where('stt_arsip', 1)
                 ->orderBy('id', 'desc');
 
@@ -40,7 +36,7 @@ class CustomerController extends Controller
                 ->addIndexColumn()
 
                 ->editColumn('tgl_cancel', function ($row) {
-                    $tgl = $row->tgl_cancel ? Carbon::parse($row->tgl_cancel)->translatedFormat('d F Y') : '-';
+                    $tgl  = $row->tgl_cancel ? Carbon::parse($row->tgl_cancel)->translatedFormat('d F Y') : '-';
                     $kode = $row->kode_customer ? '<strong>' . e($row->kode_customer) . '</strong>' : '';
                     return "$tgl<br>$kode";
                 })
@@ -62,8 +58,8 @@ class CustomerController extends Controller
                     return implode('<hr style="margin: 5px 0; border-top: 1px dashed #ccc;">', $output);
                 })
 
-                ->editColumn('id_status_progres', function ($row) {
-                    $status = $row->progres->status_progres ?? '-';
+                ->editColumn('tahap_pembayaran', function ($row) {
+                    $status      = $row->tahap_pembayaran ?? '-';
                     $badgeColors = [
                         'BF'           => 'warning',
                         'WAWANCARA'    => 'secondary',
@@ -100,7 +96,7 @@ class CustomerController extends Controller
                     'nama_lengkap',
                     'id_marketing',
                     'id_lokasi',
-                    'id_status_progres',
+                    'tahap_pembayaran',
                     'alasan_cancel',
                     'action',
                 ])
@@ -129,7 +125,7 @@ class CustomerController extends Controller
         Carbon::setLocale('id');
 
         if ($request->ajax()) {
-            $data = Customer::with(['marketing', 'kavling.lokasi', 'progres'])
+            $data = Customer::with(['marketing', 'kavling.lokasi', 'piutangs'])
                 ->addSelect([
                     'latest_tgl_terima' => DB::table('transaksi_kavling')
                         ->select('tgl_terima')
@@ -142,17 +138,6 @@ class CustomerController extends Controller
 
             return DataTables::of($data)
                 ->addIndexColumn()
-
-                ->editColumn('tgl_terima', function ($row) {
-                    $firstKavling = $row->kavling->first(); // ambil yang pertama
-
-                    $tglFinal = ($firstKavling && $firstKavling->pivot->tgl_terima)
-                        ? Carbon::parse($firstKavling->pivot->tgl_terima)->translatedFormat('d F Y')
-                        : '-';
-
-                    $method = e($row->jenis_pembelian === 'Cash Keras' ? 'Cash' : ($row->jenis_pembelian ?: '-'));
-                    return '<span class="customer-date">'.$tglFinal.'</span><small class="customer-purchase-method">'.$method.'</small>';
-                })
 
                 ->editColumn('id_marketing', function ($row) {
                     $namaMarketing = e($row->marketing->nama_marketing ?? 'Belum ditentukan');
@@ -176,37 +161,32 @@ class CustomerController extends Controller
                     return implode('<hr style="margin: 5px 0; border-top: 1px dashed #ccc;">', $output);
                 })
 
-                ->editColumn('id_status_progres', function ($row) {
-                    $status      = e($row->progres->status_progres ?? '-');
-                    $ketCashback = $row->progres->ket_cashback ?? '';
+                ->addColumn('status_pembayaran', function ($row) {
+                    $skema = e($row->skema_pembayaran ?: '-');
+                    $tahap = e($row->tahap_pembayaran ?: '-');
 
-                    $badgeColors = [
-                        'BF'           => 'warning',
-                        'WAWANCARA'    => 'secondary',
-                        'SP3K'         => 'success',
-                        'AKAD'         => 'info',
-                        'SERAH TERIMA' => 'dark',
-                    ];
+                    $totalSisaBayar = (int) $row->piutangs->sum('sisa_bayar');
+                    $totalTerbayar  = (int) $row->piutangs->sum('terbayar');
 
-                    if (array_key_exists($status, $badgeColors)) {
-                        $statusDisplay = '<span class="badge bg-' . $badgeColors[$status] . '">' . $status . '</span>';
-                    } else {
-                        $statusDisplay = $status;
-                    }
+                    $sisaFmt = 'Rp ' . number_format($totalSisaBayar, 0, ',', '.');
+                    $terbayarFmt = 'Rp ' . number_format($totalTerbayar, 0, ',', '.');
 
-                    $cashbackText = $ketCashback ? '<br><small>' . e($ketCashback) . '</small>' : '';
-
-                    return $statusDisplay . $cashbackText;
+                    return '<div>' .
+                               '<div><small class="text-muted">Skema :</small> <strong>' . $skema . '</strong></div>' .
+                               '<div><small class="text-muted">Tahap :</small> <strong>' . $tahap . '</strong></div>' .
+                               '<div><small class="text-muted">Sisa Bayar :</small> <span class="text-danger fw-semibold">' . $sisaFmt . '</span></div>' .
+                               '<div><small class="text-muted">Terbayar :</small> <span class="text-success fw-semibold">' . $terbayarFmt . '</span></div>' .
+                           '</div>';
                 })
 
                 ->editColumn('nama_lengkap', function ($row) {
-                    return '<div class="customer-identity"><strong>'.e($row->nama_lengkap).'</strong><small>'.e($row->kode_customer ?: '-').'</small><span>'.e($row->no_wa ?: ($row->no_telp ?: '-')).'</span></div>';
+                    return '<div class="customer-identity"><strong>' . e($row->nama_lengkap) . '</strong><small>' . e($row->kode_customer ?: '-') . '</small><span>' . e($row->no_wa ?: ($row->no_telp ?: '-')) . '</span></div>';
                 })
 
                 ->addColumn('action', function ($row) use ($permissions): string {
-                    $editUrl   = route('customer.edit', $row->id);
-                    $btn       = '<div class="customer-list-actions">';
-                    $btn .= '<a href="'.e(route('cetak.subsidi', $row->id)).'" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm">Cetak akad</a>';
+                    $editUrl  = route('customer.edit', $row->id);
+                    $btn      = '<div class="customer-list-actions">';
+                    $btn     .= '<a href="' . e(route('cetak.subsidi', $row->id)) . '" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm">Cetak akad</a>';
 
                     if ($permissions['edit']) {
                         $btn .= '<a href="' . e($editUrl) . '" class="btn btn-outline-primary btn-sm">
@@ -225,11 +205,10 @@ class CustomerController extends Controller
                 })
 
                 ->rawColumns([
-                    'tgl_terima',
                     'nama_lengkap',
                     'id_marketing',
                     'id_lokasi',
-                    'id_status_progres',
+                    'status_pembayaran',
                     'action',
                 ])
 
@@ -257,11 +236,9 @@ class CustomerController extends Controller
     {
         $cust      = null;
         $marketing = Marketing::all();
-        $progres   = ListPenjualan::all();
         $lokasi    = LokasiKavling::all();
-        $bankList  = Bank::all();
 
-        return view('admin.customer.customer.create', compact('cust', 'marketing', 'progres', 'lokasi', 'bankList'));
+        return view('admin.customer.customer.create', compact('cust', 'marketing', 'lokasi'));
     }
 
     public function getKavling(Request $request, $idLokasi)
@@ -302,132 +279,72 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $request->merge([
-            'hrg_jual'           => $request->hrg_jual ? (int) str_replace(['.', ','], '', $request->hrg_jual) : 0,
-            'discount'           => $request->discount ? (int) str_replace(['.', ','], '', $request->discount) : 0,
-            'pembayaran_booking' => $request->pembayaran_booking ? (int) str_replace(['.', ','], '', $request->pembayaran_booking) : 0,
-            'dp_kredit'          => $request->dp_kredit ? (int) str_replace(['.', ','], '', $request->dp_kredit) : 0,
-            'inhouse_tenor'      => $request->inhouse_tenor ?? 0,
-            'inhouse_perbulan'   => $request->inhouse_perbulan ? (int) str_replace(['.', ','], '', $request->inhouse_perbulan) : 0,
+            'hrg_jual'        => $request->hrg_jual ? (int) str_replace(['.', ','], '', $request->hrg_jual) : 0,
+            'discount'        => $request->discount ? (int) str_replace(['.', ','], '', $request->discount) : 0,
+            'nominal_cicilan' => $request->nominal_cicilan ? (int) str_replace(['.', ','], '', $request->nominal_cicilan) : 0,
         ]);
 
         $request->validate([
-            'tgl_terima'          => 'required|date',
-            'nama_lengkap'        => 'required|string|max:150',
-            'no_ktp'              => 'required',
-            'tempat_lahir'        => 'required',
-            'tgl_lahir'           => 'required|date',
-            'no_telp'             => 'required',
-            'alamat'              => 'required',
-            'email'               => 'nullable|email|max:75',
-            'id_lokasi'           => 'required|integer|exists:lokasi_kavling,id',
-            'id_kavling'          => 'required|array|min:1',
-            'id_kavling.*'        => 'required|integer|distinct|exists:kavling_peta,id',
-            'id_status_progres'   => 'required|exists:progres_list_penjualan,id',
-            'id_marketing'        => 'nullable|exists:marketing,id',
-            'discount'            => 'numeric|min:0',
-            'id_bank'             => 'required|exists:bank,id',
-            'hrg_jual'            => 'required|numeric',
-            'jenis_pembelian'     => 'required|in:Booking,Cash Keras,Kredit',
+            'tgl_terima'       => 'required|date',
+            'nama_lengkap'     => 'required|string|max:150',
+            'no_ktp'           => 'required',
+            'tempat_lahir'     => 'required',
+            'tgl_lahir'        => 'required|date',
+            'no_telp'          => 'required',
+            'alamat'           => 'required',
+            'email'            => 'nullable|email|max:75',
+            'id_lokasi'        => 'required|integer|exists:lokasi_kavling,id',
+            'id_kavling'       => 'required|array|min:1',
+            'id_kavling.*'     => 'required|integer|distinct|exists:kavling_peta,id',
+            'id_marketing'     => 'nullable|exists:marketing,id',
+            'discount'         => 'numeric|min:0',
+            'hrg_jual'         => 'required|numeric',
+            'skema_pembayaran' => 'required|in:Cash Keras,Cash Tempo,Kredit',
 
-            'pembayaran_booking'  => 'exclude_unless:jenis_pembelian,Booking|nullable|required_if:jenis_pembelian,Booking|numeric|min:0',
-            'tgl_batas_booking'   => 'exclude_unless:jenis_pembelian,Booking|nullable|required_if:jenis_pembelian,Booking|date|after_or_equal:tgl_terima',
-
-            'dp_kredit'           => 'exclude_unless:jenis_pembelian,Kredit|nullable|required_if:jenis_pembelian,Kredit|numeric|min:0',
-            'inhouse_tenor'       => 'exclude_unless:jenis_pembelian,Kredit|nullable|required_if:jenis_pembelian,Kredit|integer|min:1',
-            'inhouse_perbulan'    => 'exclude_unless:jenis_pembelian,Kredit|nullable|required_if:jenis_pembelian,Kredit|numeric|gt:0',
-            'inhouse_jatuh_tempo' => 'exclude_unless:jenis_pembelian,Kredit|nullable|required_if:jenis_pembelian,Kredit|date',
+            'nominal_cicilan'  => 'exclude_unless:skema_pembayaran,Cash Tempo|required_if:skema_pembayaran,Cash Tempo|integer|min:1',
+            'lama_cicilan'     => 'exclude_unless:skema_pembayaran,Cash Tempo|required_if:skema_pembayaran,Cash Tempo|integer|min:1',
+            'tgl_jatuh_tempo'  => 'exclude_unless:skema_pembayaran,Cash Tempo|required_if:skema_pembayaran,Cash Tempo|date',
         ], [
-            'tgl_terima.required'             => 'Tanggal terima wajib diisi!',
-            'tgl_terima.date'                 => 'Tanggal terima harus berupa tanggal yang valid!',
+            'tgl_terima.required'         => 'Tanggal terima wajib diisi!',
+            'tgl_terima.date'             => 'Tanggal terima harus berupa tanggal yang valid!',
 
-            'nama_lengkap.required'           => 'Nama lengkap wajib diisi!',
+            'nama_lengkap.required'       => 'Nama lengkap wajib diisi!',
 
-            'no_ktp.required'                 => 'Nomor KTP wajib diisi!',
+            'no_ktp.required'             => 'Nomor KTP wajib diisi!',
 
-            'tempat_lahir.required'           => 'Tempat lahir wajib diisi!',
+            'tempat_lahir.required'       => 'Tempat lahir wajib diisi!',
 
-            'tgl_lahir.required'              => 'Tanggal lahir wajib diisi!',
-            'tgl_lahir.date'                  => 'Tanggal lahir harus berupa tanggal yang valid!',
+            'tgl_lahir.required'          => 'Tanggal lahir wajib diisi!',
+            'tgl_lahir.date'              => 'Tanggal lahir harus berupa tanggal yang valid!',
 
-            'no_telp.required'                => 'Nomor telepon wajib diisi!',
+            'no_telp.required'            => 'Nomor telepon wajib diisi!',
 
-            'alamat.required'                 => 'Alamat wajib diisi!',
+            'alamat.required'             => 'Alamat wajib diisi!',
 
-            'email.email'                     => 'Format email tidak valid!',
+            'email.email'                 => 'Format email tidak valid!',
 
-            'id_lokasi.required'              => 'Lokasi kavling wajib dipilih!',
+            'id_lokasi.required'          => 'Lokasi kavling wajib dipilih!',
 
-            'id_kavling.required'             => 'Kavling wajib dipilih!',
-            'id_kavling.array'                => 'Data kavling tidak valid!',
-            'id_kavling.*.exists'             => 'Kavling yang dipilih tidak ditemukan!',
+            'id_kavling.required'         => 'Kavling wajib dipilih!',
+            'id_kavling.array'            => 'Data kavling tidak valid!',
+            'id_kavling.*.exists'         => 'Kavling yang dipilih tidak ditemukan!',
 
-            'id_status_progres.required'      => 'Tahap penjualan wajib dipilih!',
+            'hrg_jual.required'           => 'Harga jual wajib diisi!',
+            'hrg_jual.numeric'            => 'Harga jual harus berupa angka!',
 
-            'id_bank.required'                => 'Rekening wajib dipilih!',
-            'id_bank.exists'                  => 'Bank yang dipilih tidak ditemukan!',
+            'skema_pembayaran.required'   => 'Skema pembayaran wajib dipilih!',
 
-            'hrg_jual.required'               => 'Harga jual wajib diisi!',
-            'hrg_jual.numeric'                => 'Harga jual harus berupa angka!',
-
-            'jenis_pembelian.required'        => 'Skema pembayaran wajib dipilih!',
-
-            'pembayaran_booking.required_if'  => 'Pembayaran booking wajib diisi!',
-            'pembayaran_booking.numeric'      => 'Pembayaran booking harus berupa angka!',
-
-            'tgl_batas_booking.required_if'   => 'Tanggal batas booking wajib diisi!',
-            'tgl_batas_booking.date'          => 'Tanggal batas booking tidak valid!',
-
-            'dp_kredit.required_if'           => 'DP kredit wajib diisi!',
-            'dp_kredit.numeric'               => 'DP kredit harus berupa angka!',
-
-            'inhouse_tenor.required_if'       => 'Tenor wajib diisi!',
-            'inhouse_tenor.numeric'           => 'Tenor harus berupa angka!',
-            'inhouse_tenor.min'               => 'Tenor minimal 1 bulan.',
-            'inhouse_tenor.integer'           => 'Tenor harus berupa jumlah bulan bulat.',
-            'inhouse_perbulan.gt'             => 'Cicilan per bulan harus lebih dari nol.',
-            'jenis_pembelian.in'              => 'Pilih Booking, Cash Keras, atau Kredit.',
-            'id_kavling.*.distinct'           => 'Kavling yang sama tidak boleh dipilih dua kali.',
-            'tgl_batas_booking.after_or_equal' => 'Batas booking tidak boleh sebelum tanggal transaksi.',
-
-            'inhouse_perbulan.required_if'    => 'Cicilan per bulan wajib diisi!',
-            'inhouse_perbulan.numeric'        => 'Cicilan per bulan harus berupa angka!',
-
-            'inhouse_jatuh_tempo.required_if' => 'Jatuh tempo wajib diisi!',
-            'inhouse_jatuh_tempo.date'        => 'Tanggal jatuh tempo tidak valid!',
+            'nominal_cicilan.required_if' => 'Nominal cicilan wajib diisi!',
+            'lama_cicilan.required_if'    => 'Lama cicilan wajib diisi!',
+            'tgl_jatuh_tempo.required_if' => 'Tanggal jatuh tempo wajib diisi!',
+            'skema_pembayaran.in'         => 'Pilih Cash Keras, Cash Tempo, atau Kredit.',
+            'id_kavling.*.distinct'       => 'Kavling yang sama tidak boleh dipilih dua kali.',
         ]);
-
-        if ($request->jenis_pembelian == 'Booking') {
-            $request->merge([
-                'dp_kredit'           => null,
-                'inhouse_tenor'       => null,
-                'inhouse_perbulan'    => null,
-                'inhouse_jatuh_tempo' => null,
-            ]);
-        }
-
-        if ($request->jenis_pembelian == 'Cash Keras') {
-            $request->merge([
-                'pembayaran_booking'  => null,
-                'tgl_batas_booking'   => null,
-                'dp_kredit'           => null,
-                'inhouse_tenor'       => null,
-                'inhouse_perbulan'    => null,
-                'inhouse_jatuh_tempo' => null,
-            ]);
-        }
-
-        if ($request->jenis_pembelian == 'Kredit') {
-            $request->merge([
-                'pembayaran_booking' => null,
-                'tgl_batas_booking'  => null,
-            ]);
-        }
 
         DB::beginTransaction();
 
         try {
-            $initialPayment = $request->jenis_pembelian === 'Booking' ? $request->pembayaran_booking : ($request->jenis_pembelian === 'Kredit' ? $request->dp_kredit : 0);
-            $kavlingList = (new PurchaseSelection)->availableUnits($request->id_kavling, (int) $request->id_lokasi, (int) $request->discount, (int) $initialPayment);
+            $kavlingList = (new PurchaseSelection)->availableUnits($request->id_kavling, (int) $request->id_lokasi, (int) $request->discount, 0);
             $request->merge(['hrg_jual' => (int) $kavlingList->sum('hrg_jual')]);
             $prefix = LokasiKavling::where('id', $request->id_lokasi)
                 ->value('nama_singkat');
@@ -447,117 +364,55 @@ class CustomerController extends Controller
             }
 
             $customer = Customer::create([
-                'kode_customer'       => $newKode,
-                'nama_lengkap'        => $request->nama_lengkap,
-                'no_ktp'              => $request->no_ktp,
-                'no_ktp_p'            => $request->no_ktp_p,
-                'tempat_lahir'        => $request->tempat_lahir,
-                'tgl_lahir'           => $request->tgl_lahir,
-                'no_telp'             => $request->no_telp,
-                'jenis_kelamin'       => $request->jenis_kelamin,
-                'email'               => $request->email ?? '',
-                'npwp'                => $request->npwp,
-                'alamat'              => $request->alamat,
-                'alamat_domisili'     => $request->alamat_domisili,
-                'pekerjaan'           => $request->pekerjaan,
-                'id_lokasi'           => $request->id_lokasi,
-                'id_status_progres'   => $request->id_status_progres,
-                'no_wa'               => $request->no_telp,
-                'discount'            => $request->discount,
-                'id_marketing'        => $request->filled('id_marketing') ? $request->id_marketing : 0,
-                'ket_cashback'        => $request->ket_cashback,
-                'jenis_pembelian'     => $request->jenis_pembelian,
-                'inhouse_perbulan'    => $request->inhouse_perbulan,
-                'inhouse_tenor'       => $request->inhouse_tenor,
-                'inhouse_jatuh_tempo' => $request->inhouse_jatuh_tempo,
-                'pembayaran_booking'  => $request->pembayaran_booking,
-                'tgl_batas_booking'   => $request->tgl_batas_booking,
-                'dp_kredit'           => $request->dp_kredit,
-                'id_bank'             => $request->id_bank,
+                'kode_customer'    => $newKode,
+                'nama_lengkap'     => $request->nama_lengkap,
+                'no_ktp'           => $request->no_ktp,
+                'no_ktp_p'         => $request->no_ktp_p,
+                'tempat_lahir'     => $request->tempat_lahir,
+                'tgl_lahir'        => $request->tgl_lahir,
+                'no_telp'          => $request->no_telp,
+                'jenis_kelamin'    => $request->jenis_kelamin,
+                'email'            => $request->email ?? '',
+                'npwp'             => $request->npwp,
+                'alamat'           => $request->alamat,
+                'alamat_domisili'  => $request->alamat_domisili,
+                'pekerjaan'        => $request->pekerjaan,
+                'id_lokasi'        => $request->id_lokasi,
+                'no_wa'            => $request->no_telp,
+                'discount'         => $request->discount,
+                'id_marketing'     => $request->filled('id_marketing') ? $request->id_marketing : 0,
+                'ket_cashback'     => $request->ket_cashback,
+                'skema_pembayaran' => $request->skema_pembayaran,
+                'nominal_cicilan'  => $request->skema_pembayaran === 'Cash Tempo' ? $request->nominal_cicilan : null,
+                'lama_cicilan'     => $request->skema_pembayaran === 'Cash Tempo' ? $request->lama_cicilan : null,
+                'tgl_jatuh_tempo'  => $request->skema_pembayaran === 'Cash Tempo' ? $request->tgl_jatuh_tempo : null,
             ]);
 
-            PersyaratanLegal::create([
-                'id_customer' => $customer->id,
-            ]);
+            $sisaDiskon = (int) $request->discount;
 
-            $totalNominalPiutang = $kavlingList->sum('hrg_jual') - $request->discount;
-
-            foreach ($kavlingList as $kavling) {
-
-                TransaksiKavling::create([
+            foreach ($kavlingList as $index => $kavling) {
+                $diskonKavling  = $index === $kavlingList->count() - 1
+                    ? $sisaDiskon
+                    : (int) floor($request->discount * ($kavling->hrg_jual / max(1, $kavlingList->sum('hrg_jual'))));
+                $sisaDiskon       -= $diskonKavling;
+                $transaksiKavling  = TransaksiKavling::create([
                     'id_customer' => $customer->id,
                     'id_kavling'  => $kavling->id,
                     'tgl_terima'  => $request->tgl_terima,
                     'hrg_rumah'   => $kavling->hrg_jual,
                 ]);
-
-            }
-
-            $nominalBayar         = 0;
-            $statusPiutang        = 1;
-            $tglPelunasan         = null;
-            $kategoriPemasukan    = null;
-            $keteranganPemasukan  = null;
-
-            if ($request->jenis_pembelian == 'Booking') {
-                $nominalBayar        = $request->pembayaran_booking ?? 0;
-                $kategoriPemasukan   = 25;
-                $keteranganPemasukan = 'Pembayaran Booking Kavling';
-            }
-
-            if ($request->jenis_pembelian == 'Kredit') {
-                $nominalBayar        = $request->dp_kredit ?? 0;
-                $kategoriPemasukan   = 26;
-                $keteranganPemasukan = 'Pembayaran DP Kredit Kavling';
-            }
-
-            if ($request->jenis_pembelian == 'Cash Keras') {
-                $nominalBayar        = $totalNominalPiutang;
-                $statusPiutang       = 2;
-                $tglPelunasan        = now()->toDateString();
-                $kategoriPemasukan   = 27;
-                $keteranganPemasukan = 'Pelunasan Cash Keras Kavling';
-            }
-
-            $sisaBayar = $totalNominalPiutang - $nominalBayar;
-
-            if ($sisaBayar <= 0) {
-                $statusPiutang = 2;
-                $sisaBayar     = 0;
-                $tglPelunasan  = now()->toDateString();
-            }
-
-            $namaKavling = $kavlingList
-                ->map(function ($item) {
-                    return $item->lokasi->nama_kavling . ' Blok ' . $item->kode_kavling;
-                })
-                ->implode(', ');
-
-            $deskripsiPiutang = 'Harga Tanah Kavling di ' . $namaKavling;
-
-            $piutang = Piutang::create([
-                'id_bank'               => $request->id_bank,
-                'id_customer'           => $customer->id,
-                'tanggal_piutang'       => $request->tgl_terima,
-                'deskripsi'             => $deskripsiPiutang,
-                'nominal'               => $totalNominalPiutang,
-                'status'                => $statusPiutang,
-                'terbayar'              => $nominalBayar,
-                'sisa_bayar'            => $sisaBayar,
-                'tgl_pelunasan'         => $tglPelunasan,
-                'id_kategori_transaksi' => 0,
-            ]);
-
-            if ($nominalBayar > 0) {
-                Pemasukan::create([
-                    'id_bank'               => $request->id_bank,
-                    'id_piutang'            => $piutang->id,
+                $nominalPiutang  = max(0, (int) $kavling->hrg_jual - $diskonKavling);
+                Piutang::create([
                     'id_customer'           => $customer->id,
-                    'id_lokasi'             => $request->id_lokasi,
-                    'tanggal'               => $request->tgl_terima,
-                    'nominal'               => $nominalBayar,
-                    'id_kategori_transaksi' => $kategoriPemasukan,
-                    'keterangan'            => $keteranganPemasukan . ' - ' . $customer->nama_lengkap,
+                    'id_transaksi_kavling'  => $transaksiKavling->id,
+                    'tanggal_piutang'       => $request->tgl_terima,
+                    'deskripsi'             => 'Harga Tanah Kavling ' . $kavling->lokasi->nama_kavling . ' Blok ' . $kavling->kode_kavling,
+                    'nominal'               => $nominalPiutang,
+                    'status'                => 1,
+                    'terbayar'              => 0,
+                    'sisa_bayar'            => $nominalPiutang,
+                    'tgl_pelunasan'         => null,
+                    'id_kategori_transaksi' => 0,
                 ]);
             }
 
@@ -587,72 +442,119 @@ class CustomerController extends Controller
         $cust = Customer::with(['lokasi', 'transaksiKavling.kavling', 'piutangs'])->findOrFail($id);
 
         $marketing = Marketing::all();
-        $progres   = ListPenjualan::all();
         $lokasi    = LokasiKavling::all();
-        $bankList  = Bank::all();
 
         return view(
             'admin.customer.customer.edit',
-            compact('cust', 'marketing', 'progres', 'lokasi', 'bankList')
+            compact('cust', 'marketing', 'lokasi')
         );
     }
 
     public function update(Request $request, $id)
     {
         $customer = Customer::findOrFail($id);
-        $request->validate([
-            'nama_lengkap'      => 'required|string|max:150',
-            'no_ktp'            => 'required|string|max:25',
-            'tempat_lahir'      => 'required|string|max:100',
-            'tgl_lahir'         => 'required|date',
-            'no_telp'           => 'required|string|max:25',
-            'alamat'            => 'required',
-            'email'             => 'nullable|email|max:75',
-            'id_status_progres' => 'required|integer|exists:progres_list_penjualan,id',
-            'id_marketing'      => 'nullable|exists:marketing,id',
-        ], [
-            'nama_lengkap.required'      => 'Nama lengkap wajib diisi!',
 
-            'no_ktp.required'            => 'Nomor KTP wajib diisi!',
-
-            'tempat_lahir.required'      => 'Tempat lahir wajib diisi!',
-
-            'tgl_lahir.required'         => 'Tanggal lahir wajib diisi!',
-            'tgl_lahir.date'             => 'Tanggal lahir harus berupa tanggal yang valid!',
-
-            'no_telp.required'           => 'Nomor telepon wajib diisi!',
-
-            'alamat.required'            => 'Alamat wajib diisi!',
-
-            'email.email'                => 'Format email tidak valid!',
-
-            'id_status_progres.required' => 'Tahap penjualan wajib dipilih!',
-
-            'id_marketing.exists'        => 'Marketing yang dipilih tidak ditemukan!',
+        $request->merge([
+            'discount'        => $request->filled('discount') ? (int) str_replace(['.', ','], '', $request->discount) : 0,
+            'nominal_cicilan' => $request->filled('nominal_cicilan') ? (int) str_replace(['.', ','], '', $request->nominal_cicilan) : 0,
         ]);
+
+        $isCashTempo = $customer->skema_pembayaran === 'Cash Tempo';
+
+        $rules = [
+            'nama_lengkap' => 'required|string|max:150',
+            'no_ktp'       => 'required|string|max:25',
+            'tempat_lahir' => 'required|string|max:100',
+            'tgl_lahir'    => 'required|date',
+            'no_telp'      => 'required|string|max:25',
+            'alamat'       => 'required',
+            'email'        => 'nullable|email|max:75',
+            'id_marketing' => 'nullable|exists:marketing,id',
+            'discount'     => 'integer|min:0',
+        ];
+
+        $messages = [
+            'nama_lengkap.required' => 'Nama lengkap wajib diisi!',
+
+            'no_ktp.required'       => 'Nomor KTP wajib diisi!',
+
+            'tempat_lahir.required' => 'Tempat lahir wajib diisi!',
+
+            'tgl_lahir.required'    => 'Tanggal lahir wajib diisi!',
+            'tgl_lahir.date'        => 'Tanggal lahir harus berupa tanggal yang valid!',
+
+            'no_telp.required'      => 'Nomor telepon wajib diisi!',
+
+            'alamat.required'       => 'Alamat wajib diisi!',
+
+            'email.email'           => 'Format email tidak valid!',
+
+            'id_marketing.exists'   => 'Marketing yang dipilih tidak ditemukan!',
+
+            'discount.integer'      => 'Diskon harus berupa angka!',
+            'discount.min'          => 'Diskon tidak boleh bernilai negatif!',
+        ];
+
+        if ($isCashTempo) {
+            $rules['nominal_cicilan'] = 'required|integer|min:1';
+            $rules['lama_cicilan']    = 'required|integer|min:1';
+            $rules['tgl_jatuh_tempo'] = 'required|date';
+
+            $messages['nominal_cicilan.required'] = 'Nominal cicilan wajib diisi!';
+            $messages['nominal_cicilan.min']      = 'Nominal cicilan harus lebih dari nol!';
+            $messages['lama_cicilan.required']    = 'Lama cicilan wajib diisi!';
+            $messages['lama_cicilan.min']         = 'Lama cicilan harus lebih dari nol!';
+            $messages['tgl_jatuh_tempo.required'] = 'Tanggal jatuh tempo wajib diisi!';
+            $messages['tgl_jatuh_tempo.date']     = 'Tanggal jatuh tempo harus berupa tanggal yang valid!';
+        }
+
+        $request->validate($rules, $messages);
+
+        $totalHarga     = (int) TransaksiKavling::where('id_customer', $customer->id)->sum('hrg_rumah');
+        $totalTerbayar  = (int) Piutang::where('id_customer', $customer->id)->sum('terbayar');
+
+        if ($request->discount > $totalHarga) {
+            throw ValidationException::withMessages([
+                'discount' => 'Diskon tidak boleh melebihi harga total kavling (Rp ' . number_format($totalHarga, 0, ',', '.') . ').',
+            ]);
+        }
+
+        if ($totalHarga - $request->discount < $totalTerbayar) {
+            throw ValidationException::withMessages([
+                'discount' => 'Diskon terlalu besar. Nilai setelah diskon tidak boleh lebih kecil dari pembayaran yang sudah masuk (Rp ' . number_format($totalTerbayar, 0, ',', '.') . ').',
+            ]);
+        }
 
         DB::beginTransaction();
 
         try {
+            $diskonLama = (int) $customer->discount;
 
             $customer->update([
-                'nama_lengkap'      => $request->nama_lengkap,
-                'no_ktp'            => $request->no_ktp,
-                'no_ktp_p'          => $request->no_ktp_p,
-                'tempat_lahir'      => $request->tempat_lahir,
-                'tgl_lahir'         => $request->tgl_lahir,
-                'no_telp'           => $request->no_telp,
-                'no_wa'             => $request->no_telp,
-                'jenis_kelamin'     => $request->jenis_kelamin,
-                'email'             => $request->email ?? '',
-                'npwp'              => $request->npwp,
-                'alamat'            => $request->alamat,
-                'alamat_domisili'   => $request->alamat_domisili,
-                'pekerjaan'         => $request->pekerjaan,
-                'id_status_progres' => $request->id_status_progres,
-                'id_marketing'      => $request->filled('id_marketing') ? $request->id_marketing : 0,
-                'ket_cashback'      => $request->ket_cashback,
+                'nama_lengkap'    => $request->nama_lengkap,
+                'no_ktp'          => $request->no_ktp,
+                'no_ktp_p'        => $request->no_ktp_p,
+                'tempat_lahir'    => $request->tempat_lahir,
+                'tgl_lahir'       => $request->tgl_lahir,
+                'no_telp'         => $request->no_telp,
+                'no_wa'           => $request->no_telp,
+                'jenis_kelamin'   => $request->jenis_kelamin,
+                'email'           => $request->email ?? '',
+                'npwp'            => $request->npwp,
+                'alamat'          => $request->alamat,
+                'alamat_domisili' => $request->alamat_domisili,
+                'pekerjaan'       => $request->pekerjaan,
+                'id_marketing'    => $request->filled('id_marketing') ? $request->id_marketing : 0,
+                'ket_cashback'    => $request->ket_cashback,
+                'discount'        => $request->discount,
+                'nominal_cicilan' => $isCashTempo ? $request->nominal_cicilan : null,
+                'lama_cicilan'    => $isCashTempo ? $request->lama_cicilan : null,
+                'tgl_jatuh_tempo' => $isCashTempo ? $request->tgl_jatuh_tempo : null,
             ]);
+
+            if ($diskonLama !== (int) $request->discount) {
+                $this->sesuaikanPiutangDiskon($customer, (int) $request->discount);
+            }
 
             DB::commit();
 
@@ -672,9 +574,44 @@ class CustomerController extends Controller
         }
     }
 
+    private function sesuaikanPiutangDiskon(Customer $customer, int $diskon): void
+    {
+        $transaksiList = TransaksiKavling::where('id_customer', $customer->id)->orderBy('id')->get();
+        $piutangList   = Piutang::where('id_customer', $customer->id)
+            ->where('deskripsi', 'like', 'Harga Tanah Kavling%')
+            ->orderBy('id')
+            ->get();
+
+        if ($transaksiList->isEmpty() || $transaksiList->count() !== $piutangList->count()) {
+            Log::warning('Penyesuaian piutang diskon dilewati untuk customer ' . $customer->id . ': jumlah transaksi kavling dan piutang tidak cocok.');
+
+            return;
+        }
+
+        $totalHarga    = max(1, (int) $transaksiList->sum('hrg_rumah'));
+        $sisaDiskon    = $diskon;
+        $indexTerakhir = $transaksiList->count() - 1;
+
+        foreach ($transaksiList as $index => $transaksi) {
+            $diskonKavling = $index === $indexTerakhir
+                ? $sisaDiskon
+                : (int) floor($diskon * ((int) $transaksi->hrg_rumah / $totalHarga));
+
+            $sisaDiskon -= $diskonKavling;
+
+            $nominal = max(0, (int) $transaksi->hrg_rumah - $diskonKavling);
+            $piutang = $piutangList[$index];
+
+            $piutang->update([
+                'nominal'    => $nominal,
+                'sisa_bayar' => max(0, $nominal - (int) $piutang->terbayar),
+            ]);
+        }
+    }
+
     public function cetakData(Request $request)
     {
-        $query = Customer::with(['marketing', 'lokasi', 'kavling', 'progres'])->where('stt_arsip', 0);
+        $query = Customer::with(['marketing', 'lokasi', 'kavling'])->where('stt_arsip', 0);
 
         if ($request->lokasi) {
             $query->where('id_lokasi', $request->lokasi);
@@ -768,7 +705,7 @@ class CustomerController extends Controller
                 $pdf->Cell(15, 7, $unitKavling, 1, 0, 'C'); // Menggunakan string gabungan
                 $pdf->Cell(25, 7, (! empty($d->no_wa) ? $d->no_wa : ($d->no_telp ?? '-')), 1, 0, 'C');
                 $pdf->Cell(40, 7, ($d->marketing->nama_marketing ?? '-'), 1, 0, 'L');
-                $pdf->Cell(30, 7, ($d->progres->status_progres ?? '-'), 1, 1, 'C');
+                $pdf->Cell(30, 7, ($d->tahap_pembayaran ?? '-'), 1, 1, 'C');
             }
         } else {
             $pdf->SetX($startX);

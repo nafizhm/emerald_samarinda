@@ -28,16 +28,15 @@
                         </div>
                     </div>
                 </div>
-                <div class="card-body customer-list-content">
-                    <table class="table data-table customer-table">
+                <div class="card-body">
+                    <table class="table data-table table-striped table-bordered">
                         <thead>
                             <tr>
                                 <th>No</th>
-                                <th>Transaksi</th>
                                 <th>Customer</th>
                                 <th>Marketing</th>
                                 <th>Kavling / proyek</th>
-                                <th>Tahapan penjualan</th>
+                                <th>Status Pembayaran</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
@@ -176,7 +175,7 @@
                 ordering: false,
                 responsive: false,
                 autoWidth: false,
-                createdRow: function(row) { const labels = ['No', 'Transaksi', 'Customer', 'Marketing', 'Kavling / proyek', 'Tahapan penjualan', 'Aksi']; row.querySelectorAll('td').forEach((cell, index) => cell.setAttribute('data-label', labels[index])); },
+                createdRow: function(row) { const labels = ['No', 'Customer', 'Marketing', 'Kavling / proyek', 'Status Pembayaran', 'Aksi']; row.querySelectorAll('td').forEach((cell, index) => cell.setAttribute('data-label', labels[index])); },
                 ajax: "{{ route('customer.index') }}",
                 columns: [{
                         data: 'DT_RowIndex',
@@ -184,11 +183,6 @@
                         orderable: false,
                         searchable: false,
                         className: 'text-center'
-                    },
-                    {
-                        data: 'tgl_terima',
-                        name: 'tgl_terima',
-                        searchable: false
                     },
                     {
                         data: 'nama_lengkap',
@@ -206,9 +200,9 @@
                         searchable: false
                     },
                     {
-                        data: 'id_status_progres',
-                        name: 'id_status_progres',
-                        className: 'text-center',
+                        data: 'status_pembayaran',
+                        name: 'status_pembayaran',
+                        orderable: false,
                         searchable: false
                     },
                     {

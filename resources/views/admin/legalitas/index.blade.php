@@ -1,6 +1,6 @@
 @extends('admin.layout')
 @section('page_title', 'Data Legalitas')
-@section('search_placeholder', 'Cari kode kavling, nama konsumen...')
+@section('search_placeholder', 'Cari nama konsumen...')
 @section('content')
     <style>
         td.keterangan-col {
@@ -26,13 +26,8 @@
             <div class="card">
                 <div class="card-header workspace-page-header">
                     <div class="d-flex align-content-center justify-content-between">
-                        <div class="workspace-heading"><p class="dashboard-eyebrow">Dokumen & legalitas</p><h1>Data Legalitas</h1><p class="workspace-description">Kelola dokumen legalitas dan lampiran terkait.</p></div>
-                        <div class="d-flex align-items-center gap-2 w-25">
-                            <select name="filter" id="filter" class="form-control form-control-sm select-filter"
-                                style="height: 32px;">
-                                <option value="all">Semua</option>
-                                <option value="laku">Sudah Laku</option>
-                            </select>
+                        <div class="workspace-heading"><p class="dashboard-eyebrow">Dokumen & legalitas</p><h1>Data Legalitas</h1><p class="workspace-description">Kelola dokumen legalitas customer aktif.</p></div>
+                        <div class="d-flex align-items-center gap-2">
                             <a href="javascript:void(0);" onclick="reloadTable()"
                                 class="btn btn-light btn-rounded btn-sm d-flex align-items-center" title="Perbarui daftar"
                                 style="height: 32px;">
@@ -46,14 +41,16 @@
                             <thead>
                                 <tr>
                                     <th width="4%">No</th>
-                                    <th width="10%">Kode Kavling</th>
                                     <th width="18%">Nama Konsumen</th>
-                                    <th width="15%">Atas Nama Surat</th>
-                                    <th width="12%">No. Surat</th>
-                                    <th width="10%">Progres</th>
-                                    <th width="8%">Bukti Foto</th>
-                                    <th width="13%">Keterangan</th>
-                                    <th class="text-center" width="10%">Aksi</th>
+                                    <th width="10%">Kavling</th>
+                                    <th width="12%">Atas Nama Surat</th>
+                                    <th width="10%">No. Surat</th>
+                                    <th width="7%">IPH</th>
+                                    <th width="7%">SHGB</th>
+                                    <th width="7%">Pajak</th>
+                                    <th width="12%">Catatan Legalitas</th>
+                                    <th width="6%">Bukti Foto</th>
+                                    <th class="text-center" width="7%">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -97,6 +94,38 @@
                         </div>
 
                         <div class="row mb-3">
+                            <label for="IPH" class="col-sm-4 col-form-label">IPH</label>
+                            <div class="col-sm-8">
+                                <input type="text" id="IPH" class="form-control" name="IPH"
+                                    placeholder="Masukkan status IPH">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label for="SHGB" class="col-sm-4 col-form-label">SHGB</label>
+                            <div class="col-sm-8">
+                                <input type="text" id="SHGB" class="form-control" name="SHGB"
+                                    placeholder="Masukkan status SHGB">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label for="PAJAK" class="col-sm-4 col-form-label">Pajak</label>
+                            <div class="col-sm-8">
+                                <input type="text" id="PAJAK" class="form-control" name="PAJAK"
+                                    placeholder="Masukkan status pajak">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <label for="catatan_legalitas" class="col-sm-4 col-form-label">Catatan Legalitas</label>
+                            <div class="col-sm-8">
+                                <textarea id="catatan_legalitas" class="form-control" name="catatan_legalitas" rows="2"
+                                    placeholder="Tambahkan catatan legalitas jika ada"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
                             <label for="keterangan" class="col-sm-4 col-form-label">Keterangan</label>
                             <div class="col-sm-8">
                                 <textarea id="keterangan_legalitas" class="form-control" name="keterangan_legalitas" rows="3"
@@ -105,7 +134,7 @@
                         </div>
 
                         <div class="row mb-3">
-                            <label for="keterangan" class="col-sm-4 col-form-label">Upload Foto</label>
+                            <label for="upload_foto" class="col-sm-4 col-form-label">Upload Foto</label>
                             <div class="col-sm-8">
                                 <input type="file" multiple id="upload_foto" class="form-control" name="upload_foto[]"
                                     accept="image/*">
@@ -154,18 +183,6 @@
 @endsection
 @push('scripts')
     <script>
-        $(document).ready(function() {
-            $('.select-filter').select2({
-                width: '100%',
-                placeholder: 'Pilih Status',
-                minimumResultsForSearch: Infinity,
-            });
-
-            if ($('body').hasClass('dark')) {
-                $('.select2-container').addClass('select2-dark');
-            }
-        });
-
         var permissions = @json($permissions);
         var showActionColumn = (permissions['edit'] == 1 || permissions['hapus'] == 1);
 
@@ -178,10 +195,7 @@
                 ordering: false,
                 responsive: true,
                 ajax: {
-                    url: "{{ route('legalitas.index') }}",
-                    data: function(d) {
-                        d.filter = $('.select-filter').val();
-                    }
+                    url: "{{ route('legalitas.index') }}"
                 },
                 columns: [{
                         data: 'DT_RowIndex',
@@ -191,14 +205,14 @@
                         className: 'text-center'
                     },
                     {
-                        data: 'kode_kavling',
-                        name: 'kode_kavling',
+                        data: 'nama_lengkap',
+                        name: 'nama_lengkap',
                         orderable: false,
                         searchable: true
                     },
                     {
-                        data: 'nama_konsumen',
-                        name: 'nama_konsumen',
+                        data: 'kavling',
+                        name: 'kavling',
                         orderable: false,
                         searchable: false
                     },
@@ -215,24 +229,38 @@
                         searchable: false
                     },
                     {
-                        data: 'progres',
-                        name: 'progres',
+                        data: 'iph',
+                        name: 'iph',
                         orderable: false,
                         searchable: false,
                         className: 'text-center'
+                    },
+                    {
+                        data: 'shgb',
+                        name: 'shgb',
+                        orderable: false,
+                        searchable: false,
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'pajak',
+                        name: 'pajak',
+                        orderable: false,
+                        searchable: false,
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'catatan',
+                        name: 'catatan',
+                        orderable: false,
+                        searchable: false,
+                        className: 'keterangan-col'
                     },
                     {
                         data: 'bukti_foto',
                         name: 'bukti_foto',
                         orderable: false,
                         searchable: false
-                    },
-                    {
-                        data: 'keterangan',
-                        name: 'keterangan',
-                        orderable: false,
-                        searchable: false,
-                        className: 'keterangan-col'
                     },
                     {
                         data: 'action',
@@ -250,10 +278,6 @@
                     }
                 }]
             });
-
-            $('.select-filter').on('change', function() {
-                table.ajax.reload();
-            });
         });
 
         function reloadTable() {
@@ -268,6 +292,10 @@
                     $('#primary_id').val(response.data.id);
                     $('#atas_nama').val(response.data.atas_nama);
                     $('#no_surat').val(response.data.no_surat);
+                    $('#IPH').val(response.data.IPH);
+                    $('#SHGB').val(response.data.SHGB);
+                    $('#PAJAK').val(response.data.PAJAK);
+                    $('#catatan_legalitas').val(response.data.catatan_legalitas);
                     $('#keterangan_legalitas').val(response.data.keterangan_legalitas);
 
                     $('#modalForm').modal('show');
@@ -280,6 +308,10 @@
             $('#primary_id').val('');
             $('#atas_nama').val('');
             $('#no_surat').val('');
+            $('#IPH').val('');
+            $('#SHGB').val('');
+            $('#PAJAK').val('');
+            $('#catatan_legalitas').val('');
             $('#keterangan_legalitas').val('');
 
             $('.is-invalid').removeClass('is-invalid');

@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
@@ -15,10 +14,14 @@ class UploadFileController extends Controller
 {
     public function index()
     {
-        $data = UploadFile::first();
+        $data        = UploadFile::first();
         $permissions = HakAksesController::getUserPermissions();
+        $customers   = Customer::where('stt_arsip', 0)
+            ->select('id', 'nama_lengkap', 'kode_customer')
+            ->orderBy('nama_lengkap', 'asc')
+            ->get();
 
-        return view('admin.customer.upload_file.index', compact('data', 'permissions'));
+        return view('admin.customer.upload_file.index', compact('data', 'permissions', 'customers'));
     }
 
     public function getFileNasabah($id)
@@ -29,7 +32,7 @@ class UploadFileController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Data tidak ditemukan',
-                'data' => []
+                'data'    => [],
             ], 200);
         }
 
@@ -37,7 +40,7 @@ class UploadFileController extends Controller
             [
                 'success' => true,
                 'message' => 'Data ditemukan',
-                'data'    => $files
+                'data'    => $files,
             ],
             200
         );
@@ -47,31 +50,31 @@ class UploadFileController extends Controller
     {
         $request->validate([
             'id_customer' => 'required|exists:customer,id',
-            'tanggal'    => 'required|date',
-            'nama_file'  => 'required|string',
-            'lampiran'   => 'required|file|mimes:jpg,jpeg,png,webp,pdf',
+            'tanggal'     => 'nullable|date',
+            'jenis_file'  => 'nullable|string',
+            'keterangan'  => 'nullable|string',
+            'lampiran'    => 'required|file|mimes:jpg,jpeg,png,webp,pdf|max:5120',
         ], [
-            'id_customer.required'  => 'Customer wajib diisi.',
-            'id_customer.exists'    => 'Customer tidak ditemukan.',
-            'tanggal.required'      => 'Tanggal wajib diisi.',
-            'tanggal.date'          => 'Tanggal tidak valid.',
-            'nama_file.required'    => 'Nama file wajib diisi.',
-            'lampiran.required'     => 'Lampiran wajib diunggah.',
-            'lampiran.file'         => 'Lampiran harus berupa file.',
-            'lampiran.mimes'        => 'Hanya mendukung jpg, jpeg, png, webp, atau pdf.',
+            'id_customer.required' => 'Customer wajib diisi.',
+            'id_customer.exists'   => 'Customer tidak ditemukan.',
+            'tanggal.date'         => 'Tanggal tidak valid.',
+            'lampiran.required'    => 'Lampiran wajib diunggah.',
+            'lampiran.file'        => 'Lampiran harus berupa file.',
+            'lampiran.mimes'       => 'Hanya mendukung jpg, jpeg, png, webp, atau pdf.',
+            'lampiran.max'         => 'Ukuran lampiran maksimal 5 MB.',
         ]);
 
         DB::beginTransaction();
 
         try {
-            $folder = 'berkas_user';
-            $destination = public_path($folder);
+            $folderRelative = 'assets/berkas_customer';
+            $destination    = public_path($folderRelative);
 
-            if (!file_exists($destination)) {
+            if (! file_exists($destination)) {
                 mkdir($destination, 0755, true);
             }
 
-            $file = $request->file('lampiran');
+            $file              = $request->file('lampiran');
             $originalExtension = strtolower($file->getClientOriginalExtension());
 
             $cleanName = preg_replace('/[^a-zA-Z0-9-_\.]/', '_', pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
@@ -82,8 +85,7 @@ class UploadFileController extends Controller
             UploadFile::create([
                 'tanggal'     => $request->tanggal,
                 'id_customer' => $request->id_customer,
-                'folder'      => $folder,
-                'nama_file'   => $request->nama_file,
+                'jenis_file'  => $request->jenis_file ?: $request->nama_file,
                 'keterangan'  => $request->keterangan,
                 'lampiran'    => $finalName,
             ]);
@@ -93,6 +95,7 @@ class UploadFileController extends Controller
             return response()->json(['success' => true, 'message' => 'Data Berhasil Disimpan!'], 200);
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error($e->getMessage());
             return response()->json(['success' => false, 'message' => 'Terjadi Kesalahan', 'error' => $e->getMessage()], 500);
         }
     }
@@ -101,12 +104,17 @@ class UploadFileController extends Controller
     {
         $file = UploadFile::find($id);
 
-        if (!$file) {
+        if (! $file) {
             return response()->json(['success' => false, 'message' => 'Data tidak ditemukan!'], 404);
         }
 
         DB::beginTransaction();
         try {
+            $folder = $file->folder ?: 'assets/berkas_customer';
+            $filePath = public_path($folder . '/' . $file->lampiran);
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+            }
             if (Storage::exists('public/' . $file->folder . '/' . $file->lampiran)) {
                 Storage::delete('public/' . $file->folder . '/' . $file->lampiran);
             }
@@ -123,19 +131,19 @@ class UploadFileController extends Controller
 
     public function getNasabah(Request $request)
     {
-        $search = $request->get('q');
+        $search  = $request->get('q');
         $nasabah = Customer::where('stt_arsip', 0)->where(function ($q) use ($search) {
             $q->where('nama_lengkap', 'like', "%$search%")
                 ->orWhere('kode_customer', 'like', "%$search%");
         })->select('id', 'nama_lengkap', 'kode_customer')
             ->get();
 
-        if (!$nasabah) {
+        if (! $nasabah) {
             return response()->json(
                 [
                     'success' => true,
                     'message' => 'Data tidak ditemukan',
-                    'data'    => []
+                    'data'    => [],
                 ],
                 200
             );
@@ -145,7 +153,7 @@ class UploadFileController extends Controller
             [
                 'success' => true,
                 'message' => 'Data ditemukan',
-                'data'    => $nasabah
+                'data'    => $nasabah,
             ],
             200
         );
@@ -157,27 +165,30 @@ class UploadFileController extends Controller
             ->where('id', $id)
             ->first();
 
-        if (!$nasabah) {
+        if (! $nasabah) {
             return response()->json(
                 [
                     'success' => true,
                     'message' => 'Data tidak ditemukan',
-                    'data'    => []
+                    'data'    => [],
                 ]
             );
         }
 
+        $kodeKavling = $nasabah->kavling->pluck('kode_kavling')->filter()->implode(', ');
+        $noTelp      = $nasabah->no_telp ?: $nasabah->no_wa;
+
         $data = [
-            'no_ktp' => $nasabah->no_ktp,
+            'no_ktp'           => $nasabah->no_ktp,
             'lokasi_perumahan' => $nasabah->lokasiKavling ? $nasabah->lokasiKavling->nama_kavling : null,
-            'no_telp' => $nasabah->no_wa,
-            'lokasi_kav_blok' => $nasabah->kavlingPeta ? $nasabah->kavlingPeta->kode_kavling : null,
+            'no_telp'          => $noTelp,
+            'lokasi_kav_blok'  => $kodeKavling ?: null,
         ];
 
         return response()->json([
             'success' => true,
             'message' => 'Data ditemukan',
-            'data' => $data
+            'data'    => $data,
         ]);
     }
 
@@ -185,7 +196,7 @@ class UploadFileController extends Controller
     {
         $file = UploadFile::find($id);
 
-        if (!$file) {
+        if (! $file) {
             return response()->json([
                 'success' => false,
                 'message' => 'Data tidak ditemukan',
@@ -195,7 +206,7 @@ class UploadFileController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Data ditemukan',
-            'data' => $file
+            'data'    => $file,
         ]);
     }
 }

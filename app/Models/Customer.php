@@ -22,20 +22,24 @@ class Customer extends Model
         'alamat_domisili',
         'pekerjaan',
         'id_lokasi',
-        'id_status_progres',
+        'tahap_pembayaran',
         'no_wa',
         'discount',
         'id_marketing',
         'ket_cashback',
-        'jenis_pembelian',
-        'inhouse_perbulan',
-        'inhouse_tenor',
-        'inhouse_jatuh_tempo',
-        'pembayaran_booking',
-        'tgl_batas_booking',
-        'dp_kredit',
-        'id_bank',
+        'skema_pembayaran',
+        'nominal_cicilan',
+        'lama_cicilan',
+        'tgl_jatuh_tempo',
         'no_kk',
+        'atas_nama',
+        'no_surat',
+        'keterangan_legalitas',
+        'IPH',
+        'SHGB',
+        'PAJAK',
+        'catatan_legalitas',
+        'percakapan_wa',
         'stt_arsip',
         'tgl_cancel',
         'alasan_cancel',
@@ -64,11 +68,6 @@ class Customer extends Model
             'id_customer',
             'id_kavling'
         )->withPivot('tgl_terima', 'hrg_rumah');
-    }
-
-    public function progres()
-    {
-        return $this->belongsTo(ListPenjualan::class, 'id_status_progres');
     }
 
     public function lokasiKavling()
