@@ -2,12 +2,23 @@ document.addEventListener('DOMContentLoaded', function () {
     const page = document.getElementById('installment-page');
     if (!page) return;
 
+    function navigateToKavling(val) {
+        if (!val) return;
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('transaksi_kavling_id', val);
+        window.location.href = currentUrl.toString();
+    }
+
     const filterKavling = document.getElementById('filter-kavling');
     if (filterKavling) {
         filterKavling.addEventListener('change', function () {
-            const currentUrl = new URL(window.location.href);
-            currentUrl.searchParams.set('transaksi_kavling_id', this.value);
-            window.location.href = currentUrl.toString();
+            navigateToKavling(this.value);
+        });
+    }
+
+    if (window.jQuery) {
+        window.jQuery(document).on('change select2:select', '#filter-kavling', function () {
+            navigateToKavling(this.value);
         });
     }
 

@@ -19,7 +19,8 @@
                 <p class="dashboard-eyebrow">Pembayaran kavling</p>
                 <h1>{{ $customer->nama_lengkap }}</h1>
                 <p>{{ $customer->kode_customer }} <span class="installment-separator">/</span>
-                    {{ $customer->skema_pembayaran }}</p>
+                    {{ $customer->skema_pembayaran }} <span class="installment-separator">/</span>
+                    <strong class="text-primary">{{ $kavlingAktif?->kode_kavling ?? '-' }}</strong></p>
             </div>
             <div class="installment-actions"><a href="{{ route('pembayaran.index') }}" class="dashboard-action"><i
                         class="bi bi-arrow-left"></i>Daftar pembayaran</a><a
@@ -33,7 +34,8 @@
                 <div class="d-flex align-items-center gap-3 flex-wrap">
                     <label for="filter-kavling" class="fw-semibold mb-0" style="white-space:nowrap;"><i
                             class="bi bi-funnel"></i> Kavling</label>
-                    <select id="filter-kavling" class="form-select" style="max-width: 200px;"
+                    <select id="filter-kavling" class="form-select" style="max-width: 200px;" data-no-select2
+                        onchange="const u = new URL(window.location.href); u.searchParams.set('transaksi_kavling_id', this.value); window.location.href = u.toString();"
                         {{ $jumlahTransaksiKavling <= 1 ? 'disabled' : '' }}>
                         @foreach ($transaksiKavlingList as $tk)
                             <option value="{{ $tk->id }}"
