@@ -134,6 +134,23 @@ class PembayaranController extends Controller
                 if ($canDelete) $aksi .= '<button type="button" class="btn btn-danger btn-sm mx-1 delete-transaction" data-url="'.e(route('pembayaran.hapus-transaksi-cicilan', [$customer->id, $payment->id])).'" data-amount="'.e($payment->nominal).'"><i class="bi bi-trash"></i> Hapus</button>';
                 $payment->setAttribute('aksi', $aksi);
             });
+
+            if ($request->ajax()) {
+                $html = view('admin.pembayaran.partials.content', compact(
+                    'customer', 'schedule', 'canPay', 'canEdit', 'canDelete', 'history',
+                    'selectedTransaksiKavling'
+                ))->render();
+
+                return response()->json([
+                    'success' => true,
+                    'html' => $html,
+                    'paid' => $schedule['paid'],
+                    'remaining' => $schedule['remaining'],
+                    'transaksi_kavling_id' => $selectedTransaksiKavling->id,
+                    'kode_kavling' => $selectedTransaksiKavling->kavling?->kode_kavling ?? '-',
+                ]);
+            }
+
             return view('admin.pembayaran.detail', compact(
                 'customer', 'schedule', 'banks', 'kategoriPemasukan', 'canPay', 'canEdit', 'canDelete', 'history',
                 'transaksiKavlingList', 'selectedTransaksiKavling', 'jumlahTransaksiKavling', 'piutangAktif'
