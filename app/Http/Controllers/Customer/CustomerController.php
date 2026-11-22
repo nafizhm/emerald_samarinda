@@ -403,7 +403,6 @@ class CustomerController extends Controller
                 ]);
                 $nominalPiutang  = max(0, (int) $kavling->hrg_jual - $diskonKavling);
                 Piutang::create([
-                    'id_customer'           => $customer->id,
                     'id_transaksi_kavling'  => $transaksiKavling->id,
                     'tanggal_piutang'       => $request->tgl_terima,
                     'deskripsi'             => 'Harga Tanah Kavling ' . $kavling->lokasi->nama_kavling . ' Blok ' . $kavling->kode_kavling,
@@ -511,7 +510,7 @@ class CustomerController extends Controller
         $request->validate($rules, $messages);
 
         $totalHarga     = (int) TransaksiKavling::where('id_customer', $customer->id)->sum('hrg_rumah');
-        $totalTerbayar  = (int) Piutang::where('id_customer', $customer->id)->sum('terbayar');
+        $totalTerbayar  = (int) Piutang::whereHas('transaksiKavling', fn ($q) => $q->where('id_customer', $customer->id))->sum('terbayar');
 
         if ($request->discount > $totalHarga) {
             throw ValidationException::withMessages([
@@ -577,7 +576,7 @@ class CustomerController extends Controller
     private function sesuaikanPiutangDiskon(Customer $customer, int $diskon): void
     {
         $transaksiList = TransaksiKavling::where('id_customer', $customer->id)->orderBy('id')->get();
-        $piutangList   = Piutang::where('id_customer', $customer->id)
+        $piutangList   = Piutang::whereHas('transaksiKavling', fn ($q) => $q->where('id_customer', $customer->id))
             ->where('deskripsi', 'like', 'Harga Tanah Kavling%')
             ->orderBy('id')
             ->get();

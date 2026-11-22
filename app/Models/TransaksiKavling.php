@@ -25,4 +25,9 @@ class TransaksiKavling extends Model
     {
         return $this->belongsTo(KavlingPeta::class, 'id_kavling');
     }
+
+    public function piutang()
+    {
+        return $this->hasOne(Piutang::class, 'id_transaksi_kavling');
+    }
 }

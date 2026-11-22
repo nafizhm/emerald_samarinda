@@ -118,7 +118,7 @@ class PemasukanController extends Controller
             ->where('stt_fix', 1)
             ->get();
 
-        $PiutangList = Piutang::where('status', 1)->where('id_customer', 0)->get();
+        $PiutangList = Piutang::where('status', 1)->whereNull('id_transaksi_kavling')->get();
 
         $bankList = Bank::all();
 
@@ -224,9 +224,12 @@ class PemasukanController extends Controller
 
     private function paymentOwner(?Piutang $piutang): array
     {
-        return ['id_customer' => $piutang?->id_customer ?? 0,
-            'id_lokasi' => $piutang?->id_customer ? (Customer::find($piutang->id_customer)?->id_lokasi ?? 0) : 0,
-            'id_bank' => $piutang?->id_bank ?? 0];
+        $cust = $piutang?->transaksiKavling?->customer;
+        return [
+            'id_customer' => $cust?->id ?? 0,
+            'id_lokasi'   => $cust?->id_lokasi ?? 0,
+            'id_bank'     => $piutang?->id_bank ?? 0
+        ];
     }
 
     private function assertWithinBalance(?Piutang $piutang, int $amount): void

@@ -80,7 +80,7 @@ class PiutangController extends Controller
                     $deleteUrl = route('piutang.destroy', $row->id);
 
                     $btn = '<div class="d-flex justify-content-center">';
-                    if ($row->id_customer != 0) {
+                    if (!empty($row->id_transaksi_kavling)) {
                         $btn .= '<button class="btn btn-primary btn-sm mx-1 detail-button"
                                 data-id="'.e($row->id).'"
                                 data-url="'.e($detailUrl).'">Detail</button>';
@@ -346,20 +346,17 @@ class PiutangController extends Controller
             $status = $request->status;
 
             $query = DB::table('piutang')
-                ->leftJoin('customer', 'piutang.id_customer', '=', 'customer.id')
+                ->leftJoin('transaksi_kavling', 'piutang.id_transaksi_kavling', '=', 'transaksi_kavling.id')
+                ->leftJoin('customer', 'transaksi_kavling.id_customer', '=', 'customer.id')
                 ->leftJoin('lokasi_kavling', 'customer.id_lokasi', '=', 'lokasi_kavling.id')
                 ->whereYear('piutang.tanggal_piutang', $tahun)
                 ->when($bulan != 0, fn ($q) => $q->whereMonth('piutang.tanggal_piutang', $bulan))
                 ->when($status != 0, fn ($q) => $q->where('piutang.status', $status))
                 ->when($lokasi === 'all_lokasi', function ($q) {
-                    $q->whereNotNull('piutang.id_customer')
-                        ->where('piutang.id_customer', '!=', 0);
+                    $q->whereNotNull('piutang.id_transaksi_kavling');
                 })
                 ->when($lokasi === 'other', function ($q) {
-                    $q->where(function ($sub) {
-                        $sub->whereNull('piutang.id_customer')
-                            ->orWhere('piutang.id_customer', 0);
-                    });
+                    $q->whereNull('piutang.id_transaksi_kavling');
                 })
                 ->when(
                     $lokasi !== 'all_lokasi' && $lokasi !== 'other' && $lokasi != 0,
@@ -449,20 +446,17 @@ class PiutangController extends Controller
             $statusNama = $status == 0 ? 'Semua Status' : ($status == 1 ? 'Belum Lunas' : 'Sudah Lunas');
 
             $query = DB::table('piutang')
-                ->leftJoin('customer', 'piutang.id_customer', '=', 'customer.id')
+                ->leftJoin('transaksi_kavling', 'piutang.id_transaksi_kavling', '=', 'transaksi_kavling.id')
+                ->leftJoin('customer', 'transaksi_kavling.id_customer', '=', 'customer.id')
                 ->leftJoin('lokasi_kavling', 'customer.id_lokasi', '=', 'lokasi_kavling.id')
                 ->whereYear('piutang.tanggal_piutang', $tahun)
                 ->when($bulan != 0, fn ($q) => $q->whereMonth('piutang.tanggal_piutang', $bulan))
                 ->when($status != 0, fn ($q) => $q->where('piutang.status', $status))
                 ->when($lokasi === 'all_lokasi', function ($q) {
-                    $q->whereNotNull('piutang.id_customer')
-                        ->where('piutang.id_customer', '!=', 0);
+                    $q->whereNotNull('piutang.id_transaksi_kavling');
                 })
                 ->when($lokasi === 'other', function ($q) {
-                    $q->where(function ($sub) {
-                        $sub->whereNull('piutang.id_customer')
-                            ->orWhere('piutang.id_customer', 0);
-                    });
+                    $q->whereNull('piutang.id_transaksi_kavling');
                 })
                 ->when(
                     $lokasi !== 'all_lokasi' && $lokasi !== 'other' && $lokasi != 0,
@@ -624,20 +618,17 @@ class PiutangController extends Controller
             $statusNama = $status == 0 ? 'Semua Status' : ($status == 1 ? 'Belum Lunas' : 'Sudah Lunas');
 
             $query = DB::table('piutang')
-                ->leftJoin('customer', 'piutang.id_customer', '=', 'customer.id')
+                ->leftJoin('transaksi_kavling', 'piutang.id_transaksi_kavling', '=', 'transaksi_kavling.id')
+                ->leftJoin('customer', 'transaksi_kavling.id_customer', '=', 'customer.id')
                 ->leftJoin('lokasi_kavling', 'customer.id_lokasi', '=', 'lokasi_kavling.id')
                 ->whereYear('piutang.tanggal_piutang', $tahun)
                 ->when($bulan != 0, fn ($q) => $q->whereMonth('piutang.tanggal_piutang', $bulan))
                 ->when($status != 0, fn ($q) => $q->where('piutang.status', $status))
                 ->when($lokasi === 'all_lokasi', function ($q) {
-                    $q->whereNotNull('piutang.id_customer')
-                        ->where('piutang.id_customer', '!=', 0);
+                    $q->whereNotNull('piutang.id_transaksi_kavling');
                 })
                 ->when($lokasi === 'other', function ($q) {
-                    $q->where(function ($sub) {
-                        $sub->whereNull('piutang.id_customer')
-                            ->orWhere('piutang.id_customer', 0);
-                    });
+                    $q->whereNull('piutang.id_transaksi_kavling');
                 })
                 ->when(
                     $lokasi !== 'all_lokasi' && $lokasi !== 'other' && $lokasi != 0,

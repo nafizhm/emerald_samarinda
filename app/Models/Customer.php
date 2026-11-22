@@ -77,7 +77,14 @@ class Customer extends Model
 
     public function piutangs()
     {
-        return $this->hasMany(Piutang::class, 'id_customer');
+        return $this->hasManyThrough(
+            Piutang::class,
+            TransaksiKavling::class,
+            'id_customer',          // FK di transaksi_kavling
+            'id_transaksi_kavling', // FK di piutang
+            'id',                   // local key di customer
+            'id'                    // local key di transaksi_kavling
+        );
     }
 
     public function pemasukans()

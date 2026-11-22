@@ -3,10 +3,72 @@
 namespace App\Services;
 
 use App\Models\Customer;
+use App\Models\Piutang;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class InstallmentSchedule
 {
+    /**
+     * Hitung schedule berdasarkan piutang tunggal (per transaksi kavling).
+     */
+    public function forTransaksiKavling(Customer $customer, ?Piutang $piutang, Collection $pemasukans): array
+    {
+        $customer->loadMissing(['kavling']);
+        $contract = $piutang ? max(0, (int) $piutang->nominal) : 0;
+        $paid = $piutang ? max(0, (int) $piutang->terbayar) : 0;
+        $remaining = max(0, $contract - $paid);
+        $today = Carbon::today('Asia/Jakarta');
+        $rows = []; $total = 0;
+        $add = function (int $month, string $label, int $amount, ?Carbon $date) use (&$rows, &$total, $paid, $today) {
+            if ($amount <= 0) return;
+            $allocated = min($amount, max(0, $paid - $total));
+            $total += $amount;
+            $balance = $amount - $allocated;
+            $status = $balance === 0 ? 'Lunas' : ($allocated > 0 ? 'Sebagian' : ($date && $date->lt($today) ? 'Terlambat' : ($date && $date->isSameDay($today) ? 'Hari ini' : 'Belum dibayar')));
+            $rows[] = ['month' => $month, 'label' => $label, 'date' => $date, 'amount' => $amount, 'paid' => $allocated,
+                'balance' => $balance, 'cumulative' => $total, 'pay_through' => max(0, $total - $paid),
+                'status' => $status, 'late' => $balance > 0 && $date && $date->lt($today)];
+        };
+        $firstDate = $customer->kavling->pluck('pivot.tgl_terima')->filter()->sort()->first();
+        $transactionDate = $this->date($firstDate);
+        $valid = true;
+        if ($customer->skema_pembayaran === 'Kredit') {
+            $tenor = (int) ($customer->lama_cicilan ?: 0);
+            $monthly = (int) ($customer->nominal_cicilan ?: 0);
+            $start = $this->date($customer->tgl_jatuh_tempo);
+            $valid = $tenor >= 1 && $tenor <= 600 && $monthly > 0 && $start !== null;
+            $add(0, 'Uang muka (DP)', max(0, $contract - $tenor * $monthly), $transactionDate);
+            if ($valid) {
+                for ($month = 1; $month <= $tenor; $month++) {
+                    $amount = $month === $tenor ? max(0, $contract - $total) : min($monthly, max(0, $contract - $total));
+                    $add($month, 'Cicilan ke-'.$month, $amount, $start->copy()->addMonthsNoOverflow($month - 1));
+                }
+            }
+        } elseif ($customer->skema_pembayaran === 'Cash Tempo') {
+            $tenor = (int) ($customer->lama_cicilan ?: 0);
+            $monthly = (int) ($customer->nominal_cicilan ?: 0);
+            $start = $this->date($customer->tgl_jatuh_tempo);
+            $valid = $tenor >= 1 && $tenor <= 600 && $monthly > 0 && $start !== null;
+            if ($valid) {
+                for ($month = 1; $month <= $tenor; $month++) {
+                    $amount = $month === $tenor ? max(0, $contract - $total) : min($monthly, max(0, $contract - $total));
+                    $add($month, 'Cicilan ke-'.$month, $amount, $start->copy()->addMonthsNoOverflow($month - 1));
+                }
+            } else {
+                $add(1, 'Pelunasan kavling', max(0, $contract - $total), $transactionDate);
+            }
+        } else {
+            $add(1, 'Pelunasan kavling', max(0, $contract - $total), $transactionDate);
+        }
+        return ['contract' => $contract, 'paid' => $paid, 'remaining' => $remaining, 'rows' => collect($rows), 'valid' => $valid,
+            'percent' => $contract > 0 ? min(100, round($paid / $contract * 100, 1)) : 0,
+            'due' => collect($rows)->filter(fn ($row) => $row['date'] && $row['date']->lte($today))->sum('balance')];
+    }
+
+    /**
+     * Legacy: hitung schedule berdasarkan semua piutang customer (backward compatible).
+     */
     public function forCustomer(Customer $customer): array
     {
         $customer->loadMissing(['piutangs', 'kavling', 'pemasukans']);
@@ -29,7 +91,6 @@ class InstallmentSchedule
         $transactionDate = $this->date($firstDate);
         $valid = true;
         if ($customer->skema_pembayaran === 'Kredit') {
-            // Kredit: jadwal cicilan berdasarkan data kredit bank (belum diimplementasi penuh)
             $tenor = (int) ($customer->lama_cicilan ?: 0);
             $monthly = (int) ($customer->nominal_cicilan ?: 0);
             $start = $this->date($customer->tgl_jatuh_tempo);
@@ -42,7 +103,6 @@ class InstallmentSchedule
                 }
             }
         } elseif ($customer->skema_pembayaran === 'Cash Tempo') {
-            // Cash Tempo: cicilan berkala berdasarkan nominal_cicilan, lama_cicilan, tgl_jatuh_tempo
             $tenor = (int) ($customer->lama_cicilan ?: 0);
             $monthly = (int) ($customer->nominal_cicilan ?: 0);
             $start = $this->date($customer->tgl_jatuh_tempo);
@@ -56,7 +116,6 @@ class InstallmentSchedule
                 $add(1, 'Pelunasan kavling', max(0, $contract - $total), $transactionDate);
             }
         } else {
-            // Cash Keras: satu kali pelunasan
             $add(1, 'Pelunasan kavling', max(0, $contract - $total), $transactionDate);
         }
         return ['contract' => $contract, 'paid' => $paid, 'remaining' => $remaining, 'rows' => collect($rows), 'valid' => $valid,
