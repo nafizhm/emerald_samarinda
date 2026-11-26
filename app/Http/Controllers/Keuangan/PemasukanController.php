@@ -118,7 +118,7 @@ class PemasukanController extends Controller
             ->where('stt_fix', 1)
             ->get();
 
-        $PiutangList = Piutang::where('status', 1)->whereNull('id_transaksi_kavling')->get();
+        $PiutangList = Piutang::where('status', 1)->whereNull('id_customer')->get();
 
         $bankList = Bank::all();
 
@@ -224,7 +224,7 @@ class PemasukanController extends Controller
 
     private function paymentOwner(?Piutang $piutang): array
     {
-        $cust = $piutang?->transaksiKavling?->customer;
+        $cust = $piutang?->customer;
         return [
             'id_customer' => $cust?->id ?? 0,
             'id_lokasi'   => $cust?->id_lokasi ?? 0,

@@ -29,10 +29,9 @@ class PembayaranController extends Controller
     {
         $permissions = HakAksesController::getUserPermissions('pembayaran.index');
         $financials = DB::table('piutang')
-            ->join('transaksi_kavling', 'piutang.id_transaksi_kavling', '=', 'transaksi_kavling.id')
-            ->select('transaksi_kavling.id_customer')
+            ->select('piutang.id_customer')
             ->selectRaw('SUM(piutang.nominal) as contract, SUM(piutang.terbayar) as paid, SUM(piutang.sisa_bayar) as remaining')
-            ->groupBy('transaksi_kavling.id_customer');
+            ->groupBy('piutang.id_customer');
         $base = Customer::query()->leftJoinSub($financials, 'balances', 'customer.id', '=', 'balances.id_customer')->where('customer.stt_arsip', 0);
         $stats = (clone $base)->selectRaw('COUNT(*) as total, SUM(CASE WHEN balances.contract IS NOT NULL AND balances.remaining <= 0 THEN 1 ELSE 0 END) as settled, SUM(CASE WHEN balances.remaining > 0 THEN 1 ELSE 0 END) as outstanding, SUM(CASE WHEN balances.remaining > 0 THEN balances.remaining ELSE 0 END) as balance_total')->first();
         $dueRows = app(\App\Services\JatuhTempoService::class)->rows()->keyBy('id');
@@ -90,100 +89,53 @@ class PembayaranController extends Controller
 
     public function show(Request $request, $id)
     {
-        $customer = Customer::with(['piutangs', 'lokasi', 'kavling', 'transaksiKavling.kavling'])
+        $customer = Customer::with(['piutangs', 'lokasi', 'kavling.lokasi', 'transaksiKavling.kavling'])
             ->findOrFail($id);
 
-        // Daftar transaksi kavling milik customer
-        $transaksiKavlingList = $customer->transaksiKavling->load('kavling');
-        $jumlahTransaksiKavling = $transaksiKavlingList->count();
+        $piutangAktif = $customer->piutangs->first();
+        $pemasukansFiltered = Pemasukan::where('id_customer', $customer->id)
+            ->where(fn ($q) => $q->whereNull('keterangan')->orWhere('keterangan', '!=', 'GANTI NAMA'))
+            ->get();
 
-        if (in_array($customer->skema_pembayaran, ['Kredit', 'Cash Keras', 'Cash Tempo']) && $jumlahTransaksiKavling >= 1) {
-            // Tentukan transaksi kavling aktif dari filter atau default pertama
-            $selectedTransaksiKavlingId = $request->query('transaksi_kavling_id', $transaksiKavlingList->first()?->id);
-            $selectedTransaksiKavling = $transaksiKavlingList->firstWhere('id', $selectedTransaksiKavlingId) ?? $transaksiKavlingList->first();
+        $schedule = app(\App\Services\InstallmentSchedule::class)->forTransaksiKavling($customer, $piutangAktif, $pemasukansFiltered);
 
-            if (!$selectedTransaksiKavling) {
-                abort(404, 'Transaksi kavling tidak ditemukan.');
-            }
-
-            // Ambil piutang berdasarkan id_transaksi_kavling yang dipilih
-            $piutangAktif = $customer->piutangs->firstWhere('id_transaksi_kavling', $selectedTransaksiKavling->id);
-
-            // Load pemasukan hanya yang terkait piutang kavling ini
-            $customer->load(['kavling.lokasi']);
-            $pemasukansFiltered = $piutangAktif
-                ? Pemasukan::where('id_piutang', $piutangAktif->id)->get()
-                : collect();
-
-            // Buat schedule berdasarkan piutang tunggal kavling ini
-            $schedule = app(\App\Services\InstallmentSchedule::class)->forTransaksiKavling($customer, $piutangAktif, $pemasukansFiltered);
-
-            $banks = \App\Models\Bank::all();
-            $kategoriPemasukan = KategoriTransaksi::where('jenis_kategori', 'PEMASUKAN')
-                ->where('stt_fix', 1)
-                ->orderBy('kategori')
-                ->get(['id', 'kategori']);
-            $permissions = HakAksesController::getUserPermissions('pembayaran.index');
-            $canPay = (bool) ($permissions['tambah'] || $permissions['edit']);
-            $canEdit = (bool) $permissions['edit'];
-            $canDelete = (bool) $permissions['hapus'];
-            $history = $pemasukansFiltered->sortByDesc(fn ($payment) => $payment->tanggal.'-'.str_pad($payment->id, 12, '0', STR_PAD_LEFT))->values();
-            $history->each(function ($payment) use ($customer, $canEdit, $canDelete) {
-                $aksi = '<a class="btn btn-dark btn-sm mx-1" href="'.e(route('pembayaran.cetak', $payment->id)).'" target="_blank" rel="noopener"><i class="bi bi-printer"></i> Cetak Kwitansi</a>';
-                if ($canEdit) $aksi .= '<button type="button" class="btn btn-primary btn-sm mx-1 edit-transaction" data-url="'.e(route('pembayaran.transaksi-cicilan', [$customer->id, $payment->id])).'" data-update-url="'.e(route('pembayaran.update-transaksi-cicilan', [$customer->id, $payment->id])).'"><i class="bi bi-pencil-square"></i> Edit</button>';
-                if ($canDelete) $aksi .= '<button type="button" class="btn btn-danger btn-sm mx-1 delete-transaction" data-url="'.e(route('pembayaran.hapus-transaksi-cicilan', [$customer->id, $payment->id])).'" data-amount="'.e($payment->nominal).'"><i class="bi bi-trash"></i> Hapus</button>';
-                $payment->setAttribute('aksi', $aksi);
-            });
-
-            if ($request->ajax()) {
-                $html = view('admin.pembayaran.partials.content', compact(
-                    'customer', 'schedule', 'canPay', 'canEdit', 'canDelete', 'history',
-                    'selectedTransaksiKavling'
-                ))->render();
-
-                return response()->json([
-                    'success' => true,
-                    'html' => $html,
-                    'paid' => $schedule['paid'],
-                    'remaining' => $schedule['remaining'],
-                    'transaksi_kavling_id' => $selectedTransaksiKavling->id,
-                    'kode_kavling' => $selectedTransaksiKavling->kavling?->kode_kavling ?? '-',
-                ]);
-            }
-
-            return view('admin.pembayaran.detail', compact(
-                'customer', 'schedule', 'banks', 'kategoriPemasukan', 'canPay', 'canEdit', 'canDelete', 'history',
-                'transaksiKavlingList', 'selectedTransaksiKavling', 'jumlahTransaksiKavling', 'piutangAktif'
-            ));
-        }
-
-        $totalHargaJual = $customer->kavling->sum(function ($kav) {
-            return $kav->pivot->hrg_rumah;
+        $banks = \App\Models\Bank::all();
+        $kategoriPemasukan = KategoriTransaksi::where('jenis_kategori', 'PEMASUKAN')
+            ->where('stt_fix', 1)
+            ->orderBy('kategori')
+            ->get(['id', 'kategori']);
+        $permissions = HakAksesController::getUserPermissions('pembayaran.index');
+        $canPay = (bool) ($permissions['tambah'] || $permissions['edit']);
+        $canEdit = (bool) $permissions['edit'];
+        $canDelete = (bool) $permissions['hapus'];
+        $history = $pemasukansFiltered->sortByDesc(fn ($payment) => $payment->tanggal.'-'.str_pad($payment->id, 12, '0', STR_PAD_LEFT))->values();
+        $history->each(function ($payment) use ($customer, $canEdit, $canDelete) {
+            $aksi = '<a class="btn btn-dark btn-sm mx-1" href="'.e(route('pembayaran.cetak', $payment->id)).'" target="_blank" rel="noopener"><i class="bi bi-printer"></i> Cetak Kwitansi</a>';
+            if ($canEdit) $aksi .= '<button type="button" class="btn btn-primary btn-sm mx-1 edit-transaction" data-url="'.e(route('pembayaran.transaksi-cicilan', [$customer->id, $payment->id])).'" data-update-url="'.e(route('pembayaran.update-transaksi-cicilan', [$customer->id, $payment->id])).'"><i class="bi bi-pencil-square"></i> Edit</button>';
+            if ($canDelete) $aksi .= '<button type="button" class="btn btn-danger btn-sm mx-1 delete-transaction" data-url="'.e(route('pembayaran.hapus-transaksi-cicilan', [$customer->id, $payment->id])).'" data-amount="'.e($payment->nominal).'"><i class="bi bi-trash"></i> Hapus</button>';
+            $payment->setAttribute('aksi', $aksi);
         });
 
-        $kodeKavlingGabungan = $customer->kavling->pluck('kode_kavling')->implode(', ');
+        $kodeKavlingGabungan = $customer->kavling->pluck('kode_kavling')->filter()->implode(', ') ?: '-';
 
-        $metodeBayar = MetodeBayar::all();
+        if ($request->ajax()) {
+            $html = view('admin.pembayaran.partials.content', compact(
+                'customer', 'schedule', 'canPay', 'canEdit', 'canDelete', 'history',
+                'kodeKavlingGabungan'
+            ))->render();
 
-        $kategoriTransaksiPemasukan = KategoriTransaksi::whereIn('id', [25, 26, 27, 28, 102])
-            ->get();
-
-        $kategoriTransaksiTagihan = KategoriTransaksi::whereIn('id', [30])
-            ->get();
-
-        $piutang = Piutang::with('kategori')
-            ->where('id_customer', $id)
-            ->where('id_kategori_transaksi', '!=', 0)
-            ->get();
+            return response()->json([
+                'success' => true,
+                'html' => $html,
+                'paid' => $schedule['paid'],
+                'remaining' => $schedule['remaining'],
+                'kode_kavling' => $kodeKavlingGabungan,
+            ]);
+        }
 
         return view('admin.pembayaran.detail', compact(
-            'customer',
-            'metodeBayar',
-            'kategoriTransaksiPemasukan',
-            'kategoriTransaksiTagihan',
-            'piutang',
-            'totalHargaJual',
-            'kodeKavlingGabungan'
+            'customer', 'schedule', 'banks', 'kategoriPemasukan', 'canPay', 'canEdit', 'canDelete', 'history',
+            'piutangAktif', 'kodeKavlingGabungan'
         ));
     }
 
@@ -196,18 +148,15 @@ class PembayaranController extends Controller
             'amount' => 'required_if:mode,manual|nullable|integer|min:1', 'expected_paid' => 'required|integer|min:0',
             'date' => 'required|date|before_or_equal:today', 'bank_id' => 'required|integer|exists:bank,id',
             'note' => 'nullable|string|max:500', 'proof' => 'nullable|file|mimes:jpeg,png,jpg,webp,pdf|max:2048',
-            'id_transaksi_kavling' => 'required|integer|exists:transaksi_kavling,id',
+            'id_transaksi_kavling' => 'nullable|integer',
         ]);
         $proofPath = null;
         try {
         return DB::transaction(function () use ($input, $id, $request, &$proofPath) {
             $customer = Customer::lockForUpdate()->findOrFail($id);
             abort_if($customer->stt_arsip, 422, 'Customer telah diarsipkan.');
-            // Validasi transaksi kavling milik customer
-            $transaksiKavling = \App\Models\TransaksiKavling::where('id', $input['id_transaksi_kavling'])
-                ->where('id_customer', $id)->firstOrFail();
-            $piutang = Piutang::where('id_transaksi_kavling', $transaksiKavling->id)->lockForUpdate()->sole();
-            $pemasukansFiltered = Pemasukan::where('id_piutang', $piutang->id)->get();
+            $piutang = Piutang::where('id_customer', $id)->lockForUpdate()->sole();
+            $pemasukansFiltered = Pemasukan::where('id_customer', $id)->get();
             $plan = app(\App\Services\InstallmentSchedule::class)->forTransaksiKavling($customer, $piutang, $pemasukansFiltered);
             if ($plan['paid'] !== (int) $input['expected_paid']) return response()->json(['message' => 'Pembayaran telah berubah. Muat ulang halaman sebelum melanjutkan.'], 409);
             $amount = (int) ($input['amount'] ?? 0);
@@ -259,7 +208,7 @@ class PembayaranController extends Controller
             'nominal' => 'required|integer|min:1',
             'lampiran' => 'nullable|file|mimes:jpeg,png,jpg,webp,pdf|max:2048',
             'keterangan' => 'nullable|string|max:500',
-            'id_transaksi_kavling' => 'required|integer|exists:transaksi_kavling,id',
+            'id_transaksi_kavling' => 'nullable|integer',
         ], [
             'tanggal.required' => 'Tanggal transaksi wajib diisi.',
             'tanggal.date' => 'Tanggal transaksi tidak valid.',
@@ -270,7 +219,6 @@ class PembayaranController extends Controller
             'nominal.min' => 'Nominal transaksi minimal Rp1.',
             'lampiran.mimes' => 'Lampiran harus berupa JPG, PNG, WebP, atau PDF.',
             'lampiran.max' => 'Ukuran lampiran maksimal 2 MB.',
-            'id_transaksi_kavling.required' => 'Transaksi kavling wajib dipilih.',
         ]);
 
         abort_unless(KategoriTransaksi::whereKey($input['id_kategori_transaksi'])
@@ -280,10 +228,7 @@ class PembayaranController extends Controller
         try {
             return DB::transaction(function () use ($request, $input, $id, &$proofPath) {
                 $customer = Customer::lockForUpdate()->findOrFail($id);
-                // Validasi transaksi kavling milik customer
-                $transaksiKavling = \App\Models\TransaksiKavling::where('id', $input['id_transaksi_kavling'])
-                    ->where('id_customer', $id)->firstOrFail();
-                $piutang = Piutang::where('id_transaksi_kavling', $transaksiKavling->id)->lockForUpdate()->sole();
+                $piutang = Piutang::where('id_customer', $customer->id)->lockForUpdate()->sole();
                 $remaining = max(0, (int) $piutang->sisa_bayar);
                 if ((int) $input['nominal'] > $remaining) {
                     throw \Illuminate\Validation\ValidationException::withMessages(['nominal' => 'Nominal tidak boleh melebihi sisa pembayaran.']);
@@ -406,7 +351,7 @@ class PembayaranController extends Controller
         $piutang->update(['terbayar' => $terbayar, 'sisa_bayar' => $sisaBayar, 'status' => $sisaBayar === 0 ? 2 : 1,
             'tgl_pelunasan' => $sisaBayar === 0 ? $terakhir?->tanggal : null]);
         // Cek semua piutang customer untuk update tahap
-        $allPiutangs = Piutang::whereHas('transaksiKavling', fn ($q) => $q->where('id_customer', $customer->id))->get();
+        $allPiutangs = Piutang::where('id_customer', $customer->id)->get();
         $semuaLunas = $allPiutangs->every(fn ($p) => $p->sisa_bayar <= 0);
         $kategori = Pemasukan::with('kategori')->where('id_customer', $customer->id)->get()
             ->pluck('kategori.kategori')->filter();
@@ -420,12 +365,10 @@ class PembayaranController extends Controller
     public function cancelInstallment(Request $request, $id, $payment)
     {
         abort_unless(HakAksesController::getUserPermissions('pembayaran.index')['hapus'], 403);
-        $request->validate(['expected_paid' => 'required|integer|min:0', 'id_transaksi_kavling' => 'required|integer']);
+        $request->validate(['expected_paid' => 'required|integer|min:0', 'id_transaksi_kavling' => 'nullable|integer']);
         return DB::transaction(function () use ($request, $id, $payment) {
             $customer = Customer::lockForUpdate()->findOrFail($id);
-            $transaksiKavling = \App\Models\TransaksiKavling::where('id', $request->id_transaksi_kavling)
-                ->where('id_customer', $id)->firstOrFail();
-            $piutang = Piutang::where('id_transaksi_kavling', $transaksiKavling->id)->lockForUpdate()->sole();
+            $piutang = Piutang::where('id_customer', $id)->lockForUpdate()->sole();
             if ((int) $piutang->terbayar !== (int) $request->expected_paid) return response()->json(['message' => 'Saldo berubah. Muat ulang halaman sebelum membatalkan pembayaran.'], 409);
             Pemasukan::where('id_customer', $id)->whereKey($payment)->firstOrFail();
             app(\App\Http\Controllers\Keuangan\PemasukanController::class)->destroy($payment);
@@ -1044,7 +987,7 @@ class PembayaranController extends Controller
     public function detailTagihan(Request $request, $id)
     {
         if ($request->ajax()) {
-            $tagihanList  = Piutang::whereHas('transaksiKavling', fn ($q) => $q->where('id_customer', $id))->orderBy('id')->get();
+            $tagihanList  = Piutang::where('id_customer', $id)->orderBy('id')->get();
             $totalTagihan = $tagihanList->sum('nominal');
             $firstId      = $tagihanList->first() ? $tagihanList->first()->id : null;
 
@@ -1106,11 +1049,10 @@ class PembayaranController extends Controller
         DB::beginTransaction();
         try {
 
-            $cust = Customer::with('transaksiKavling')->findOrFail($id);
-            $transaksiKavling = $cust->transaksiKavling->first();
+            $cust = Customer::findOrFail($id);
 
             Piutang::create([
-                'id_transaksi_kavling'  => $transaksiKavling?->id,
+                'id_customer'           => $cust->id,
                 'id_bank'               => $cust->id_bank,
                 'tanggal_piutang'       => Carbon::now(),
                 'deskripsi'             => $request->deskripsi,
@@ -1121,8 +1063,8 @@ class PembayaranController extends Controller
                 'sisa_bayar'            => $request->nominal,
             ]);
 
-            $totalTagihan = Piutang::whereHas('transaksiKavling', fn ($q) => $q->where('id_customer', $id))->sum('nominal');
-            $sisaBayar    = Piutang::whereHas('transaksiKavling', fn ($q) => $q->where('id_customer', $id))->sum('sisa_bayar');
+            $totalTagihan = Piutang::where('id_customer', $id)->sum('nominal');
+            $sisaBayar    = Piutang::where('id_customer', $id)->sum('sisa_bayar');
 
             DB::commit();
 
@@ -1161,7 +1103,7 @@ class PembayaranController extends Controller
                     ->update(['hrg_rumah' => $kav->hrg_jual]);
             }
 
-            $piutangUtama = Piutang::whereHas('transaksiKavling', fn ($q) => $q->where('id_customer', $id))->orderBy('id')->lockForUpdate()->first();
+            $piutangUtama = Piutang::where('id_customer', $id)->orderBy('id')->lockForUpdate()->first();
 
             if (! $piutangUtama) {
                 DB::rollBack();
@@ -1191,8 +1133,8 @@ class PembayaranController extends Controller
                 $piutangUtama->update(['status' => 1]); // Belum Lunas
             }
 
-            $totalTagihan = Piutang::whereHas('transaksiKavling', fn ($q) => $q->where('id_customer', $id))->sum('nominal');
-            $sisaBayar    = Piutang::whereHas('transaksiKavling', fn ($q) => $q->where('id_customer', $id))->sum('sisa_bayar');
+            $totalTagihan = Piutang::where('id_customer', $id)->sum('nominal');
+            $sisaBayar    = Piutang::where('id_customer', $id)->sum('sisa_bayar');
 
             DB::commit();
 
@@ -1217,17 +1159,17 @@ class PembayaranController extends Controller
     {
         DB::beginTransaction();
         try {
-            $tagihan     = Piutang::with('transaksiKavling')->findOrFail($id);
-            $id_customer = $tagihan->transaksiKavling?->id_customer;
+            $tagihan     = Piutang::findOrFail($id);
+            $id_customer = $tagihan->id_customer;
             $tagihan->delete();
 
             Pemasukan::where('id_piutang', $id)
                 ->where('keterangan', 'NOT LIKE', 'Biaya ganti nama%')
                 ->delete();
 
-            $totalTagihan = Piutang::whereHas('transaksiKavling', fn ($q) => $q->where('id_customer', $id_customer))->sum('nominal');
-            $jumlahBayar  = Piutang::whereHas('transaksiKavling', fn ($q) => $q->where('id_customer', $id_customer))->sum('terbayar');
-            $sisaBayar    = Piutang::whereHas('transaksiKavling', fn ($q) => $q->where('id_customer', $id_customer))->sum('sisa_bayar');
+            $totalTagihan = Piutang::where('id_customer', $id_customer)->sum('nominal');
+            $jumlahBayar  = Piutang::where('id_customer', $id_customer)->sum('terbayar');
+            $sisaBayar    = Piutang::where('id_customer', $id_customer)->sum('sisa_bayar');
 
             DB::commit();
 
@@ -2167,11 +2109,25 @@ class PembayaranController extends Controller
                 ], 422);
             }
 
-            $customer->update([
-                'nominal_cicilan' => $request->nominal_cicilan,
+            $nominal = str_replace('.', '', $request->nominal_cicilan);
+
+            $updateData = [
+                'nominal_cicilan' => $nominal,
                 'lama_cicilan'    => $request->lama_cicilan,
                 'tgl_jatuh_tempo' => $request->tgl_jatuh_tempo,
-            ]);
+            ];
+
+            if ($customer->skema_pembayaran === 'Cash Tempo') {
+                $updateData['nominal_cicilan_ct'] = $nominal;
+                $updateData['lama_cicilan_ct']    = $request->lama_cicilan;
+                $updateData['tgl_jatuh_tempo_ct'] = $request->tgl_jatuh_tempo;
+            } elseif ($customer->skema_pembayaran === 'Kredit') {
+                $updateData['nominal_cicilan_kr'] = $nominal;
+                $updateData['lama_cicilan_kr']    = $request->lama_cicilan;
+                $updateData['tgl_jatuh_tempo_kr'] = $request->tgl_jatuh_tempo;
+            }
+
+            $customer->update($updateData);
 
             DB::commit();
 

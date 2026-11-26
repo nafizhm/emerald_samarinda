@@ -31,6 +31,12 @@ class Customer extends Model
         'nominal_cicilan',
         'lama_cicilan',
         'tgl_jatuh_tempo',
+        'nominal_cicilan_ct',
+        'lama_cicilan_ct',
+        'tgl_jatuh_tempo_ct',
+        'nominal_cicilan_kr',
+        'lama_cicilan_kr',
+        'tgl_jatuh_tempo_kr',
         'no_kk',
         'atas_nama',
         'no_surat',
@@ -77,14 +83,12 @@ class Customer extends Model
 
     public function piutangs()
     {
-        return $this->hasManyThrough(
-            Piutang::class,
-            TransaksiKavling::class,
-            'id_customer',          // FK di transaksi_kavling
-            'id_transaksi_kavling', // FK di piutang
-            'id',                   // local key di customer
-            'id'                    // local key di transaksi_kavling
-        );
+        return $this->hasMany(Piutang::class, 'id_customer');
+    }
+
+    public function piutang()
+    {
+        return $this->hasOne(Piutang::class, 'id_customer');
     }
 
     public function pemasukans()
@@ -95,6 +99,39 @@ class Customer extends Model
     public function bank()
     {
         return $this->belongsTo(Bank::class, 'id_bank');
+    }
+
+    public function getNominalCicilanAttribute($value)
+    {
+        if ($this->skema_pembayaran === 'Cash Tempo') {
+            return $this->nominal_cicilan_ct ?? $value;
+        }
+        if ($this->skema_pembayaran === 'Kredit') {
+            return $this->nominal_cicilan_kr ?? $value;
+        }
+        return $value;
+    }
+
+    public function getLamaCicilanAttribute($value)
+    {
+        if ($this->skema_pembayaran === 'Cash Tempo') {
+            return $this->lama_cicilan_ct ?? $value;
+        }
+        if ($this->skema_pembayaran === 'Kredit') {
+            return $this->lama_cicilan_kr ?? $value;
+        }
+        return $value;
+    }
+
+    public function getTglJatuhTempoAttribute($value)
+    {
+        if ($this->skema_pembayaran === 'Cash Tempo') {
+            return $this->tgl_jatuh_tempo_ct ?? $value;
+        }
+        if ($this->skema_pembayaran === 'Kredit') {
+            return $this->tgl_jatuh_tempo_kr ?? $value;
+        }
+        return $value;
     }
 
     public $timestamps = false;

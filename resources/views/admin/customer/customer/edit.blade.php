@@ -11,6 +11,7 @@
         $diskon = (int) ($cust->discount ?? 0);
         $netHarga = max(0, $totalHarga - $diskon);
         $isCashTempo = $cust->skema_pembayaran === 'Cash Tempo';
+        $isKredit = $cust->skema_pembayaran === 'Kredit';
     @endphp
     <div class="dashboard-page customer-page purchase-page">
 
@@ -259,37 +260,73 @@
                             <p id="purchase-payment-hint" class="purchase-hint">Pilih skema pembayaran untuk melengkapi
                                 rencana pembayaran.</p>
                             <!-- CASH TEMPO -->
-                            <hr class="hr-transaksi" @if (!$isCashTempo) style="display: none;" @endif>
-                            <div id="trx_booking" @if (!$isCashTempo) style="display: none;" @endif>
+                            <hr class="hr-transaksi hr-cash-tempo" @if (!$isCashTempo) style="display: none;" @endif>
+                            <div id="trx_cash_tempo" class="trx-form" @if (!$isCashTempo) style="display: none;" @endif>
                                 <div class="row mb-3">
-                                    <label for="nominal_cicilan" class="col-sm-2 col-form-label">Nominal Cicilan
+                                    <label for="nominal_cicilan_ct" class="col-sm-2 col-form-label">Nominal Cicilan
                                         <span class="text-danger">*</span></label>
                                     <div class="col-sm-4">
                                         <div class="input-group">
                                             <span class="input-group-text">Rp</span>
-                                            <input type="text" class="form-control format-number" id="nominal_cicilan"
-                                                name="nominal_cicilan"
-                                                value="{{ $cust->nominal_cicilan ? number_format($cust->nominal_cicilan, 0, ',', '.') : '' }}">
+                                            <input type="text" class="form-control format-number" id="nominal_cicilan_ct"
+                                                name="nominal_cicilan_ct"
+                                                value="{{ ($cust->nominal_cicilan_ct ?? $cust->nominal_cicilan) ? number_format($cust->nominal_cicilan_ct ?? $cust->nominal_cicilan, 0, ',', '.') : '' }}">
                                         </div>
                                     </div>
-                                    <label for="lama_cicilan" class="col-sm-2 col-form-label">Lama Cicilan
+                                    <label for="lama_cicilan_ct" class="col-sm-2 col-form-label">Lama Cicilan
                                         <span class="text-danger">*</span></label>
                                     <div class="col-sm-4">
                                         <div class="input-group">
-                                            <input type="number" class="form-control" id="lama_cicilan"
-                                                name="lama_cicilan" min="1" step="1"
-                                                value="{{ $cust->lama_cicilan }}">
+                                            <input type="number" class="form-control" id="lama_cicilan_ct"
+                                                name="lama_cicilan_ct" min="1" step="1"
+                                                value="{{ $cust->lama_cicilan_ct ?? $cust->lama_cicilan }}">
                                             <span class="input-group-text">Bulan</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <label for="tgl_jatuh_tempo" class="col-sm-2 col-form-label">Tanggal Jatuh Tempo
+                                    <label for="tgl_jatuh_tempo_ct" class="col-sm-2 col-form-label">Tanggal Jatuh Tempo
                                         <span class="text-danger">*</span></label>
                                     <div class="col-sm-4">
-                                        <input type="date" name="tgl_jatuh_tempo" id="tgl_jatuh_tempo"
+                                        <input type="date" name="tgl_jatuh_tempo_ct" id="tgl_jatuh_tempo_ct"
                                             class="form-control"
-                                            value="{{ $cust->tgl_jatuh_tempo ? substr((string) $cust->tgl_jatuh_tempo, 0, 10) : '' }}">
+                                            value="{{ ($cust->tgl_jatuh_tempo_ct ?? $cust->tgl_jatuh_tempo) ? substr((string) ($cust->tgl_jatuh_tempo_ct ?? $cust->tgl_jatuh_tempo), 0, 10) : '' }}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- KREDIT -->
+                            <hr class="hr-transaksi hr-kredit" @if (!$isKredit) style="display: none;" @endif>
+                            <div id="trx_kredit" class="trx-form" @if (!$isKredit) style="display: none;" @endif>
+                                <div class="row mb-3">
+                                    <label for="nominal_cicilan_kr" class="col-sm-2 col-form-label">Nominal Cicilan
+                                        <span class="text-danger">*</span></label>
+                                    <div class="col-sm-4">
+                                        <div class="input-group">
+                                            <span class="input-group-text">Rp</span>
+                                            <input type="text" class="form-control format-number" id="nominal_cicilan_kr"
+                                                name="nominal_cicilan_kr"
+                                                value="{{ ($cust->nominal_cicilan_kr ?? $cust->nominal_cicilan) ? number_format($cust->nominal_cicilan_kr ?? $cust->nominal_cicilan, 0, ',', '.') : '' }}">
+                                        </div>
+                                    </div>
+                                    <label for="lama_cicilan_kr" class="col-sm-2 col-form-label">Lama Cicilan
+                                        <span class="text-danger">*</span></label>
+                                    <div class="col-sm-4">
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" id="lama_cicilan_kr"
+                                                name="lama_cicilan_kr" min="1" step="1"
+                                                value="{{ $cust->lama_cicilan_kr ?? $cust->lama_cicilan }}">
+                                            <span class="input-group-text">Bulan</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="tgl_jatuh_tempo_kr" class="col-sm-2 col-form-label">Tanggal Jatuh Tempo
+                                        <span class="text-danger">*</span></label>
+                                    <div class="col-sm-4">
+                                        <input type="date" name="tgl_jatuh_tempo_kr" id="tgl_jatuh_tempo_kr"
+                                            class="form-control"
+                                            value="{{ ($cust->tgl_jatuh_tempo_kr ?? $cust->tgl_jatuh_tempo) ? substr((string) ($cust->tgl_jatuh_tempo_kr ?? $cust->tgl_jatuh_tempo), 0, 10) : '' }}">
                                     </div>
                                 </div>
                             </div>
@@ -351,11 +388,18 @@
             function toggleTransaksiForm() {
                 const selected = $('#skema_pembayaran').val();
                 if (selected === 'Cash Tempo') {
-                    $('.hr-transaksi').show();
-                    $('#trx_booking').show().find('input').prop('disabled', false);
+                    $('.hr-cash-tempo').show();
+                    $('#trx_cash_tempo').show().find('input').prop('disabled', false);
+                    $('.hr-kredit').hide();
+                    $('#trx_kredit').hide().find('input').prop('disabled', true);
+                } else if (selected === 'Kredit') {
+                    $('.hr-kredit').show();
+                    $('#trx_kredit').show().find('input').prop('disabled', false);
+                    $('.hr-cash-tempo').hide();
+                    $('#trx_cash_tempo').hide().find('input').prop('disabled', true);
                 } else {
                     $('.hr-transaksi').hide();
-                    $('#trx_booking').hide().find('input').prop('disabled', true);
+                    $('#trx_cash_tempo, #trx_kredit').hide().find('input').prop('disabled', true);
                 }
             }
 

@@ -428,12 +428,21 @@
                 if (response.success && response.data) {
                     let customer = response.data.customer;
 
-                    $('#id_cust').val(customer.id);
-                    $('#inhouse_perbulan').val(Number(customer.nominal_cicilan || 0).toLocaleString(
-                        'id-ID'));
-                    $('#inhouse_tenor').val(customer.lama_cicilan || '');
+                    let nominal = customer.skema_pembayaran === 'Kredit'
+                        ? (customer.nominal_cicilan_kr || customer.nominal_cicilan || 0)
+                        : (customer.nominal_cicilan_ct || customer.nominal_cicilan || 0);
+                    let tenor = customer.skema_pembayaran === 'Kredit'
+                        ? (customer.lama_cicilan_kr || customer.lama_cicilan || '')
+                        : (customer.lama_cicilan_ct || customer.lama_cicilan || '');
+                    let jatuhTempo = customer.skema_pembayaran === 'Kredit'
+                        ? (customer.tgl_jatuh_tempo_kr || customer.tgl_jatuh_tempo)
+                        : (customer.tgl_jatuh_tempo_ct || customer.tgl_jatuh_tempo);
 
-                    let jatuhTempo = customer.tgl_jatuh_tempo;
+                    $('#id_cust').val(customer.id);
+                    $('#inhouse_perbulan').val(Number(nominal || 0).toLocaleString(
+                        'id-ID'));
+                    $('#inhouse_tenor').val(tenor || '');
+
                     if (jatuhTempo) {
                         let formattedDate = jatuhTempo.split(' ')[0];
                         $('#inhouse_jatuh_tempo').val(formattedDate);

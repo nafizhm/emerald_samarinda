@@ -15,10 +15,43 @@ class JatuhTempoService
         if ($this->cachedRows !== null) return $this->cachedRows;
         $today = Carbon::today('Asia/Jakarta');
         $customers = Customer::where('stt_arsip', 0)
-            ->where('skema_pembayaran', 'Cash Tempo')
-            ->where('nominal_cicilan', '>', 0)->where('lama_cicilan', '>', 0)
-            ->whereNotNull('tgl_jatuh_tempo')->where('tgl_jatuh_tempo', '!=', '0000-00-00')
-            ->whereDate('tgl_jatuh_tempo', '<=', $today->toDateString())
+            ->where(function ($query) use ($today) {
+                $query->where(function ($ct) use ($today) {
+                    $ct->where('skema_pembayaran', 'Cash Tempo')
+                        ->where(function ($sub) {
+                            $sub->where('nominal_cicilan_ct', '>', 0)->orWhere('nominal_cicilan', '>', 0);
+                        })
+                        ->where(function ($sub) {
+                            $sub->where('lama_cicilan_ct', '>', 0)->orWhere('lama_cicilan', '>', 0);
+                        })
+                        ->where(function ($sub) use ($today) {
+                            $sub->where(function ($d) use ($today) {
+                                $d->whereNotNull('tgl_jatuh_tempo_ct')->where('tgl_jatuh_tempo_ct', '!=', '0000-00-00')
+                                    ->whereDate('tgl_jatuh_tempo_ct', '<=', $today->toDateString());
+                            })->orWhere(function ($d) use ($today) {
+                                $d->whereNotNull('tgl_jatuh_tempo')->where('tgl_jatuh_tempo', '!=', '0000-00-00')
+                                    ->whereDate('tgl_jatuh_tempo', '<=', $today->toDateString());
+                            });
+                        });
+                })->orWhere(function ($kr) use ($today) {
+                    $kr->where('skema_pembayaran', 'Kredit')
+                        ->where(function ($sub) {
+                            $sub->where('nominal_cicilan_kr', '>', 0)->orWhere('nominal_cicilan', '>', 0);
+                        })
+                        ->where(function ($sub) {
+                            $sub->where('lama_cicilan_kr', '>', 0)->orWhere('lama_cicilan', '>', 0);
+                        })
+                        ->where(function ($sub) use ($today) {
+                            $sub->where(function ($d) use ($today) {
+                                $d->whereNotNull('tgl_jatuh_tempo_kr')->where('tgl_jatuh_tempo_kr', '!=', '0000-00-00')
+                                    ->whereDate('tgl_jatuh_tempo_kr', '<=', $today->toDateString());
+                            })->orWhere(function ($d) use ($today) {
+                                $d->whereNotNull('tgl_jatuh_tempo')->where('tgl_jatuh_tempo', '!=', '0000-00-00')
+                                    ->whereDate('tgl_jatuh_tempo', '<=', $today->toDateString());
+                            });
+                        });
+                });
+            })
             ->with(['kavling' => fn ($query) => $query->select('kavling_peta.id', 'id_lokasi', 'kode_kavling', 'hrg_jual'), 'kavling.lokasi:id,nama_kavling'])
             ->withSum('piutangs', 'nominal')
             ->withSum(['pemasukans' => fn ($query) => $query->where(fn ($q) => $q->whereNull('keterangan')->orWhere('keterangan', '!=', 'GANTI NAMA'))], 'nominal')
@@ -49,15 +82,23 @@ class JatuhTempoService
 
     private function calculate(Customer $customer, Carbon $today): ?array
     {
+        $tglJatuhTempo = $customer->skema_pembayaran === 'Kredit'
+            ? ($customer->tgl_jatuh_tempo_kr ?: $customer->tgl_jatuh_tempo)
+            : ($customer->tgl_jatuh_tempo_ct ?: $customer->tgl_jatuh_tempo);
+
         try {
-            $dateText = substr((string) $customer->tgl_jatuh_tempo, 0, 10);
+            $dateText = substr((string) $tglJatuhTempo, 0, 10);
             $start = Carbon::createFromFormat('!Y-m-d', $dateText, 'Asia/Jakarta');
             if (!$start || $start->format('Y-m-d') !== $dateText || $start->year < 1900 || $start->gt($today)) return null;
         } catch (\Throwable) {
             return null;
         }
-        $monthly = (float) $customer->nominal_cicilan;
-        $tenor = (int) $customer->lama_cicilan;
+        $monthly = (float) ($customer->skema_pembayaran === 'Kredit'
+            ? ($customer->nominal_cicilan_kr ?: $customer->nominal_cicilan)
+            : ($customer->nominal_cicilan_ct ?: $customer->nominal_cicilan));
+        $tenor = (int) ($customer->skema_pembayaran === 'Kredit'
+            ? ($customer->lama_cicilan_kr ?: $customer->lama_cicilan)
+            : ($customer->lama_cicilan_ct ?: $customer->lama_cicilan));
         $installmentsTotal = $monthly * $tenor;
         $price = $customer->kavling->sum(fn ($kavling) => (float) ($kavling->pivot->hrg_rumah ?? $kavling->hrg_jual ?? 0));
         $contract = (float) $customer->piutangs_sum_nominal;

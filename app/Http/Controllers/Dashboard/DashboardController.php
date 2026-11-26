@@ -628,14 +628,18 @@ class DashboardController extends Controller
                 ->sum('nominal');
             $sisaBayar = max($nilaiKontrak - $sudahDibayar, 0);
             $tanggalBeliCarbon = Carbon::parse($tanggalBeli)->startOfDay();
-            $tenor = (int) ($customer->lama_cicilan ?: 0);
+            $tenor = (int) ($customer->skema_pembayaran === 'Cash Tempo'
+                ? ($customer->lama_cicilan_ct ?: $customer->lama_cicilan ?: 0)
+                : ($customer->lama_cicilan_kr ?: $customer->lama_cicilan ?: 0));
             $bulanBerjalan = (int) ceil(max(1, $tanggalBeliCarbon->floatDiffInMonths($today) + 1));
 
             if ($tenor > 0) {
                 $bulanBerjalan = min($bulanBerjalan, $tenor);
             }
 
-            $angsuranPerBulan = (float) ($customer->nominal_cicilan ?: 0);
+            $angsuranPerBulan = (float) ($customer->skema_pembayaran === 'Cash Tempo'
+                ? ($customer->nominal_cicilan_ct ?: $customer->nominal_cicilan ?: 0)
+                : ($customer->nominal_cicilan_kr ?: $customer->nominal_cicilan ?: 0));
             $bulanTerbayar = $angsuranPerBulan > 0
                 ? min($tenor > 0 ? $tenor : $bulanBerjalan, (int) floor($sudahDibayar / $angsuranPerBulan))
                 : 0;
@@ -658,8 +662,11 @@ class DashboardController extends Controller
                 $totalTunggakan = 0;
             }
 
-            $jatuhTempoDay = $customer->tgl_jatuh_tempo
-                ? Carbon::parse($customer->tgl_jatuh_tempo)->day
+            $tglJatuhTempo = $customer->skema_pembayaran === 'Cash Tempo'
+                ? ($customer->tgl_jatuh_tempo_ct ?: $customer->tgl_jatuh_tempo)
+                : ($customer->tgl_jatuh_tempo_kr ?: $customer->tgl_jatuh_tempo);
+            $jatuhTempoDay = $tglJatuhTempo
+                ? Carbon::parse($tglJatuhTempo)->day
                 : 10;
             $jatuhTempoBulanIni = $today->copy()->day(min($jatuhTempoDay, $today->daysInMonth));
             $kodeKavling = $customer->kavling->pluck('kode_kavling')->filter()->implode(', ');

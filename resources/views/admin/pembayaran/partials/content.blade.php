@@ -1,17 +1,17 @@
 @php
     $rupiah = fn($value) => 'Rp ' . number_format($value, 0, ',', '.');
     $next = $schedule['rows']->first(fn($row) => $row['balance'] > 0);
-    $tampilkan_jatuh_tempo = $customer->skema_pembayaran === 'Cash Tempo';
-    $kavlingAktif = $selectedTransaksiKavling->kavling ?? null;
+    $tampilkan_jatuh_tempo = in_array($customer->skema_pembayaran, ['Cash Tempo', 'Kredit']);
+    $kodeKavlingGabungan = $customer->kavling->pluck('kode_kavling')->filter()->implode(', ') ?: '-';
 @endphp
 
 <section class="dashboard-panel installment-overview">
     <div class="installment-overview-top">
         <div><span class="installment-kicker">{{ $customer->lokasi?->nama_kavling ?? 'Lokasi belum tersedia' }} —
-                {{ $kavlingAktif?->kode_kavling ?? '-' }}</span>
+                {{ $kodeKavlingGabungan }}</span>
             <h2>{{ $schedule['remaining'] === 0 ? 'Pembayaran sudah lunas' : 'Pantau cicilan, catat pembayaran' }}
             </h2>
-            <p>{{ $customer->skema_pembayaran === 'Cash Tempo' ? $customer->lama_cicilan . ' bulan / ' . $rupiah($customer->nominal_cicilan) . ' per bulan' : 'Pembayaran berdasarkan nilai kontrak kavling.' }}
+            <p>{{ in_array($customer->skema_pembayaran, ['Cash Tempo', 'Kredit']) ? $customer->lama_cicilan . ' bulan / ' . $rupiah($customer->nominal_cicilan) . ' per bulan' : 'Pembayaran berdasarkan nilai kontrak kavling.' }}
             </p>
         </div><span class="installment-contract-status {{ $schedule['remaining'] === 0 ? 'paid' : '' }}"><i
                 class="bi {{ $schedule['remaining'] === 0 ? 'bi-check-circle' : 'bi-clock' }}"></i>{{ $schedule['remaining'] === 0 ? 'Lunas' : 'Dalam pembayaran' }}</span>

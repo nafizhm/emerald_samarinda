@@ -279,66 +279,86 @@ class CustomerController extends Controller
     public function store(Request $request)
     {
         $request->merge([
-            'hrg_jual'        => $request->hrg_jual ? (int) str_replace(['.', ','], '', $request->hrg_jual) : 0,
-            'discount'        => $request->discount ? (int) str_replace(['.', ','], '', $request->discount) : 0,
-            'nominal_cicilan' => $request->nominal_cicilan ? (int) str_replace(['.', ','], '', $request->nominal_cicilan) : 0,
+            'hrg_jual'           => $request->hrg_jual ? (int) str_replace(['.', ','], '', $request->hrg_jual) : 0,
+            'discount'           => $request->discount ? (int) str_replace(['.', ','], '', $request->discount) : 0,
+            'nominal_cicilan_ct' => $request->nominal_cicilan_ct ? (int) str_replace(['.', ','], '', $request->nominal_cicilan_ct) : ($request->nominal_cicilan ? (int) str_replace(['.', ','], '', $request->nominal_cicilan) : 0),
+            'nominal_cicilan_kr' => $request->nominal_cicilan_kr ? (int) str_replace(['.', ','], '', $request->nominal_cicilan_kr) : ($request->nominal_cicilan ? (int) str_replace(['.', ','], '', $request->nominal_cicilan) : 0),
+            'lama_cicilan_ct'    => $request->filled('lama_cicilan_ct') ? $request->lama_cicilan_ct : $request->lama_cicilan,
+            'lama_cicilan_kr'    => $request->filled('lama_cicilan_kr') ? $request->lama_cicilan_kr : $request->lama_cicilan,
+            'tgl_jatuh_tempo_ct' => $request->filled('tgl_jatuh_tempo_ct') ? $request->tgl_jatuh_tempo_ct : $request->tgl_jatuh_tempo,
+            'tgl_jatuh_tempo_kr' => $request->filled('tgl_jatuh_tempo_kr') ? $request->tgl_jatuh_tempo_kr : $request->tgl_jatuh_tempo,
         ]);
 
         $request->validate([
-            'tgl_terima'       => 'required|date',
-            'nama_lengkap'     => 'required|string|max:150',
-            'no_ktp'           => 'required',
-            'tempat_lahir'     => 'required',
-            'tgl_lahir'        => 'required|date',
-            'no_telp'          => 'required',
-            'alamat'           => 'required',
-            'email'            => 'nullable|email|max:75',
-            'id_lokasi'        => 'required|integer|exists:lokasi_kavling,id',
-            'id_kavling'       => 'required|array|min:1',
-            'id_kavling.*'     => 'required|integer|distinct|exists:kavling_peta,id',
-            'id_marketing'     => 'nullable|exists:marketing,id',
-            'discount'         => 'numeric|min:0',
-            'hrg_jual'         => 'required|numeric',
-            'skema_pembayaran' => 'required|in:Cash Keras,Cash Tempo,Kredit',
+            'tgl_terima'          => 'required|date',
+            'nama_lengkap'        => 'required|string|max:150',
+            'no_ktp'              => 'required',
+            'tempat_lahir'        => 'required',
+            'tgl_lahir'           => 'required|date',
+            'no_telp'             => 'required',
+            'alamat'              => 'required',
+            'email'               => 'nullable|email|max:75',
+            'id_lokasi'           => 'required|integer|exists:lokasi_kavling,id',
+            'id_kavling'          => 'required|array|min:1',
+            'id_kavling.*'        => 'required|integer|distinct|exists:kavling_peta,id',
+            'id_marketing'        => 'nullable|exists:marketing,id',
+            'discount'            => 'numeric|min:0',
+            'hrg_jual'            => 'required|numeric',
+            'skema_pembayaran'    => 'required|in:Cash Keras,Cash Tempo,Kredit',
 
-            'nominal_cicilan'  => 'exclude_unless:skema_pembayaran,Cash Tempo|required_if:skema_pembayaran,Cash Tempo|integer|min:1',
-            'lama_cicilan'     => 'exclude_unless:skema_pembayaran,Cash Tempo|required_if:skema_pembayaran,Cash Tempo|integer|min:1',
-            'tgl_jatuh_tempo'  => 'exclude_unless:skema_pembayaran,Cash Tempo|required_if:skema_pembayaran,Cash Tempo|date',
+            'nominal_cicilan_ct'  => 'exclude_unless:skema_pembayaran,Cash Tempo|required_if:skema_pembayaran,Cash Tempo|integer|min:1',
+            'lama_cicilan_ct'     => 'exclude_unless:skema_pembayaran,Cash Tempo|required_if:skema_pembayaran,Cash Tempo|integer|min:1',
+            'tgl_jatuh_tempo_ct'  => 'exclude_unless:skema_pembayaran,Cash Tempo|required_if:skema_pembayaran,Cash Tempo|date',
+
+            'nominal_cicilan_kr'  => 'exclude_unless:skema_pembayaran,Kredit|required_if:skema_pembayaran,Kredit|integer|min:1',
+            'lama_cicilan_kr'     => 'exclude_unless:skema_pembayaran,Kredit|required_if:skema_pembayaran,Kredit|integer|min:1',
+            'tgl_jatuh_tempo_kr'  => 'exclude_unless:skema_pembayaran,Kredit|required_if:skema_pembayaran,Kredit|date',
         ], [
-            'tgl_terima.required'         => 'Tanggal terima wajib diisi!',
-            'tgl_terima.date'             => 'Tanggal terima harus berupa tanggal yang valid!',
+            'tgl_terima.required'            => 'Tanggal terima wajib diisi!',
+            'tgl_terima.date'                => 'Tanggal terima harus berupa tanggal yang valid!',
 
-            'nama_lengkap.required'       => 'Nama lengkap wajib diisi!',
+            'nama_lengkap.required'          => 'Nama lengkap wajib diisi!',
 
-            'no_ktp.required'             => 'Nomor KTP wajib diisi!',
+            'no_ktp.required'                => 'Nomor KTP wajib diisi!',
 
-            'tempat_lahir.required'       => 'Tempat lahir wajib diisi!',
+            'tempat_lahir.required'          => 'Tempat lahir wajib diisi!',
 
-            'tgl_lahir.required'          => 'Tanggal lahir wajib diisi!',
-            'tgl_lahir.date'              => 'Tanggal lahir harus berupa tanggal yang valid!',
+            'tgl_lahir.required'             => 'Tanggal lahir wajib diisi!',
+            'tgl_lahir.date'                 => 'Tanggal lahir harus berupa tanggal yang valid!',
 
-            'no_telp.required'            => 'Nomor telepon wajib diisi!',
+            'no_telp.required'               => 'Nomor telepon wajib diisi!',
 
-            'alamat.required'             => 'Alamat wajib diisi!',
+            'alamat.required'                => 'Alamat wajib diisi!',
 
-            'email.email'                 => 'Format email tidak valid!',
+            'email.email'                    => 'Format email tidak valid!',
 
-            'id_lokasi.required'          => 'Lokasi kavling wajib dipilih!',
+            'id_lokasi.required'             => 'Lokasi kavling wajib dipilih!',
 
-            'id_kavling.required'         => 'Kavling wajib dipilih!',
-            'id_kavling.array'            => 'Data kavling tidak valid!',
-            'id_kavling.*.exists'         => 'Kavling yang dipilih tidak ditemukan!',
+            'id_kavling.required'            => 'Kavling wajib dipilih!',
+            'id_kavling.array'               => 'Data kavling tidak valid!',
+            'id_kavling.*.exists'            => 'Kavling yang dipilih tidak ditemukan!',
 
-            'hrg_jual.required'           => 'Harga jual wajib diisi!',
-            'hrg_jual.numeric'            => 'Harga jual harus berupa angka!',
+            'hrg_jual.required'              => 'Harga jual wajib diisi!',
+            'hrg_jual.numeric'               => 'Harga jual harus berupa angka!',
 
-            'skema_pembayaran.required'   => 'Skema pembayaran wajib dipilih!',
+            'skema_pembayaran.required'      => 'Skema pembayaran wajib dipilih!',
 
-            'nominal_cicilan.required_if' => 'Nominal cicilan wajib diisi!',
-            'lama_cicilan.required_if'    => 'Lama cicilan wajib diisi!',
-            'tgl_jatuh_tempo.required_if' => 'Tanggal jatuh tempo wajib diisi!',
-            'skema_pembayaran.in'         => 'Pilih Cash Keras, Cash Tempo, atau Kredit.',
-            'id_kavling.*.distinct'       => 'Kavling yang sama tidak boleh dipilih dua kali.',
+            'nominal_cicilan_ct.required_if' => 'Nominal cicilan wajib diisi!',
+            'nominal_cicilan_ct.min'         => 'Nominal cicilan harus lebih dari nol!',
+            'lama_cicilan_ct.required_if'    => 'Lama cicilan wajib diisi!',
+            'lama_cicilan_ct.min'            => 'Lama cicilan harus lebih dari nol!',
+            'tgl_jatuh_tempo_ct.required_if' => 'Tanggal jatuh tempo wajib diisi!',
+            'tgl_jatuh_tempo_ct.date'        => 'Tanggal jatuh tempo harus berupa tanggal yang valid!',
+
+            'nominal_cicilan_kr.required_if' => 'Nominal cicilan wajib diisi!',
+            'nominal_cicilan_kr.min'         => 'Nominal cicilan harus lebih dari nol!',
+            'lama_cicilan_kr.required_if'    => 'Lama cicilan wajib diisi!',
+            'lama_cicilan_kr.min'            => 'Lama cicilan harus lebih dari nol!',
+            'tgl_jatuh_tempo_kr.required_if' => 'Tanggal jatuh tempo wajib diisi!',
+            'tgl_jatuh_tempo_kr.date'        => 'Tanggal jatuh tempo harus berupa tanggal yang valid!',
+
+            'skema_pembayaran.in'            => 'Pilih Cash Keras, Cash Tempo, atau Kredit.',
+            'id_kavling.*.distinct'          => 'Kavling yang sama tidak boleh dipilih dua kali.',
         ]);
 
         DB::beginTransaction();
@@ -363,57 +383,74 @@ class CustomerController extends Controller
                 $newKode = $prefix . '-0001';
             }
 
+            $isCashTempo = $request->skema_pembayaran === 'Cash Tempo';
+            $isKredit    = $request->skema_pembayaran === 'Kredit';
+
+            $nominalCt = $isCashTempo ? ($request->nominal_cicilan_ct ?: $request->nominal_cicilan) : null;
+            $lamaCt    = $isCashTempo ? ($request->lama_cicilan_ct ?: $request->lama_cicilan) : null;
+            $tglCt     = $isCashTempo ? ($request->tgl_jatuh_tempo_ct ?: $request->tgl_jatuh_tempo) : null;
+
+            $nominalKr = $isKredit ? ($request->nominal_cicilan_kr ?: $request->nominal_cicilan) : null;
+            $lamaKr    = $isKredit ? ($request->lama_cicilan_kr ?: $request->lama_cicilan) : null;
+            $tglKr     = $isKredit ? ($request->tgl_jatuh_tempo_kr ?: $request->tgl_jatuh_tempo) : null;
+
             $customer = Customer::create([
-                'kode_customer'    => $newKode,
-                'nama_lengkap'     => $request->nama_lengkap,
-                'no_ktp'           => $request->no_ktp,
-                'no_ktp_p'         => $request->no_ktp_p,
-                'tempat_lahir'     => $request->tempat_lahir,
-                'tgl_lahir'        => $request->tgl_lahir,
-                'no_telp'          => $request->no_telp,
-                'jenis_kelamin'    => $request->jenis_kelamin,
-                'email'            => $request->email ?? '',
-                'npwp'             => $request->npwp,
-                'alamat'           => $request->alamat,
-                'alamat_domisili'  => $request->alamat_domisili,
-                'pekerjaan'        => $request->pekerjaan,
-                'id_lokasi'        => $request->id_lokasi,
-                'no_wa'            => $request->no_telp,
-                'discount'         => $request->discount,
-                'id_marketing'     => $request->filled('id_marketing') ? $request->id_marketing : 0,
-                'ket_cashback'     => $request->ket_cashback,
-                'skema_pembayaran' => $request->skema_pembayaran,
-                'nominal_cicilan'  => $request->skema_pembayaran === 'Cash Tempo' ? $request->nominal_cicilan : null,
-                'lama_cicilan'     => $request->skema_pembayaran === 'Cash Tempo' ? $request->lama_cicilan : null,
-                'tgl_jatuh_tempo'  => $request->skema_pembayaran === 'Cash Tempo' ? $request->tgl_jatuh_tempo : null,
+                'kode_customer'      => $newKode,
+                'nama_lengkap'       => $request->nama_lengkap,
+                'no_ktp'             => $request->no_ktp,
+                'no_ktp_p'           => $request->no_ktp_p,
+                'tempat_lahir'       => $request->tempat_lahir,
+                'tgl_lahir'          => $request->tgl_lahir,
+                'no_telp'            => $request->no_telp,
+                'jenis_kelamin'      => $request->jenis_kelamin,
+                'email'              => $request->email ?? '',
+                'npwp'               => $request->npwp,
+                'alamat'             => $request->alamat,
+                'alamat_domisili'    => $request->alamat_domisili,
+                'pekerjaan'          => $request->pekerjaan,
+                'id_lokasi'          => $request->id_lokasi,
+                'no_wa'              => $request->no_telp,
+                'discount'           => $request->discount,
+                'id_marketing'       => $request->filled('id_marketing') ? $request->id_marketing : 0,
+                'ket_cashback'       => $request->ket_cashback,
+                'skema_pembayaran'   => $request->skema_pembayaran,
+                'nominal_cicilan_ct' => $nominalCt,
+                'lama_cicilan_ct'    => $lamaCt,
+                'tgl_jatuh_tempo_ct' => $tglCt,
+                'nominal_cicilan_kr' => $nominalKr,
+                'lama_cicilan_kr'    => $lamaKr,
+                'tgl_jatuh_tempo_kr' => $tglKr,
+                'nominal_cicilan'    => $nominalCt ?? $nominalKr,
+                'lama_cicilan'       => $lamaCt ?? $lamaKr,
+                'tgl_jatuh_tempo'    => $tglCt ?? $tglKr,
             ]);
 
-            $sisaDiskon = (int) $request->discount;
-
-            foreach ($kavlingList as $index => $kavling) {
-                $diskonKavling  = $index === $kavlingList->count() - 1
-                    ? $sisaDiskon
-                    : (int) floor($request->discount * ($kavling->hrg_jual / max(1, $kavlingList->sum('hrg_jual'))));
-                $sisaDiskon       -= $diskonKavling;
-                $transaksiKavling  = TransaksiKavling::create([
+            foreach ($kavlingList as $kavling) {
+                TransaksiKavling::create([
                     'id_customer' => $customer->id,
                     'id_kavling'  => $kavling->id,
                     'tgl_terima'  => $request->tgl_terima,
                     'hrg_rumah'   => $kavling->hrg_jual,
                 ]);
-                $nominalPiutang  = max(0, (int) $kavling->hrg_jual - $diskonKavling);
-                Piutang::create([
-                    'id_transaksi_kavling'  => $transaksiKavling->id,
-                    'tanggal_piutang'       => $request->tgl_terima,
-                    'deskripsi'             => 'Harga Tanah Kavling ' . $kavling->lokasi->nama_kavling . ' Blok ' . $kavling->kode_kavling,
-                    'nominal'               => $nominalPiutang,
-                    'status'                => 1,
-                    'terbayar'              => 0,
-                    'sisa_bayar'            => $nominalPiutang,
-                    'tgl_pelunasan'         => null,
-                    'id_kategori_transaksi' => 0,
-                ]);
             }
+
+            $totalHrgKavling     = (int) $kavlingList->sum('hrg_jual');
+            $nominalPiutangTotal = max(0, $totalHrgKavling - (int) $request->discount);
+            $namaLokasi          = $kavlingList->first()?->lokasi?->nama_kavling ?? 'Emerald Garden Samarinda';
+            $kodeKavlingGabungan = $kavlingList->pluck('kode_kavling')->filter()->implode(', ');
+
+            Piutang::create([
+                'id_customer'           => $customer->id,
+                'id_bank'               => $request->filled('id_bank') ? $request->id_bank : null,
+                'tanggal_piutang'       => $request->tgl_terima,
+                'deskripsi'             => 'Harga Tanah Kavling ' . $namaLokasi . ' Blok ' . $kodeKavlingGabungan,
+                'nominal'               => $nominalPiutangTotal,
+                'status'                => 1,
+                'terbayar'              => 0,
+                'sisa_bayar'            => $nominalPiutangTotal,
+                'tgl_pelunasan'         => null,
+                'id_kategori_transaksi' => 0,
+            ]);
 
             DB::commit();
 
@@ -453,12 +490,18 @@ class CustomerController extends Controller
     {
         $customer = Customer::findOrFail($id);
 
-        $request->merge([
-            'discount'        => $request->filled('discount') ? (int) str_replace(['.', ','], '', $request->discount) : 0,
-            'nominal_cicilan' => $request->filled('nominal_cicilan') ? (int) str_replace(['.', ','], '', $request->nominal_cicilan) : 0,
-        ]);
-
         $isCashTempo = $customer->skema_pembayaran === 'Cash Tempo';
+        $isKredit    = $customer->skema_pembayaran === 'Kredit';
+
+        $request->merge([
+            'discount'           => $request->filled('discount') ? (int) str_replace(['.', ','], '', $request->discount) : 0,
+            'nominal_cicilan_ct' => $request->filled('nominal_cicilan_ct') ? (int) str_replace(['.', ','], '', $request->nominal_cicilan_ct) : ($request->filled('nominal_cicilan') ? (int) str_replace(['.', ','], '', $request->nominal_cicilan) : 0),
+            'nominal_cicilan_kr' => $request->filled('nominal_cicilan_kr') ? (int) str_replace(['.', ','], '', $request->nominal_cicilan_kr) : ($request->filled('nominal_cicilan') ? (int) str_replace(['.', ','], '', $request->nominal_cicilan) : 0),
+            'lama_cicilan_ct'    => $request->filled('lama_cicilan_ct') ? $request->lama_cicilan_ct : $request->lama_cicilan,
+            'lama_cicilan_kr'    => $request->filled('lama_cicilan_kr') ? $request->lama_cicilan_kr : $request->lama_cicilan,
+            'tgl_jatuh_tempo_ct' => $request->filled('tgl_jatuh_tempo_ct') ? $request->tgl_jatuh_tempo_ct : $request->tgl_jatuh_tempo,
+            'tgl_jatuh_tempo_kr' => $request->filled('tgl_jatuh_tempo_kr') ? $request->tgl_jatuh_tempo_kr : $request->tgl_jatuh_tempo,
+        ]);
 
         $rules = [
             'nama_lengkap' => 'required|string|max:150',
@@ -495,22 +538,33 @@ class CustomerController extends Controller
         ];
 
         if ($isCashTempo) {
-            $rules['nominal_cicilan'] = 'required|integer|min:1';
-            $rules['lama_cicilan']    = 'required|integer|min:1';
-            $rules['tgl_jatuh_tempo'] = 'required|date';
+            $rules['nominal_cicilan_ct'] = 'required|integer|min:1';
+            $rules['lama_cicilan_ct']    = 'required|integer|min:1';
+            $rules['tgl_jatuh_tempo_ct'] = 'required|date';
 
-            $messages['nominal_cicilan.required'] = 'Nominal cicilan wajib diisi!';
-            $messages['nominal_cicilan.min']      = 'Nominal cicilan harus lebih dari nol!';
-            $messages['lama_cicilan.required']    = 'Lama cicilan wajib diisi!';
-            $messages['lama_cicilan.min']         = 'Lama cicilan harus lebih dari nol!';
-            $messages['tgl_jatuh_tempo.required'] = 'Tanggal jatuh tempo wajib diisi!';
-            $messages['tgl_jatuh_tempo.date']     = 'Tanggal jatuh tempo harus berupa tanggal yang valid!';
+            $messages['nominal_cicilan_ct.required'] = 'Nominal cicilan wajib diisi!';
+            $messages['nominal_cicilan_ct.min']      = 'Nominal cicilan harus lebih dari nol!';
+            $messages['lama_cicilan_ct.required']    = 'Lama cicilan wajib diisi!';
+            $messages['lama_cicilan_ct.min']         = 'Lama cicilan harus lebih dari nol!';
+            $messages['tgl_jatuh_tempo_ct.required'] = 'Tanggal jatuh tempo wajib diisi!';
+            $messages['tgl_jatuh_tempo_ct.date']     = 'Tanggal jatuh tempo harus berupa tanggal yang valid!';
+        } elseif ($isKredit) {
+            $rules['nominal_cicilan_kr'] = 'required|integer|min:1';
+            $rules['lama_cicilan_kr']    = 'required|integer|min:1';
+            $rules['tgl_jatuh_tempo_kr'] = 'required|date';
+
+            $messages['nominal_cicilan_kr.required'] = 'Nominal cicilan wajib diisi!';
+            $messages['nominal_cicilan_kr.min']      = 'Nominal cicilan harus lebih dari nol!';
+            $messages['lama_cicilan_kr.required']    = 'Lama cicilan wajib diisi!';
+            $messages['lama_cicilan_kr.min']         = 'Lama cicilan harus lebih dari nol!';
+            $messages['tgl_jatuh_tempo_kr.required'] = 'Tanggal jatuh tempo wajib diisi!';
+            $messages['tgl_jatuh_tempo_kr.date']     = 'Tanggal jatuh tempo harus berupa tanggal yang valid!';
         }
 
         $request->validate($rules, $messages);
 
         $totalHarga     = (int) TransaksiKavling::where('id_customer', $customer->id)->sum('hrg_rumah');
-        $totalTerbayar  = (int) Piutang::whereHas('transaksiKavling', fn ($q) => $q->where('id_customer', $customer->id))->sum('terbayar');
+        $totalTerbayar  = (int) Piutang::where('id_customer', $customer->id)->sum('terbayar');
 
         if ($request->discount > $totalHarga) {
             throw ValidationException::withMessages([
@@ -545,10 +599,16 @@ class CustomerController extends Controller
                 'pekerjaan'       => $request->pekerjaan,
                 'id_marketing'    => $request->filled('id_marketing') ? $request->id_marketing : 0,
                 'ket_cashback'    => $request->ket_cashback,
-                'discount'        => $request->discount,
-                'nominal_cicilan' => $isCashTempo ? $request->nominal_cicilan : null,
-                'lama_cicilan'    => $isCashTempo ? $request->lama_cicilan : null,
-                'tgl_jatuh_tempo' => $isCashTempo ? $request->tgl_jatuh_tempo : null,
+                'discount'           => $request->discount,
+                'nominal_cicilan_ct' => $isCashTempo ? $request->nominal_cicilan_ct : null,
+                'lama_cicilan_ct'    => $isCashTempo ? $request->lama_cicilan_ct : null,
+                'tgl_jatuh_tempo_ct' => $isCashTempo ? $request->tgl_jatuh_tempo_ct : null,
+                'nominal_cicilan_kr' => $isKredit ? $request->nominal_cicilan_kr : null,
+                'lama_cicilan_kr'    => $isKredit ? $request->lama_cicilan_kr : null,
+                'tgl_jatuh_tempo_kr' => $isKredit ? $request->tgl_jatuh_tempo_kr : null,
+                'nominal_cicilan'    => $isCashTempo ? $request->nominal_cicilan_ct : ($isKredit ? $request->nominal_cicilan_kr : null),
+                'lama_cicilan'       => $isCashTempo ? $request->lama_cicilan_ct : ($isKredit ? $request->lama_cicilan_kr : null),
+                'tgl_jatuh_tempo'    => $isCashTempo ? $request->tgl_jatuh_tempo_ct : ($isKredit ? $request->tgl_jatuh_tempo_kr : null),
             ]);
 
             if ($diskonLama !== (int) $request->discount) {
@@ -575,37 +635,22 @@ class CustomerController extends Controller
 
     private function sesuaikanPiutangDiskon(Customer $customer, int $diskon): void
     {
-        $transaksiList = TransaksiKavling::where('id_customer', $customer->id)->orderBy('id')->get();
-        $piutangList   = Piutang::whereHas('transaksiKavling', fn ($q) => $q->where('id_customer', $customer->id))
-            ->where('deskripsi', 'like', 'Harga Tanah Kavling%')
-            ->orderBy('id')
-            ->get();
-
-        if ($transaksiList->isEmpty() || $transaksiList->count() !== $piutangList->count()) {
-            Log::warning('Penyesuaian piutang diskon dilewati untuk customer ' . $customer->id . ': jumlah transaksi kavling dan piutang tidak cocok.');
-
+        $piutang = Piutang::where('id_customer', $customer->id)->first();
+        if (! $piutang) {
             return;
         }
 
-        $totalHarga    = max(1, (int) $transaksiList->sum('hrg_rumah'));
-        $sisaDiskon    = $diskon;
-        $indexTerakhir = $transaksiList->count() - 1;
+        $totalHarga = (int) TransaksiKavling::where('id_customer', $customer->id)->sum('hrg_rumah');
+        $nominal    = max(0, $totalHarga - $diskon);
+        $terbayar   = (int) $piutang->terbayar;
+        $sisaBayar  = max(0, $nominal - $terbayar);
+        $status     = $sisaBayar === 0 && $nominal > 0 ? 2 : 1;
 
-        foreach ($transaksiList as $index => $transaksi) {
-            $diskonKavling = $index === $indexTerakhir
-                ? $sisaDiskon
-                : (int) floor($diskon * ((int) $transaksi->hrg_rumah / $totalHarga));
-
-            $sisaDiskon -= $diskonKavling;
-
-            $nominal = max(0, (int) $transaksi->hrg_rumah - $diskonKavling);
-            $piutang = $piutangList[$index];
-
-            $piutang->update([
-                'nominal'    => $nominal,
-                'sisa_bayar' => max(0, $nominal - (int) $piutang->terbayar),
-            ]);
-        }
+        $piutang->update([
+            'nominal'    => $nominal,
+            'sisa_bayar' => $sisaBayar,
+            'status'     => $status,
+        ]);
     }
 
     public function cetakData(Request $request)

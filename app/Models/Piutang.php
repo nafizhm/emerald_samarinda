@@ -16,7 +16,7 @@ class Piutang extends Model
         'id_invoice',
         'tanggal_piutang',
         'id_bank',
-        'id_transaksi_kavling',
+        'id_customer',
         'deskripsi',
         'nominal',
         'lampiran',
@@ -32,20 +32,18 @@ class Piutang extends Model
         return $this->belongsTo(KategoriTransaksi::class, 'id_kategori_transaksi');
     }
 
-    public function transaksiKavling()
-    {
-        return $this->belongsTo(TransaksiKavling::class, 'id_transaksi_kavling');
-    }
-
     public function customer()
     {
-        return $this->hasOneThrough(
-            Customer::class,
-            TransaksiKavling::class,
-            'id',           // FK di transaksi_kavling
-            'id',           // FK di customer
-            'id_transaksi_kavling', // local key di piutang
-            'id_customer'   // local key di transaksi_kavling
-        );
+        return $this->belongsTo(Customer::class, 'id_customer');
+    }
+
+    public function transaksiKavling()
+    {
+        return $this->hasMany(TransaksiKavling::class, 'id_customer', 'id_customer');
+    }
+
+    public function pemasukans()
+    {
+        return $this->hasMany(Pemasukan::class, 'id_piutang');
     }
 }

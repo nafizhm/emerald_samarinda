@@ -81,10 +81,6 @@ document.addEventListener('DOMContentLoaded', function () {
             addBtn.onclick = () => {
                 transactionForm.reset();
                 resetTransactionErrors();
-                const tkInput = document.getElementById('form-transaksi-kavling-id');
-                if (tkInput && page.dataset.transaksiKavlingId) {
-                    tkInput.value = page.dataset.transaksiKavlingId;
-                }
                 transactionForm.dataset.url = transactionForm.dataset.createUrl || transactionForm.dataset.url;
                 transactionForm.dataset.method = 'POST';
                 document.getElementById('transaction-modal-title').textContent = 'Tambah Transaksi';
@@ -115,13 +111,12 @@ document.addEventListener('DOMContentLoaded', function () {
                             'X-CSRF-TOKEN': form.querySelector('[name="_token"]').value
                         },
                         body: JSON.stringify({
-                            expected_paid: Number(page.dataset.paid),
-                            id_transaksi_kavling: Number(page.dataset.transaksiKavlingId)
+                            expected_paid: Number(page.dataset.paid)
                         })
                     });
                     const result = await response.json();
                     if (!response.ok || !result.success) throw new Error(result.message || 'Pembatalan gagal.');
-                    loadKavlingData(page.dataset.transaksiKavlingId, false);
+                    reloadPaymentData();
                 } catch (failure) {
                     button.disabled = false;
                     Swal.fire({icon: 'error', title: 'Pembayaran belum dibatalkan', text: failure.message});
@@ -133,11 +128,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // Panggil saat awal render
     bindDynamicEvents();
 
-    // AJAX Switch Kavling
-    let isSwitching = false;
-    function loadKavlingData(transaksiKavlingId, updateHistory = true) {
-        if (!transaksiKavlingId || isSwitching) return;
-        isSwitching = true;
+    // AJAX Reload Data Pembayaran
+    let isReloading = false;
+    function reloadPaymentData() {
+        if (isReloading) return;
+        isReloading = true;
 
         const wrapper = document.getElementById('installment-content-wrapper');
         if (wrapper) {
@@ -145,17 +140,14 @@ document.addEventListener('DOMContentLoaded', function () {
             wrapper.style.pointerEvents = 'none';
         }
 
-        const currentUrl = new URL(window.location.href);
-        currentUrl.searchParams.set('transaksi_kavling_id', transaksiKavlingId);
-
-        fetch(currentUrl.toString(), {
+        fetch(window.location.href, {
             headers: {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest'
             }
         })
         .then(res => {
-            if (!res.ok) throw new Error('Gagal memuat data kavling.');
+            if (!res.ok) throw new Error('Gagal memuat data pembayaran.');
             return res.json();
         })
         .then(data => {
@@ -163,7 +155,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             page.dataset.paid = data.paid;
             page.dataset.remaining = data.remaining;
-            page.dataset.transaksiKavlingId = data.transaksi_kavling_id;
 
             const activeCode = document.getElementById('active-kavling-code');
             if (activeCode) activeCode.textContent = data.kode_kavling;
@@ -171,29 +162,19 @@ document.addEventListener('DOMContentLoaded', function () {
             const expPaid = document.getElementById('payment-expected-paid');
             if (expPaid) expPaid.value = data.paid;
 
-            const payTkId = document.getElementById('payment-transaksi-kavling-id');
-            if (payTkId) payTkId.value = data.transaksi_kavling_id;
-
             const payAmount = document.getElementById('payment-amount');
             if (payAmount) payAmount.max = data.remaining;
-
-            const formTkId = document.getElementById('form-transaksi-kavling-id');
-            if (formTkId) formTkId.value = data.transaksi_kavling_id;
 
             if (wrapper) {
                 wrapper.innerHTML = data.html;
             }
 
             bindDynamicEvents();
-
-            if (updateHistory) {
-                window.history.pushState({ transaksi_kavling_id: transaksiKavlingId }, '', currentUrl.toString());
-            }
         })
         .catch(err => {
             Swal.fire({
                 icon: 'error',
-                title: 'Gagal Beralih Kavling',
+                title: 'Gagal Memuat Data',
                 text: err.message
             });
         })
@@ -202,34 +183,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 wrapper.style.opacity = '1';
                 wrapper.style.pointerEvents = 'auto';
             }
-            isSwitching = false;
+            isReloading = false;
         });
     }
-
-    // Event Listener Filter Kavling (Select2 maupun native)
-    const filterKavling = document.getElementById('filter-kavling');
-    if (filterKavling) {
-        filterKavling.addEventListener('change', function () {
-            loadKavlingData(this.value);
-        });
-    }
-
-    if (window.jQuery) {
-        window.jQuery(document).on('change select2:select', '#filter-kavling', function () {
-            loadKavlingData(this.value);
-        });
-    }
-
-    window.addEventListener('popstate', function () {
-        const url = new URL(window.location.href);
-        const tkId = url.searchParams.get('transaksi_kavling_id');
-        if (tkId) {
-            if (window.jQuery) {
-                window.jQuery('#filter-kavling').val(tkId).trigger('change.select2');
-            }
-            loadKavlingData(tkId, false);
-        }
-    });
 
     // Delegasi click untuk Edit & Hapus Transaksi (tetap berjalan tanpa perlu rebind)
     document.addEventListener('click', async function (event) {
@@ -246,10 +202,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 const data = result.data;
                 transactionForm.reset();
-                const tkInput = document.getElementById('form-transaksi-kavling-id');
-                if (tkInput && page.dataset.transaksiKavlingId) {
-                    tkInput.value = page.dataset.transaksiKavlingId;
-                }
                 transactionForm.dataset.url = editBtn.dataset.updateUrl;
                 transactionForm.dataset.method = 'PUT';
                 document.getElementById('transaction-modal-title').textContent = 'Edit Transaksi';
@@ -309,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const result = await response.json();
                 if (!response.ok || !result.success) throw new Error(result.message || 'Transaksi gagal dihapus.');
                 await Swal.fire({icon: 'success', title: 'Transaksi dihapus'});
-                loadKavlingData(page.dataset.transaksiKavlingId, false);
+                reloadPaymentData();
             } catch (failure) {
                 deleteBtn.disabled = false;
                 Swal.fire({icon: 'error', title: 'Transaksi belum dihapus', text: failure.message});
@@ -397,7 +349,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 confirmButtonText: 'Kembali ke cicilan',
                 allowOutsideClick: false
             });
-            loadKavlingData(page.dataset.transaksiKavlingId, false);
+            reloadPaymentData();
         } catch (failure) {
             error.textContent = failure.message;
             error.hidden = false;
@@ -440,7 +392,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 title: 'Transaksi tersimpan',
                 text: 'Riwayat, piutang, dan tahap pembayaran telah diperbarui.'
             });
-            loadKavlingData(page.dataset.transaksiKavlingId, false);
+            reloadPaymentData();
         } catch (failure) {
             transactionSave.disabled = false;
             spinner.classList.add('d-none');

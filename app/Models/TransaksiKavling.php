@@ -28,6 +28,6 @@ class TransaksiKavling extends Model
 
     public function piutang()
     {
-        return $this->hasOne(Piutang::class, 'id_transaksi_kavling');
+        return $this->hasOne(Piutang::class, 'id_customer', 'id_customer');
     }
 }

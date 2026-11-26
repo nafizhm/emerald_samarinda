@@ -9,47 +9,24 @@
         $rupiah = fn($value) => 'Rp ' . number_format($value, 0, ',', '.');
         $next = $schedule['rows']->first(fn($row) => $row['balance'] > 0);
         $tampilkan_jatuh_tempo = $customer->skema_pembayaran === 'Cash Tempo';
-        $kavlingAktif = $selectedTransaksiKavling->kavling ?? null;
+        $kodeKavlingGabungan = $customer->kavling->pluck('kode_kavling')->filter()->implode(', ') ?: '-';
     @endphp
     <div class="dashboard-page installment-page" id="installment-page"
         data-url="{{ route('pembayaran.bayar-cicilan', $customer->id) }}" data-paid="{{ $schedule['paid'] }}"
-        data-remaining="{{ $schedule['remaining'] }}" data-transaksi-kavling-id="{{ $selectedTransaksiKavling->id ?? '' }}">
+        data-remaining="{{ $schedule['remaining'] }}">
         <div class="dashboard-intro">
             <div>
                 <p class="dashboard-eyebrow">Pembayaran kavling</p>
                 <h1>{{ $customer->nama_lengkap }}</h1>
                 <p>{{ $customer->kode_customer }} <span class="installment-separator">/</span>
                     {{ $customer->skema_pembayaran }} <span class="installment-separator">/</span>
-                    <strong class="text-primary" id="active-kavling-code">{{ $kavlingAktif?->kode_kavling ?? '-' }}</strong></p>
+                    <strong class="text-primary" id="active-kavling-code">{{ $kodeKavlingGabungan }}</strong></p>
             </div>
             <div class="installment-actions"><a href="{{ route('pembayaran.index') }}" class="dashboard-action"><i
                         class="bi bi-arrow-left"></i>Daftar pembayaran</a><a
                     href="{{ route('customer.cetak-rekap', $customer->id) }}" class="dashboard-action" target="_blank"
                     rel="noopener"><i class="bi bi-printer"></i>Cetak rekap</a></div>
         </div>
-
-        {{-- Filter kavling --}}
-        @if ($jumlahTransaksiKavling > 0)
-            <section class="dashboard-panel" style="padding: 1rem 1.5rem; margin-bottom: 1rem;">
-                <div class="d-flex align-items-center gap-3 flex-wrap">
-                    <label for="filter-kavling" class="fw-semibold mb-0" style="white-space:nowrap;"><i
-                            class="bi bi-funnel"></i> Kavling</label>
-                    <select id="filter-kavling" class="form-select" style="min-width: 140px; max-width: 220px;"
-                        {{ $jumlahTransaksiKavling <= 1 ? 'disabled' : '' }}>
-                        @foreach ($transaksiKavlingList as $tk)
-                            <option value="{{ $tk->id }}"
-                                {{ $tk->id == $selectedTransaksiKavling->id ? 'selected' : '' }}>
-                                {{ $tk->kavling?->kode_kavling ?? 'Kavling #' . $tk->id_kavling }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @if ($jumlahTransaksiKavling > 1)
-                        <small class="text-muted">Customer memiliki {{ $jumlahTransaksiKavling }} kavling. Pilih untuk
-                            melihat pembayaran masing-masing.</small>
-                    @endif
-                </div>
-            </section>
-        @endif
 
         <div id="installment-content-wrapper">
             @include('admin.pembayaran.partials.content')
@@ -70,8 +47,6 @@
                         data-url="{{ route('pembayaran.tambah-transaksi-cicilan', $customer->id) }}"
                         data-create-url="{{ route('pembayaran.tambah-transaksi-cicilan', $customer->id) }}"
                         data-method="POST">@csrf
-                        <input type="hidden" name="id_transaksi_kavling" id="form-transaksi-kavling-id"
-                            value="{{ $selectedTransaksiKavling->id ?? '' }}">
                         <div class="row mb-3 align-items-center"><label for="tanggal"
                                 class="col-sm-3 col-form-label">Tanggal</label>
                             <div class="col-sm-4"><input type="date" name="tanggal" id="tanggal"
@@ -138,8 +113,7 @@
                 <div class="modal-body">
                     <form id="installment-form">@csrf<input type="hidden" name="mode" id="payment-mode"><input
                             type="hidden" name="month" id="payment-month"><input type="hidden" name="expected_paid"
-                            id="payment-expected-paid" value="{{ $schedule['paid'] }}"><input type="hidden" name="id_transaksi_kavling"
-                            id="payment-transaksi-kavling-id" value="{{ $selectedTransaksiKavling->id ?? '' }}">
+                            id="payment-expected-paid" value="{{ $schedule['paid'] }}">
                         <p id="payment-selection"></p>
                         <div class="installment-payment-summary"><span>Nominal yang dicatat</span><strong
                                 id="payment-total"></strong><small id="payment-after"></small></div>

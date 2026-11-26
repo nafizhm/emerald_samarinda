@@ -34,9 +34,9 @@ class InstallmentSchedule
         $transactionDate = $this->date($firstDate);
         $valid = true;
         if ($customer->skema_pembayaran === 'Kredit') {
-            $tenor = (int) ($customer->lama_cicilan ?: 0);
-            $monthly = (int) ($customer->nominal_cicilan ?: 0);
-            $start = $this->date($customer->tgl_jatuh_tempo);
+            $tenor = (int) ($customer->lama_cicilan_kr ?: $customer->lama_cicilan ?: 0);
+            $monthly = (int) ($customer->nominal_cicilan_kr ?: $customer->nominal_cicilan ?: 0);
+            $start = $this->date($customer->tgl_jatuh_tempo_kr ?: $customer->tgl_jatuh_tempo);
             $valid = $tenor >= 1 && $tenor <= 600 && $monthly > 0 && $start !== null;
             $add(0, 'Uang muka (DP)', max(0, $contract - $tenor * $monthly), $transactionDate);
             if ($valid) {
@@ -46,9 +46,9 @@ class InstallmentSchedule
                 }
             }
         } elseif ($customer->skema_pembayaran === 'Cash Tempo') {
-            $tenor = (int) ($customer->lama_cicilan ?: 0);
-            $monthly = (int) ($customer->nominal_cicilan ?: 0);
-            $start = $this->date($customer->tgl_jatuh_tempo);
+            $tenor = (int) ($customer->lama_cicilan_ct ?: $customer->lama_cicilan ?: 0);
+            $monthly = (int) ($customer->nominal_cicilan_ct ?: $customer->nominal_cicilan ?: 0);
+            $start = $this->date($customer->tgl_jatuh_tempo_ct ?: $customer->tgl_jatuh_tempo);
             $valid = $tenor >= 1 && $tenor <= 600 && $monthly > 0 && $start !== null;
             if ($valid) {
                 for ($month = 1; $month <= $tenor; $month++) {
@@ -91,9 +91,9 @@ class InstallmentSchedule
         $transactionDate = $this->date($firstDate);
         $valid = true;
         if ($customer->skema_pembayaran === 'Kredit') {
-            $tenor = (int) ($customer->lama_cicilan ?: 0);
-            $monthly = (int) ($customer->nominal_cicilan ?: 0);
-            $start = $this->date($customer->tgl_jatuh_tempo);
+            $tenor = (int) ($customer->lama_cicilan_kr ?: $customer->lama_cicilan ?: 0);
+            $monthly = (int) ($customer->nominal_cicilan_kr ?: $customer->nominal_cicilan ?: 0);
+            $start = $this->date($customer->tgl_jatuh_tempo_kr ?: $customer->tgl_jatuh_tempo);
             $valid = $tenor >= 1 && $tenor <= 600 && $monthly > 0 && $start !== null;
             $add(0, 'Uang muka (DP)', max(0, $contract - $tenor * $monthly), $transactionDate);
             if ($valid) {
@@ -103,9 +103,9 @@ class InstallmentSchedule
                 }
             }
         } elseif ($customer->skema_pembayaran === 'Cash Tempo') {
-            $tenor = (int) ($customer->lama_cicilan ?: 0);
-            $monthly = (int) ($customer->nominal_cicilan ?: 0);
-            $start = $this->date($customer->tgl_jatuh_tempo);
+            $tenor = (int) ($customer->lama_cicilan_ct ?: $customer->lama_cicilan ?: 0);
+            $monthly = (int) ($customer->nominal_cicilan_ct ?: $customer->nominal_cicilan ?: 0);
+            $start = $this->date($customer->tgl_jatuh_tempo_ct ?: $customer->tgl_jatuh_tempo);
             $valid = $tenor >= 1 && $tenor <= 600 && $monthly > 0 && $start !== null;
             if ($valid) {
                 for ($month = 1; $month <= $tenor; $month++) {
